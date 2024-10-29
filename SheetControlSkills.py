@@ -165,7 +165,6 @@ def get_pj_skill_bonus(discord_id: int, skill_name: str) -> Tuple[int, str, str]
     skill_values = skills[skill_name]
     prof = skill_values["prof_level"]
     prof_bonus = PROF_BONUSES[prof]
-    prof_bonus += 0 if prof_bonus == 0 else get_level_global()
     extra_bonus = skill_values["extra_bonus"]
     stat_bonus = stats[skill_ab]
     extra_msg = f"[Extra: {extra_bonus}]" if extra_bonus != 0 else ""
