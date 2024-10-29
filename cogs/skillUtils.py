@@ -47,9 +47,9 @@ def skill_description(
     submsg: str = (
         f"\n{PROF.ICONS[prof_level]} {SKILL_ICONS[skill_name]} {skill_title.ljust(just_spacing, just_char)} "
         f'{f"{(prof_bonus + pj_mod_bonus + extra_bonus):+} ".ljust(4)}'
-        f"([{mod_type.name}: {pj_mod_bonus:+}]"
+        f"[{mod_type.name}: {pj_mod_bonus:+}]"
         f"[{f'{prof_level}:'.ljust(10)} {f'{(prof_bonus):+}]'.rjust(4)}"
-        f"{extra_msg})"
+        f"{extra_msg}"
     )
     return submsg
 
