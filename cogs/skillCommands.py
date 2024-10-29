@@ -16,7 +16,7 @@ from varenv import getVar
 from .skillUtils import *
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
-CODEBLOCK_LANG = "python"
+CODEBLOCK_LANG = "ansi"
 
 
 class Skills(commands.Cog):
@@ -79,15 +79,15 @@ class Skills(commands.Cog):
     @gets_skill_data
     async def all_lores(self: Self, interaction: nextcord.Interaction, extra_info: bool = False) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
-        pj_mods: dict[Ability, int]
         name_mods, row, pj_mods = sh_skills.get_pj_abilities(user_id)
 
-        if name_mods is None:
+        if name_mods is None or row is None or pj_mods is None:
             return await interaction.followup.send(
                 "Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             )
-        pj_skills: dict[str, dict[str, str | int]]
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
@@ -125,15 +125,15 @@ class Skills(commands.Cog):
         extra_info: bool = False,
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
-        pj_mods: dict[Ability, int]
         name_mods, row, pj_mods = sh_skills.get_pj_abilities(user_id)
 
-        if name_mods is None:
+        if name_mods is None or row is None or pj_mods is None:
             return await interaction.followup.send(
                 "Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             )
-        pj_skills: dict[str, dict[str, str | int]]
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
@@ -169,15 +169,15 @@ class Skills(commands.Cog):
         extra_info: bool = False,
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
-        pj_mods: dict[Ability, int]
         name_mods, row, pj_mods = sh_skills.get_pj_abilities(user_id)
 
-        if name_mods is None:
+        if name_mods is None or row is None or pj_mods is None:
             return await interaction.followup.send(
                 "Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             )
-        pj_skills: dict[str, dict[str, str | int]]
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
@@ -234,9 +234,10 @@ class Skills(commands.Cog):
         ),
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
 
-        pj_skills: dict[str, dict[str, str | int]]
         pj_name, pj_skills = sh_skills.get_pj_skills(user_id)
 
         pj_skill = pj_skills.get(skill, None)
@@ -246,7 +247,7 @@ class Skills(commands.Cog):
             try:
                 pj_name = sh_pj.get_pj_data(sh_pj.get_pj_row(user_id), PJ_COL.Name)
             except CharacterNotFoundError as e:
-                return await interaction.followup.send(e)
+                return await interaction.followup.send(f"{e}")
             row: int = sh_skills.first_empty_skill_row()
             msg = f"Se definió la proficiencia de {pj_name} en {skill}"
         else:
@@ -392,7 +393,6 @@ class Skills(commands.Cog):
         await interaction.response.defer()
         user_id: int = interaction.user.id
 
-        pj_skills: dict[str, dict[str, str | int]]
         pj_name, pj_skills = sh_skills.get_pj_skills(user_id)
 
         skill = f"Lore ({lore_subname})"
@@ -450,7 +450,7 @@ class Skills(commands.Cog):
             try:
                 pj_name = sh_pj.get_pj_data(sh_pj.get_pj_row(user_id), PJ_COL.Name)
             except CharacterNotFoundError as e:
-                return await interaction.followup.send(e)
+                return await interaction.followup.send(f"{e}")
         data = (
             pj_name,
             str(user_id),

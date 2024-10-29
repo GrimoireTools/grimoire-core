@@ -20,7 +20,7 @@ def skill_description(
     pj_level: int,
     mod_type: Ability,
     skill_name: str,
-    pj_skill: None | dict[str, str | int],
+    pj_skill: None | sh_skills.SkillRow,
     extra_info: bool,
 ) -> str:
     global ALTERNATE
@@ -41,17 +41,28 @@ def skill_description(
         extra_msg = (
             ""
             if (extra_bonus == 0 and extra_descripcion == "")
-            else f"[Other: {extra_bonus:+}{f' ({extra_descripcion})' if extra_info else ''}]"
+            else f"[Other: {fb(extra_bonus)}{f' ({extra_descripcion})' if extra_info else ''}]"
         )
     prof_bonus: int = PROF_BONUSES[prof_level]
     submsg: str = (
         f"\n{PROF.ICONS[prof_level]} {SKILL_ICONS[skill_name]} {skill_title.ljust(just_spacing, just_char)} "
-        f'{f"{(prof_bonus + pj_mod_bonus + extra_bonus):+} ".ljust(4)}'
-        f"[{mod_type.name}: {pj_mod_bonus:+}]"
-        f"[{f'{prof_level}:'.ljust(10)} {f'{(prof_bonus):+}]'.rjust(4)}"
+        f'{f"{fb(prof_bonus + pj_mod_bonus + extra_bonus, True)} ".ljust(15)}'
+        f"[{mod_type.name}: {fb(pj_mod_bonus)}]"
+        f"[{f'{prof_level}:'.ljust(10)} {f'{fb(prof_bonus)}]'.rjust(15)}"
         f"{extra_msg}"
     )
     return submsg
+
+
+def fb(bonus: int, bold: bool = False) -> str:
+    """Format bonus numbers with colors."""
+    b = 1 if bold else 0
+    BLUE = f"\033[{b};34m"
+    RED = f"\033[{b};31m"
+    YELLOW = f"\033[{b};33m"
+    RESET = "\033[0m"
+    color = YELLOW if bonus == 0 else RED if bonus < 0 else BLUE
+    return f"{color}{bonus:+}{RESET}"
 
 
 def ability_param(ability_name: str):
