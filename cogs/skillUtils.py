@@ -1,5 +1,5 @@
 import nextcord
-from PF2eData import PROF, PROF_BONUSES, Ability
+from PF2eData import PROF, PROF_BONUSES, SKILL_ICONS, Ability
 import SheetControlSkills as sh_skills
 from icecream import ic
 
@@ -26,31 +26,31 @@ def skill_description(
     global ALTERNATE
     ALTERNATE = not ALTERNATE
     just_char = "·" if ALTERNATE else " "
+
+    just_spacing = 20
     if pj_skill is None:
-        skill_title = f"{PROF.ICONS[PROF.Untrained]} {skill_name} (Untrained?):"
-        submsg: str = (
-            f"\n- {skill_title.ljust(28, just_char)} " f"{pj_mod_bonus:+} " f"([{mod_type.name}: {pj_mod_bonus:+}])"
-        )
+        prof_level = PROF.Untrained
+        skill_title = f"{skill_name}? "
+        extra_msg = ""
     else:
+        skill_title = f"{skill_name} "
         prof_level: str = str(pj_skill["prof_level"])
-        level_bonus: int = 0 if prof_level == PROF.Untrained else pj_level
-        prof_bonus: int = PROF_BONUSES[prof_level]
         extra_bonus: int = int(pj_skill["extra_bonus"])
         extra_descripcion: str = str(pj_skill["extra_descripcion"])
-        skill_title = f"{skill_name} ({prof_level})"
 
         extra_msg = (
             ""
             if (extra_bonus == 0 and extra_descripcion == "")
             else f"[Other: {extra_bonus:+}{f' ({extra_descripcion})' if extra_info else ''}]"
         )
-        submsg: str = (
-            f"\n- {PROF.ICONS[prof_level]} {skill_title.ljust(28, just_char)} "
-            f'{f"{(prof_bonus + pj_mod_bonus + extra_bonus + level_bonus):+} ".ljust(4)}'
-            f"([{mod_type.name}: {pj_mod_bonus:+}]"
-            f"[{f'{prof_level}:'.ljust(10)} {f'{(prof_bonus + level_bonus):+}]'.rjust(4)}"
-            f"{extra_msg})"
-        )
+    prof_bonus: int = PROF_BONUSES[prof_level]
+    submsg: str = (
+        f"\n{PROF.ICONS[prof_level]} {SKILL_ICONS[skill_name]} {skill_title.ljust(just_spacing, just_char)} "
+        f'{f"{(prof_bonus + pj_mod_bonus + extra_bonus):+} ".ljust(4)}'
+        f"([{mod_type.name}: {pj_mod_bonus:+}]"
+        f"[{f'{prof_level}:'.ljust(10)} {f'{(prof_bonus):+}]'.rjust(4)}"
+        f"{extra_msg})"
+    )
     return submsg
 
 

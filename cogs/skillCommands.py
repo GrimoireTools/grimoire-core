@@ -16,6 +16,7 @@ from varenv import getVar
 from .skillUtils import *
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
+CODEBLOCK_LANG = "python"
 
 
 class Skills(commands.Cog):
@@ -41,7 +42,7 @@ class Skills(commands.Cog):
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
-        message: str = f"# Skills de {name_mods if name is None else name}:\n```\n"
+        message: str = f"# Skills de {name_mods if name is None else name}:\n```{CODEBLOCK_LANG}\n"
 
         pj_level = sh_pj.get_level_global()
 
@@ -90,7 +91,7 @@ class Skills(commands.Cog):
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
-        message: str = f"# Skills de {name_mods if name is None else name}:"
+        message: str = f"# Lores de {name_mods if name is None else name}:\n```{CODEBLOCK_LANG}"
 
         pj_level = sh_pj.get_level_global()
 
@@ -105,7 +106,7 @@ class Skills(commands.Cog):
                 lore,
                 extra_info,
             )
-        return await interaction.followup.send(message)
+        return await interaction.followup.send(message + f"\n```")
 
     @nextcord.slash_command(
         description="Muestra la información de una skill de tu personaje",
@@ -136,19 +137,19 @@ class Skills(commands.Cog):
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
-        message: str = f"## {skill} de {name_mods if name is None else name}:"
+        message: str = f"## {skill} de {name_mods if name is None else name}:\n"
 
         pj_level = sh_pj.get_level_global()
         mod_type: Ability = [ab for skill_nm, ab in SKILLS if skill_nm == skill][0]
 
-        message += skill_description(
+        message += f"```{CODEBLOCK_LANG}\n{skill_description(
             pj_mods[mod_type],
             pj_level,
             mod_type,
             skill,
             pj_skills.get(skill, None),
             extra_info,
-        )
+        )}```"
 
         return await interaction.followup.send(message)
 
@@ -182,19 +183,19 @@ class Skills(commands.Cog):
 
         lore_full_name = f"Lore ({lore_subname})"
 
-        message: str = f"## {lore_full_name} de {name_mods if name is None else name}:"
+        message: str = f"## {lore_full_name} de {name_mods if name is None else name}:\n"
 
         pj_level = sh_pj.get_level_global()
         mod_type: Ability = ABILITIES.Int
 
-        message += skill_description(
+        message += f"```{CODEBLOCK_LANG}\n{skill_description(
             pj_mods[mod_type],
             pj_level,
             mod_type,
             lore_full_name,
             pj_skills.get(lore_full_name, None),
             extra_info,
-        )
+        )}```"
 
         return await interaction.followup.send(message)
 
@@ -518,9 +519,7 @@ class Skills(commands.Cog):
             prof_msg = "[Untrained?: +0]"
         else:
             prof_level: str = pj_skill["prof_level"]
-            pj_level = sh_pj.get_level_global()
-            level_bonus: int = 0 if prof_level == PROF.Untrained else pj_level
-            prof_bonus: int = PROF_BONUSES[prof_level] + level_bonus
+            prof_bonus: int = PROF_BONUSES[prof_level]
             prof_msg = f"[{prof_level}: +{prof_bonus}]"
 
         # OTHER
@@ -596,9 +595,7 @@ class Skills(commands.Cog):
             prof_msg = "[Untrained?: +0]"
         else:
             prof_level: str = pj_skill["prof_level"]
-            pj_level = sh_pj.get_level_global()
-            level_bonus: int = 0 if prof_level == PROF.Untrained else pj_level
-            prof_bonus: int = PROF_BONUSES[prof_level] + level_bonus
+            prof_bonus: int = PROF_BONUSES[prof_level]
             prof_msg = f"[{prof_level}: +{prof_bonus}]"
 
         # OTHER

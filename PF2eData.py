@@ -1,5 +1,7 @@
+from collections import defaultdict
 import json
-from typing import Any, Self, Tuple, Type, TypedDict
+from typing import Any, Callable, Generic, Self, Tuple, Type, TypeVar, TypedDict
+from SheetControl import get_level_global
 
 RELIGIONS: list[str] = [
     "La Labor",
@@ -158,11 +160,36 @@ SKILLS: list[Tuple[str, Ability]] = [
     ("Survival", ABILITIES.Wis),
     ("Thievery", ABILITIES.Dex),
 ]
+
+SKILL_ICONS = defaultdict(
+    lambda: "📚",
+    {
+        "Perception": "👀",
+        "Acrobatics": "🛹",
+        "Arcana": "🪄",
+        "Athletics": "💪",
+        "Crafting": "⚒️",
+        "Deception": "🥸",
+        "Diplomacy": "🤝",
+        "Intimidation": "😡",
+        "Medicine": "🩹",
+        "Nature": "🌱",
+        "Occultism": "🔮",
+        "Performance": "🎭",
+        "Religion": "🛐",
+        "Society": "👥",
+        "Stealth": "🥷",
+        "Survival": "🏞️",
+        "Thievery": "🔑",
+    },
+)
+
 LORELESS_SKILLS: list[Tuple[str, Ability]] = list(filter(lambda x: x[0] != "Lore", SKILLS))
 
 
 class PROF:
     Untrained: str = "Untrained"
+    Improvised: str = "Untr Impr"
     Trained: str = "Trained"
     Expert: str = "Expert"
     Master: str = "Master"
@@ -170,6 +197,7 @@ class PROF:
 
     ICONS: dict[str, str] = {
         Untrained: "🌑",
+        Improvised: "🌑",
         Trained: "🌘",
         Expert: "🌗",
         Master: "🌖",
@@ -179,6 +207,7 @@ class PROF:
     max_length: int = len("Legendary")
     profs_list: list[str] = [
         Untrained,
+        Improvised,
         Trained,
         Expert,
         Master,
@@ -186,13 +215,37 @@ class PROF:
     ]
 
 
-PROF_BONUSES: dict[str, int] = {
-    PROF.Untrained: 0,
-    PROF.Trained: 2,
-    PROF.Expert: 4,
-    PROF.Master: 6,
-    PROF.Legendary: 8,
-}
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+class CallableDict(dict, Generic[K, V]):
+    def __getitem__(self, key: K) -> V:
+        value = super().__getitem__(key)
+        if callable(value):
+            return value()  # type: ignore
+        return value
+
+
+def improvised_prof_bonus() -> int:
+    lvl = get_level_global()
+    if lvl >= 7:
+        return lvl
+    if lvl >= 5:
+        return lvl - 1
+    return lvl - 2
+
+
+PROF_BONUSES: CallableDict[str, int] = CallableDict(
+    {
+        PROF.Untrained: 0,
+        PROF.Improvised: improvised_prof_bonus,
+        PROF.Trained: lambda: 2 + get_level_global(),
+        PROF.Expert: lambda: 4 + get_level_global(),
+        PROF.Master: lambda: 6 + get_level_global(),
+        PROF.Legendary: lambda: 8 + get_level_global(),
+    }
+)
 
 
 class Recipe(TypedDict):
