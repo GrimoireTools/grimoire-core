@@ -220,11 +220,17 @@ V = TypeVar("V")
 
 
 class CallableDict(dict, Generic[K, V]):
+    def __init__(self, *args: dict[K, V | Callable[[], V]], **kwargs: V | Callable[[], V]) -> None:
+        super().__init__(*args, **kwargs)
+
     def __getitem__(self, key: K) -> V:
         value = super().__getitem__(key)
         if callable(value):
             return value()  # type: ignore
         return value
+
+    def __setitem__(self, key: V, value: V | Callable[[], V]) -> None:
+        super().__setitem__(key, value)
 
 
 def improvised_prof_bonus() -> int:
