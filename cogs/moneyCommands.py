@@ -24,9 +24,7 @@ class Money(commands.Cog):
     async def pay(
         self: Self,
         interaction: nextcord.Interaction,
-        amount_str: str = nextcord.SlashOption(
-            "money-gp", "Dinero restado a tu cuenta, en gp", True
-        ),
+        amount_str: str = nextcord.SlashOption("money-gp", "Dinero restado a tu cuenta, en gp", True),
         transfertarget: nextcord.Member = nextcord.SlashOption(
             "target-transferencia",
             "Usuario al que se le transfiere el dinero",
@@ -41,6 +39,8 @@ class Money(commands.Cog):
                 raise ValueError("La cantidad debe ser mayor o igual a 0")
         except ValueError as e:
             return await interaction.followup.send(f"Error: {e}")
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
 
         try:
@@ -54,18 +54,14 @@ class Money(commands.Cog):
                 target_pj_row = target_pj_name = None
 
         except CharacterNotFoundError:
-            return await interaction.followup.send(
-                "No se encontró un personaje con ID de discord correspondiente"
-            )
+            return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
         if amount < 0:
             return await interaction.followup.send("Debes pagar una cantidad positiva de dinero")
 
         pj_coins: list[float] = sh.get_pj_coins(pj_row)
         pp, gp, sp, cp, total = pj_coins
         if total - amount < 0:
-            return await interaction.followup.send(
-                "No tienes suficiente dinero para esta transacción"
-            )
+            return await interaction.followup.send("No tienes suficiente dinero para esta transacción")
 
         new_total = total - amount
         new_coins: list[int] = utils.gp_to_coin_list(new_total)
@@ -93,16 +89,12 @@ class Money(commands.Cog):
                 )
             )
 
-    @nextcord.slash_command(
-        description="Suma dinero a tu cuenta.", guild_ids=[CRI_GUILD_ID]
-    )
+    @nextcord.slash_command(description="Suma dinero a tu cuenta.", guild_ids=[CRI_GUILD_ID])
     @gets_pj_data
     async def addmoney(
         self: Self,
         interaction: nextcord.Interaction,
-        amount_str: str = nextcord.SlashOption(
-            "money-gp", "Dinero añadido a tu cuenta, en gp", True
-        ),
+        amount_str: str = nextcord.SlashOption("money-gp", "Dinero añadido a tu cuenta, en gp", True),
         target: nextcord.Member = nextcord.SlashOption(
             "usuario-target",
             "Usuario al que se le añade el dinero",
@@ -122,9 +114,7 @@ class Money(commands.Cog):
             pj_row = sh.get_pj_row(user_id)
             pj_name = sh.get_pj_data(pj_row, PJ_COL.Name)
         except CharacterNotFoundError:
-            return await interaction.followup.send(
-                "No se encontró un personaje con ID de discord correspondiente"
-            )
+            return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
         if amount < 0:
             return await interaction.followup.send("Debes ganar una cantidad positiva de dinero")
 
@@ -138,7 +128,7 @@ class Money(commands.Cog):
         )
 
 
-def add_money_helper(amount: float, pj_row: int) -> Tuple[int, int, int, int, int]:
+def add_money_helper(amount: float, pj_row: int) -> Tuple[int, int, int, int, float]:
     """
     return pp, gp, sp, cp, new_total
     """

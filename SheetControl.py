@@ -1,9 +1,9 @@
 import json
 from functools import wraps
-from typing import Any, Callable, Iterable, Self
+from typing import Any, Callable, Iterable, Optional, Self, Type
 from icecream import ic
-import gspread  # type: ignore
-
+import gspread
+from gspread.utils import ValueRenderOption
 import utils
 from utils import CharacterNotFoundError, Column
 from varenv import getVar
@@ -13,7 +13,7 @@ SUELDO_SHEET_ID = 1681819644
 
 credentials = json.loads(getVar("GOOGLE"), strict=False)
 
-gc = gspread.service_account_from_dict(credentials)
+gc = gspread.auth.service_account_from_dict(credentials)
 
 pj_sheet = gc.open("Megamarch").get_worksheet_by_id(PJ_SHEET_ID)
 sueldo_sheet = gc.open("Megamarch").get_worksheet_by_id(SUELDO_SHEET_ID)
@@ -23,7 +23,7 @@ PJ_DATA: list[list[str]]
 
 def update_pj_data() -> None:
     global PJ_DATA
-    PJ_DATA = pj_sheet.get_all_values(value_render_option="UNFORMATTED_VALUE")
+    PJ_DATA = pj_sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
 
 
 def gets_pj_data(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -54,7 +54,7 @@ class PJ_COL:
     Religion: Column = Column("O")
 
     @classmethod
-    def num(cls: Self, col: str) -> int:
+    def num(cls: Type["PJ_COL"], col: str) -> int:
         return utils.column_to_num(col)
 
 
@@ -73,9 +73,7 @@ def get_pj_row(discord_id: int) -> int:
         # index del primer valor con [discord_id] de todos los ids (+1 por 0 indexed)
         return id_row
     except ValueError:
-        raise CharacterNotFoundError(
-            f"Error: No se encontró un personaje con ID de discord '{discord_id}'."
-        )
+        raise CharacterNotFoundError(f"Error: No se encontró un personaje con ID de discord '{discord_id}'.")
 
 
 def first_empty_PJ_row() -> int:
@@ -89,9 +87,7 @@ def get_pj_data(pj_row: int, col: Column) -> str:
     try:
         return PJ_DATA[pj_row][col.excel_index()]
     except IndexError:
-        raise CharacterNotFoundError(
-            "Error: No se encontró un personaje en la fila indicada."
-        )
+        raise CharacterNotFoundError("Error: No se encontró un personaje en la fila indicada.")
 
 
 def get_pj_full(row: int) -> list[str]:
@@ -106,7 +102,7 @@ def get_pj_coins(row: int) -> list[float]:
     pp = PJ_COL.Money_pp.excel_index()
     total = PJ_COL.Money_total.excel_index()
     # pj_sheet.get(f"{PJ_COL.Money_pp}{row}:{PJ_COL.Money_total}{row}", value_render_option = "UNFORMATTED_VALUE")[0]
-    coins = PJ_DATA[row][pp: total + 1]  # noqa: E203
+    coins = PJ_DATA[row][pp : total + 1]  # noqa: E203
     return [float(x) for x in coins]
 
 
@@ -125,19 +121,23 @@ def update_pj_coins(row: int, values: Iterable[Iterable[Any]]) -> None:
 
 
 def get_sueldo(level: int) -> tuple[float, int]:
-    data = sueldo_sheet.get_all_values(value_render_option="UNFORMATTED_VALUE")
+    data = sueldo_sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
     sueldo_gp = data[level][2]
     sueldo_dt = data[3][3]
     return (float(sueldo_gp), int(sueldo_dt))
 
 
+def delete_row(row: int) -> None:
+    pj_sheet.delete_rows(row)
+
+
 LEVEL_GLOBAL = 4
 
 
-def update_level_global(new_value: int = None) -> None:
+def update_level_global(new_value: Optional[int] = None) -> None:
     global LEVEL_GLOBAL
     if new_value is None:
-        data = sueldo_sheet.get_all_values(value_render_option="UNFORMATTED_VALUE")
+        data = sueldo_sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
         LEVEL_GLOBAL = int(data[6][3])
     else:
         sueldo_sheet.update([[new_value]], "D7")

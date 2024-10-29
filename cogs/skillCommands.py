@@ -27,19 +27,17 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
-    async def all_skills(
-        self: Self, interaction: nextcord.Interaction, extra_info: bool = False
-    ) -> Any:
+    async def all_skills(self: Self, interaction: nextcord.Interaction, extra_info: bool = False) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
-        pj_mods: dict[Ability, int]
         name_mods, row, pj_mods = sh_skills.get_pj_abilities(user_id)
 
-        if name_mods is None:
+        if name_mods is None or pj_mods is None:
             return await interaction.followup.send(
                 "Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             )
-        pj_skills: dict[str, dict[str, str | int]]
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
@@ -55,15 +53,11 @@ class Skills(commands.Cog):
                 pj_level,
                 mod_type,
                 skill_name,
-                pj_skills.get(skill_name, None),
+                pj_skills.get(skill_name, None),  # type: ignore
                 extra_info,
             )
 
-        lores = [
-            (skill_name, values)
-            for skill_name, values in pj_skills.items()
-            if skill_name.startswith("Lore")
-        ]
+        lores = [(skill_name, values) for skill_name, values in pj_skills.items() if skill_name.startswith("Lore")]
         for lore_name, lore in lores:
             pj_mod_bonus: int = pj_mods[ABILITIES.Int]
             message += skill_description(
@@ -82,9 +76,7 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
-    async def all_lores(
-        self: Self, interaction: nextcord.Interaction, extra_info: bool = False
-    ) -> Any:
+    async def all_lores(self: Self, interaction: nextcord.Interaction, extra_info: bool = False) -> Any:
         await interaction.response.defer()
         user_id: int = interaction.user.id
         pj_mods: dict[Ability, int]
@@ -102,11 +94,7 @@ class Skills(commands.Cog):
 
         pj_level = sh_pj.get_level_global()
 
-        lores = [
-            (skill_name, values)
-            for skill_name, values in pj_skills.items()
-            if skill_name.startswith("Lore")
-        ]
+        lores = [(skill_name, values) for skill_name, values in pj_skills.items() if skill_name.startswith("Lore")]
         for lore_name, lore in lores:
             pj_mod_bonus: int = pj_mods[ABILITIES.Int]
             message += skill_description(
@@ -473,9 +461,7 @@ class Skills(commands.Cog):
             charisma,
         )
         sh_skills.update_ability_row(row, data)
-        return await interaction.followup.send(
-            f"Actualizados los modificadores de habilidad de {pj_name}"
-        )
+        return await interaction.followup.send(f"Actualizados los modificadores de habilidad de {pj_name}")
 
     @nextcord.slash_command(
         description="Tira un skill check con el skill seleccionado",
@@ -523,9 +509,7 @@ class Skills(commands.Cog):
         ability_msg = f"[{mod_type.name}: {ability_bonus:+}]"
 
         # EXTRA
-        extra_msg = (
-            "" if extra_modifiers == 0 else f"[Extra: {extra_modifiers:+}]"
-        )
+        extra_msg = "" if extra_modifiers == 0 else f"[Extra: {extra_modifiers:+}]"
 
         # PROFICIENCY
         pj_skill = pj_skills.get(skill, None)
@@ -602,9 +586,7 @@ class Skills(commands.Cog):
         ability_msg = f"[{mod_type.name}: {ability_bonus:+}]"
 
         # EXTRA
-        extra_msg = (
-            "" if extra_modifiers == 0 else f"[Extra: {extra_modifiers:+}]"
-        )
+        extra_msg = "" if extra_modifiers == 0 else f"[Extra: {extra_modifiers:+}]"
 
         lore_full_name = f"Lore ({lore_subname})"
         # PROFICIENCY
@@ -638,17 +620,13 @@ class Skills(commands.Cog):
         return await interaction.followup.send(message)
 
     @set_lore.on_autocomplete("lore_subname")
-    async def autocomplete_set_lore_subname(
-        self: Self, interaction: nextcord.Interaction, lore_subname: str
-    ) -> Any:
+    async def autocomplete_set_lore_subname(self: Self, interaction: nextcord.Interaction, lore_subname: str) -> Any:
         filtered_lores: list[str] = filter_lores(lore_subname, None)
         await interaction.response.send_autocomplete(filtered_lores)
 
     @lore.on_autocomplete("lore_subname")
     @roll_lore.on_autocomplete("lore_subname")
-    async def autocomplete_lore_subname(
-        self: Self, interaction: nextcord.Interaction, lore_subname: str
-    ) -> Any:
+    async def autocomplete_lore_subname(self: Self, interaction: nextcord.Interaction, lore_subname: str) -> Any:
         user_id: int = interaction.user.id
 
         filtered_lores: list[str] = filter_lores(lore_subname, user_id)

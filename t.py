@@ -14,11 +14,7 @@ def skill_description(
     if pj_skill is None:
         bonus_str: str = f"{pj_mod_bonus:+}"
         skill_title = f"**{skill_name}** *(untrained?)*:"
-        submsg: str = (
-            f"\n- {skill_title.ljust(justify)} "
-            f"{bonus_str} "
-            f"([{mod_type.name}: {bonus_str}])"
-        )
+        submsg: str = f"\n- {skill_title.ljust(justify)} " f"{bonus_str} " f"([{mod_type.name}: {bonus_str}])"
     else:
         prof_level: str = pj_skill["prof_level"]
         level_bonus: int = 0 if prof_level == PROF.Untrained else pj_level

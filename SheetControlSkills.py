@@ -3,10 +3,11 @@ from functools import wraps
 from typing import Any, Callable, Tuple, TypedDict
 from icecream import ic
 
-import gspread  # type: ignore
+import gspread
+from gspread.utils import ValueRenderOption
 
 import utils
-from PF2eData import ABILITIES, SKILLS, PROF_BONUSES
+from PF2eData import ABILITIES, SKILLS, PROF_BONUSES, Ability
 from utils import Column
 from varenv import getVar
 from SheetControl import get_level_global
@@ -17,7 +18,7 @@ ABILITIES_SHEET_ID = 41455486
 
 credentials = json.loads(getVar("GOOGLE"), strict=False)
 
-gc = gspread.service_account_from_dict(credentials)
+gc = gspread.auth.service_account_from_dict(credentials)
 
 skill_sheet = gc.open("Megamarch").get_worksheet_by_id(SKILLS_SHEET_ID)
 ability_sheet = gc.open("Megamarch").get_worksheet_by_id(ABILITIES_SHEET_ID)
@@ -29,8 +30,8 @@ ABILITY_DATA: list[list[str]]
 def _update_skill_data() -> None:
     "Actualiza los singletons SKILL_DATA, ABILITY_DATA"
     global SKILL_DATA, ABILITY_DATA
-    SKILL_DATA = skill_sheet.get_all_values(value_render_option="UNFORMATTED_VALUE")
-    ABILITY_DATA = ability_sheet.get_all_values(value_render_option="UNFORMATTED_VALUE")
+    SKILL_DATA = skill_sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
+    ABILITY_DATA = ability_sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
 
 
 def gets_skill_data(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -74,8 +75,8 @@ def _first_empty_row(DATA: list[list[str]], col: utils.Column) -> int:
     """
     Entrega el index (indexado a 1) de la primera fila vacía de un excel
     """
-    col: list[str] = _column(DATA, col)
-    return len(col) + 1
+    column: list[str] = _column(DATA, col)
+    return len(column) + 1
 
 
 def _get_id_row(DATA: list[list[str]], col: Column, id: int) -> int | None:
@@ -158,7 +159,7 @@ def get_pj_skill_bonus(discord_id: int, skill_name: str) -> Tuple[int, str, str]
     if name is None:
         return None, None, None
     name, row, stats = get_pj_abilities(discord_id)
-    if name is None:
+    if name is None or row is None or stats is None:
         return None, None, None
     skill_ab = [ab for sk, ab in SKILLS if sk == skill_name][0]
     skill_values = skills[skill_name]
@@ -174,7 +175,7 @@ def get_pj_skill_bonus(discord_id: int, skill_name: str) -> Tuple[int, str, str]
 
 def get_pj_abilities(
     discord_id: int,
-) -> Tuple[str | None, int | None, dict[str, int] | None]:
+) -> Tuple[str | None, int | None, dict[Ability, int] | None]:
     """
     Retorna el nombre del PJ, la row (index 1) y un diccionario con los ability modifiers del pj tal que:
     {ability (tipo Ability): int}
@@ -207,9 +208,7 @@ def update_skill_row(row_index: int, data: Tuple[str, str, int, int, str]) -> No
     skill_sheet.update([data], f"A{row_index}:F{row_index}")
 
 
-def multi_update_skill_row(
-    rows_and_data: list[Tuple[int, Tuple[str, str, int, int, str]]]
-) -> None:
+def multi_update_skill_row(rows_and_data: list[Tuple[int, Tuple[str, str, int, int, str]]]) -> None:
     """
     Actualiza o crea múltiples rows de skill.
     row_index es indexado a 1
@@ -222,9 +221,7 @@ def multi_update_skill_row(
     skill_sheet.batch_update(send_batch)
 
 
-def update_ability_row(
-    row_index: int, data: Tuple[str, str, int, int, int, int, int, int]
-) -> None:
+def update_ability_row(row_index: int, data: Tuple[str, str, int, int, int, int, int, int]) -> None:
     """
     Actualiza o crea una nueva row de habilidades.
     row_index es indexado a 1

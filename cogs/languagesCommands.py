@@ -16,9 +16,7 @@ class Languages(commands.Cog):
     def __init__(self: Self, client: commands.Bot) -> None:
         self.client = client
 
-    @nextcord.slash_command(
-        description="Muestra la lista de tus lenguajes", guild_ids=[CRI_GUILD_ID]
-    )
+    @nextcord.slash_command(description="Muestra la lista de tus lenguajes", guild_ids=[CRI_GUILD_ID])
     @gets_pj_data
     async def languages(
         self: Self,
@@ -36,9 +34,7 @@ class Languages(commands.Cog):
             pj_name: str = sh.get_pj_data(pj_row, PJ_COL.Name)
             pj_languages: str = sh.get_pj_data(pj_row, PJ_COL.Languages)
         except CharacterNotFoundError:
-            return await interaction.followup.send(
-                "No se encontró un personaje con ID de discord correspondiente"
-            )
+            return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
         if pj_languages is not None:
             languages = pj_languages.split(", ")
             language_list = "\n- ".join(languages)
@@ -48,9 +44,7 @@ class Languages(commands.Cog):
             message = f"{pj_name} no sabe ningún lenguaje."
         return await interaction.followup.send(message)
 
-    @nextcord.slash_command(
-        description="Añade un lenguaje a la lista de tu PJ", guild_ids=[CRI_GUILD_ID]
-    )
+    @nextcord.slash_command(description="Añade un lenguaje a la lista de tu PJ", guild_ids=[CRI_GUILD_ID])
     @gets_pj_data
     async def addlanguage(
         self: Self,
@@ -71,20 +65,14 @@ class Languages(commands.Cog):
             pj_name: str = sh.get_pj_data(pj_row, PJ_COL.Name)
             pj_languages: str = sh.get_pj_data(pj_row, PJ_COL.Languages)
         except CharacterNotFoundError:
-            return await interaction.followup.send(
-                "No se encontró un personaje con ID de discord correspondiente"
-            )
+            return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
         languages = [] if pj_languages in [None, ""] else pj_languages.split(", ")
         if addedlanguage not in languages:
             languages.append(addedlanguage)
             sh.update_pj_data_cell(pj_row, PJ_COL.Languages, [[", ".join(languages)]])
-            return await interaction.followup.send(
-                f"{addedlanguage} ha sido añadido a la lista de {pj_name}."
-            )
+            return await interaction.followup.send(f"{addedlanguage} ha sido añadido a la lista de {pj_name}.")
         else:
-            return await interaction.followup.send(
-                f"{addedlanguage} ya está en la lista de {pj_name}."
-            )
+            return await interaction.followup.send(f"{addedlanguage} ya está en la lista de {pj_name}.")
 
 
 def setup(client: commands.Bot) -> None:

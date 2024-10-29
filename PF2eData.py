@@ -1,5 +1,5 @@
 import json
-from typing import Any, Self, Tuple, TypedDict
+from typing import Any, Self, Tuple, Type, TypedDict
 
 RELIGIONS: list[str] = [
     "La Labor",
@@ -123,7 +123,7 @@ ANCESTRIES: list[str] = [
 class Ability(str):
     name: str
 
-    def __new__(cls: Self, content: str, name: str) -> Any:
+    def __new__(cls: Type["Ability"], content: str, name: str) -> Any:
         ret = super().__new__(cls, content)
         ret.name = name
         return ret
@@ -167,6 +167,14 @@ class PROF:
     Expert: str = "Expert"
     Master: str = "Master"
     Legendary: str = "Legendary"
+
+    ICONS: dict[str, str] = {
+        Untrained: "🌑",
+        Trained: "🌘",
+        Expert: "🌗",
+        Master: "🌖",
+        Legendary: "🌕",
+    }
 
     max_length: int = len("Legendary")
     profs_list: list[str] = [

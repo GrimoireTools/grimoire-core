@@ -3,7 +3,8 @@ from functools import wraps
 from typing import Any, Callable, Iterable, Self
 from icecream import ic
 
-import gspread  # type: ignore
+import gspread
+from gspread.utils import ValueRenderOption
 
 from PF2eData import Recipe
 import utils
@@ -14,7 +15,7 @@ RECIPES_SHEET_ID = 1160647453
 
 credentials = json.loads(getVar("GOOGLE"), strict=False)
 
-gc = gspread.service_account_from_dict(credentials)
+gc = gspread.auth.service_account_from_dict(credentials)
 
 recipes_sheet = gc.open("Megamarch").get_worksheet_by_id(RECIPES_SHEET_ID)
 
@@ -24,7 +25,7 @@ RECIPES_DATA: list[list[str]]
 
 def update_recipe_data() -> None:
     global RECIPES_DATA
-    RECIPES_DATA = recipes_sheet.get_all_values(value_render_option="UNFORMATTED_VALUE")
+    RECIPES_DATA = recipes_sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
 
 
 def gets_recipe_data(func: Callable[..., Any]) -> Callable[..., Any]:
