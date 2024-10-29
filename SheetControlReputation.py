@@ -13,7 +13,7 @@ REPUTATION_SHEET_ID = 37818595
 
 credentials = json.loads(getVar("GOOGLE"), strict=False)
 
-gc = gspread.service_account_from_dict(credentials)
+gc = gspread.auth.service_account_from_dict(credentials)
 
 rep_sheet = gc.open("Megamarch").get_worksheet_by_id(REPUTATION_SHEET_ID)
 

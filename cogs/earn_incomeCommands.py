@@ -20,17 +20,14 @@ CRI_GUILD_ID = int(getVar("GUILD_ID"))
 class EarnIncome(commands.Cog):
     def __init__(self: Self, client: commands.Bot) -> None:
         self.client = client
+
     # =====================================================================================================================
 
-    @nextcord.slash_command(
-        description="Calcula las ganancias de Earn Income", guild_ids=[CRI_GUILD_ID]
-    )
+    @nextcord.slash_command(description="Calcula las ganancias de Earn Income", guild_ids=[CRI_GUILD_ID])
     async def earn_income(
         self: Self,
         interaction: nextcord.Interaction,
-        taskLevel: int = nextcord.SlashOption(
-            "task-level", "Nivel del trabajo", True, min_value=0, max_value=21
-        ),
+        taskLevel: int = nextcord.SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
         profLevel: str = nextcord.SlashOption(
             "proficiency-level",
             "Nivel de proficiencia de la skill usada",
@@ -44,11 +41,12 @@ class EarnIncome(commands.Cog):
             min_value=7,
             default=7,
         ),
-        checkBonus: int = nextcord.SlashOption(
-            "check-bonus", "Bono al check utilizado", True
-        ),
+        checkBonus: int = nextcord.SlashOption("check-bonus", "Bono al check utilizado", True),
         dcChange: int = nextcord.SlashOption(
-            "dc-adjustment", "Cambios al DC impuestos por el DM. +3 para habilidades que no sean Performance, Crafting o Lore.", False, default=0
+            "dc-adjustment",
+            "Cambios al DC impuestos por el DM. +3 para habilidades que no sean Performance, Crafting o Lore.",
+            False,
+            default=0,
         ),
     ) -> Any:
         await interaction.response.defer()
@@ -66,19 +64,19 @@ class EarnIncome(commands.Cog):
     (debes updatearlos manualmente)
     """  # noqa: E501
         await interaction.followup.send(message)
+
     # =====================================================================================================================
 
     @nextcord.slash_command(
-        description="Calcula las ganancias de Earn Income, usando tus bonos de forma automática. El DC se calcula solo.", guild_ids=[CRI_GUILD_ID]
+        description="Calcula las ganancias de Earn Income, usando tus bonos de forma automática. El DC se calcula solo.",
+        guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
     @gets_pj_data
     async def earn_income_automatic(
         self: Self,
         interaction: nextcord.Interaction,
-        taskLevel: int = nextcord.SlashOption(
-            "task-level", "Nivel del trabajo", True, min_value=0, max_value=21
-        ),
+        taskLevel: int = nextcord.SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
         skill: str = nextcord.SlashOption(
             "skill",
             "Skill utilizada. Trained Only.",
@@ -97,39 +95,44 @@ class EarnIncome(commands.Cog):
             "Para utilizar otras skills. Usa additional-check-bonus. Pon el +3 al DC de ser necesario",
             False,
             choices=["Trained", "Expert", "Master", "Legendary"],
-            default=None
+            default=None,
         ),
         checkBonus: int = nextcord.SlashOption(
             "additional-check-bonus", "Bonos adicionales al check utilizado", False, default=0
         ),
-        dcChange: int = nextcord.SlashOption(
-            "dc-adjustment", "Cambios al DC impuestos por el DM.", False, default=0
-        ),
+        dcChange: int = nextcord.SlashOption("dc-adjustment", "Cambios al DC impuestos por el DM.", False, default=0),
         experiencedProf: bool = nextcord.SlashOption(
             "experienced-professional", "Aplicar Experienced Professional, solo para Lore.", False, default=False
         ),
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id = interaction.user.id
         try:
             pj_row = sh.get_pj_row(user_id)
             pj_name = sh.get_pj_data(pj_row, PJ_COL.Name)
         except utils.CharacterNotFoundError:
-            return await interaction.followup.send(
-                "No se encontró un personaje con ID de discord correspondiente"
-            )
+            return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
         if skill == "Otro" or skill == "Lore":
             if altSkill is None:
-                return await interaction.followup.send("Debes seleccionar el nivel de proficiencia en alt-skill-profi si usas la skill 'Lore' u 'Otro'.")
+                return await interaction.followup.send(
+                    "Debes seleccionar el nivel de proficiencia en alt-skill-profi si usas la skill 'Lore' u 'Otro'."
+                )
             if checkBonus == 0:
-                return await interaction.followup.send("Debes especificar tu bono a la skill en additional-check-bonus si usas la skill 'Lore' u 'Otro'.")
+                return await interaction.followup.send(
+                    "Debes especificar tu bono a la skill en additional-check-bonus si usas la skill 'Lore' u 'Otro'."
+                )
             bonus = 0
             profLevel = altSkill
             skill_msg = ""
         else:
             bonus, profLevel, skill_msg = get_pj_skill_bonus(user_id, skill)
-        if bonus is None:
-            return await interaction.followup.send("Debes setear tus skills con /set_all_skills para usar este comando.")
+
+        if bonus is None or profLevel is None:
+            return await interaction.followup.send(
+                "Debes setear tus skills con /set_all_skills para usar este comando."
+            )
         if profLevel == PROF.Untrained:
             return await interaction.followup.send("No puedes hacer Earn Income con una skill Untrained")
         if skill_msg is None:
@@ -139,12 +142,10 @@ class EarnIncome(commands.Cog):
         pj_dt: int = int(sh.get_pj_data(pj_row, PJ_COL.Downtime))
 
         if pj_dt - downtimeUsed < 0:
-            return await interaction.followup.send(
-                "No tienes suficiente downtime para esta transacción"
-            )
+            return await interaction.followup.send("No tienes suficiente downtime para esta transacción")
         harder_dc = skill not in ["Lore", "Crafting", "Performance", "Otro"]
         harder_dc_adjustment = 3 if harder_dc else 0
-        dice = dndice.basic("1d20")
+        dice = int(dndice.basic("1d20"))
         check_value = dice + bonus + checkBonus
         harder_dc_message = f" (con +3 al DC por usar {skill})" if harder_dc else "s"
         DC = EARN_INCOME[taskLevel][0] + dcChange + harder_dc_adjustment
@@ -166,7 +167,9 @@ class EarnIncome(commands.Cog):
         pp, gp, sp, cp, old_gp_total = sh.get_pj_coins(pj_row)
         pp, gp, sp, cp, new_gp_total = add_money_helper(income * final_dt_usage, pj_row)
 
-        crit_fail_message = "" if check_result != 0 else "\nDebido a tu crit failure, tu proximo trabajo tiene un -1 al nivel."
+        crit_fail_message = (
+            "" if check_result != 0 else "\nDebido a tu crit failure, tu proximo trabajo tiene un -1 al nivel."
+        )
 
         message = f"""## {pj_name}: Earn income de {skill} lvl {taskLevel}
 Con un {check_value} ({dice}{(bonus + checkBonus):+} {skill_msg}) vs DC {DC}{harder_dc_message}, obtienes un {utils.result_name(check_result)}.
@@ -175,11 +178,10 @@ Con un {check_value} ({dice}{(bonus + checkBonus):+} {skill_msg}) vs DC {DC}{har
     Cambio de Dinero: {old_gp_total:.2f} -> {new_gp_total:.2f}{crit_fail_message}
     """  # noqa: E501
         await interaction.followup.send(message)
+
     # =====================================================================================================================
 
-    @nextcord.slash_command(
-        description="Genera trabajos especiales.", guild_ids=[CRI_GUILD_ID]
-    )
+    @nextcord.slash_command(description="Genera trabajos especiales.", guild_ids=[CRI_GUILD_ID])
     async def gen_jobs(
         self: Self,
         interaction: nextcord.Interaction,
@@ -192,9 +194,11 @@ Con un {check_value} ({dice}{(bonus + checkBonus):+} {skill_msg}) vs DC {DC}{har
     ) -> Any:
         await interaction.response.defer()
         taskLevel = taskLevel if taskLevel is not None else get_level_global()
-        message = ("# Trabajos mensuales\n"
-                   "Todos los trabajos duran 14 dias y se pueden hacer 1 sola vez por PJ.\n"
-                   "Como recordatorio, todos los trabajos con skills que no sean Crafting, Performance o Lore tienen un +3 al DC\n\n")
+        message = (
+            "# Trabajos mensuales\n"
+            "Todos los trabajos duran 14 dias y se pueden hacer 1 sola vez por PJ.\n"
+            "Como recordatorio, todos los trabajos con skills que no sean Crafting, Performance o Lore tienen un +3 al DC\n\n"
+        )
         chosen_skills = random.sample(LORELESS_SKILLS, tasksAmt)
         job_messages = [job_message(sk, taskLevel) for (sk, _ab) in chosen_skills]
         message += "\n".join(job_messages)
@@ -215,9 +219,11 @@ def job_message(skill: str, base_lvl: int) -> str:
 
     dc = EARN_INCOME[lvl][0] + dc_adjustment
 
-    return (f"### Trabajo de **{skill}**:\n"
-            f"Trabajo de Nivel {lvl}. {dc_message} (DC total {dc})"
-            f"```/earn_income_automatic task-level:{lvl} skill:{skill} downtime-used:14 dc-adjustment:{dc_adjustment}```")
+    return (
+        f"### Trabajo de **{skill}**:\n"
+        f"Trabajo de Nivel {lvl}. {dc_message} (DC total {dc})"
+        f"```/earn_income_automatic task-level:{lvl} skill:{skill} downtime-used:14 dc-adjustment:{dc_adjustment}```"
+    )
 
 
 def calc_job_income_and_dt(taskLevel: int, downtimeUsed: int, check_result: int, prof_column: int) -> tuple[float, int]:
@@ -240,7 +246,7 @@ def calc_job_income_and_dt(taskLevel: int, downtimeUsed: int, check_result: int,
     return income, final_dt_usage
 
 
-def skill_is_standard(skill: str) -> str:
+def skill_is_standard(skill: str) -> bool:
     return skill == "Performance" or skill == "Crafting" or skill.startswith("Lore")
 
 

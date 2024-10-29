@@ -5,6 +5,7 @@ from icecream import ic
 
 ALTERNATE = True
 
+
 def nat_20_1_message(dice_result: int):
     if dice_result == 20:
         return "**Nat 20!** "
@@ -26,18 +27,16 @@ def skill_description(
     ALTERNATE = not ALTERNATE
     just_char = "·" if ALTERNATE else " "
     if pj_skill is None:
-        skill_title = f"{skill_name} (Untrained?):"
+        skill_title = f"{PROF.ICONS[PROF.Untrained]} {skill_name} (Untrained?):"
         submsg: str = (
-            f"\n- {skill_title.ljust(28, just_char)} "
-            f"{pj_mod_bonus:+} "
-            f"([{mod_type.name}: {pj_mod_bonus:+}])"
+            f"\n- {skill_title.ljust(28, just_char)} " f"{pj_mod_bonus:+} " f"([{mod_type.name}: {pj_mod_bonus:+}])"
         )
     else:
-        prof_level: str = pj_skill["prof_level"]
+        prof_level: str = str(pj_skill["prof_level"])
         level_bonus: int = 0 if prof_level == PROF.Untrained else pj_level
         prof_bonus: int = PROF_BONUSES[prof_level]
-        extra_bonus: int = pj_skill["extra_bonus"]
-        extra_descripcion: str = pj_skill["extra_descripcion"]
+        extra_bonus: int = int(pj_skill["extra_bonus"])
+        extra_descripcion: str = str(pj_skill["extra_descripcion"])
         skill_title = f"{skill_name} ({prof_level})"
 
         extra_msg = (
@@ -46,7 +45,7 @@ def skill_description(
             else f"[Other: {extra_bonus:+}{f' ({extra_descripcion})' if extra_info else ''}]"
         )
         submsg: str = (
-            f"\n- {skill_title.ljust(28, just_char)} "
+            f"\n- {PROF.ICONS[prof_level]} {skill_title.ljust(28, just_char)} "
             f'{f"{(prof_bonus + pj_mod_bonus + extra_bonus + level_bonus):+} ".ljust(4)}'
             f"([{mod_type.name}: {pj_mod_bonus:+}]"
             f"[{f'{prof_level}:'.ljust(10)} {f'{(prof_bonus + level_bonus):+}]'.rjust(4)}"
@@ -71,7 +70,5 @@ def filter_lores(lore_subname: str, user_id: int | None) -> list[str]:
         sh_skills._update_skill_data()
         ic("Updated skill data once")
     filtered_lores = sh_skills.get_all_existing_lore_subnames(user_id)
-    filtered_lores = [
-        a for a in filtered_lores if a.lower().startswith(lore_subname.lower())
-    ]
+    filtered_lores = [a for a in filtered_lores if a.lower().startswith(lore_subname.lower())]
     return filtered_lores

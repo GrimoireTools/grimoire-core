@@ -18,9 +18,7 @@ class Reputation(commands.Cog):
     def __init__(self: Self, client: commands.Bot) -> None:
         self.client = client
 
-    @nextcord.slash_command(
-        description="Revisa tu reputación", guild_ids=[CRI_GUILD_ID]
-    )
+    @nextcord.slash_command(description="Revisa tu reputación", guild_ids=[CRI_GUILD_ID])
     @gets_reputation_data
     async def reputation(
         self: Self,
@@ -40,9 +38,7 @@ class Reputation(commands.Cog):
             reps.sort(reverse=True, key=lambda r: r[REP_COL.Reputation.excel_index()])
 
             for rep in reps:
-                row_pj_name, row_discord_id, row_faction, row_reputation, row_index = (
-                    rep
-                )
+                row_pj_name, row_discord_id, row_faction, row_reputation, row_index = rep
                 message += f"\n- {row_faction}: {row_reputation}"
         else:
             message = "Tu personaje no tiene reputación con ningún NPC ni facción."
@@ -72,17 +68,12 @@ class Reputation(commands.Cog):
 
         if len(rep_row):
             # Add reptuation
-            row_pj_name, row_discord_id, row_faction, row_reputation, row_index = (
-                rep_row[0]
-            )
+            row_pj_name, row_discord_id, row_faction, row_reputation, row_index = rep_row[0]
             new_rep = int(row_reputation) + amount
             new_row = [row_pj_name, row_discord_id, row_faction, new_rep]
             shr.update_rep_row(row_index, new_row)
             await interaction.followup.send(
-                (
-                    f"Actualizada la reputación de {row_pj_name} con"
-                    f" {faction}: {row_reputation} -> {new_rep}"
-                )
+                (f"Actualizada la reputación de {row_pj_name} con" f" {faction}: {row_reputation} -> {new_rep}")
             )
 
         else:
@@ -91,29 +82,18 @@ class Reputation(commands.Cog):
                 pj_row = shpj.get_pj_row(user_id)
                 pj_name = shpj.get_pj_data(pj_row, PJ_COL.Name)
             except CharacterNotFoundError:
-                return await interaction.followup.send(
-                    "No se encontró un personaje con ID de discord correspondiente"
-                )
-            row_index = ic(shr.first_empty_rep_row())
+                return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
+            row_index = shr.first_empty_rep_row()
             new_row = [pj_name, str(user_id), faction, amount]
-            ic(new_row)
             shr.update_rep_row(row_index, new_row)
-            await interaction.followup.send(
-                f"Creada la reputación de {pj_name} con {faction}: {amount}"
-            )
+            await interaction.followup.send(f"Creada la reputación de {pj_name} con {faction}: {amount}")
 
     @update_reputation.on_autocomplete("faction")
-    async def autocomplete_faction(
-        self: Self, interaction: nextcord.Interaction, faction: str
-    ) -> Any:
+    async def autocomplete_faction(self: Self, interaction: nextcord.Interaction, faction: str) -> Any:
         if len(faction) == 0:
             shr.update_reputation_data()
             ic("Updated rep data once")
-        filtered_ancestries = [
-            a
-            for a in shr.get_all_existing_factions()
-            if a.lower().startswith(faction.lower())
-        ]
+        filtered_ancestries = [a for a in shr.get_all_existing_factions() if a.lower().startswith(faction.lower())]
         await interaction.response.send_autocomplete(filtered_ancestries)
 
 
