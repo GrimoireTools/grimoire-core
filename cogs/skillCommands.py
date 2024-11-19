@@ -44,14 +44,11 @@ class Skills(commands.Cog):
 
         message: str = f"# Skills de {name_mods if name is None else name}:\n```{CODEBLOCK_LANG}\n"
 
-        pj_level = sh_pj.get_level_global()
-
         for skill_name, mod_type in SKILLS:
             if skill_name == "Lore":
                 continue
             message += skill_description(
                 pj_mods[mod_type],
-                pj_level,
                 mod_type,
                 skill_name,
                 pj_skills.get(skill_name, None),  # type: ignore
@@ -63,7 +60,6 @@ class Skills(commands.Cog):
             pj_mod_bonus: int = pj_mods[ABILITIES.Int]
             message += skill_description(
                 pj_mod_bonus,
-                pj_level,
                 ABILITIES.Int,
                 lore_name,
                 lore,
@@ -93,14 +89,11 @@ class Skills(commands.Cog):
 
         message: str = f"# Lores de {name_mods if name is None else name}:\n```{CODEBLOCK_LANG}"
 
-        pj_level = sh_pj.get_level_global()
-
         lores = [(skill_name, values) for skill_name, values in pj_skills.items() if skill_name.startswith("Lore")]
         for lore_name, lore in lores:
             pj_mod_bonus: int = pj_mods[ABILITIES.Int]
             message += skill_description(
                 pj_mod_bonus,
-                pj_level,
                 ABILITIES.Int,
                 lore_name,
                 lore,
@@ -139,12 +132,10 @@ class Skills(commands.Cog):
 
         message: str = f"## {skill} de {name_mods if name is None else name}:\n"
 
-        pj_level = sh_pj.get_level_global()
         mod_type: Ability = [ab for skill_nm, ab in SKILLS if skill_nm == skill][0]
 
         message += f"```{CODEBLOCK_LANG}\n{skill_description(
             pj_mods[mod_type],
-            pj_level,
             mod_type,
             skill,
             pj_skills.get(skill, None),
@@ -185,12 +176,10 @@ class Skills(commands.Cog):
 
         message: str = f"## {lore_full_name} de {name_mods if name is None else name}:\n"
 
-        pj_level = sh_pj.get_level_global()
         mod_type: Ability = ABILITIES.Int
 
         message += f"```{CODEBLOCK_LANG}\n{skill_description(
             pj_mods[mod_type],
-            pj_level,
             mod_type,
             lore_full_name,
             pj_skills.get(lore_full_name, None),
@@ -239,6 +228,8 @@ class Skills(commands.Cog):
         user_id: int = interaction.user.id
 
         pj_name, pj_skills = sh_skills.get_pj_skills(user_id)
+        if pj_name is None:
+            return await interaction.followup.send("Error: Null character name")
 
         pj_skill = pj_skills.get(skill, None)
 
@@ -260,7 +251,7 @@ class Skills(commands.Cog):
             str(user_id),
             skill,
             proficiency,
-            other_bonuses,
+            str(other_bonuses),
             other_bonuses_description,
         )
         sh_skills.update_skill_row(row, data)
@@ -294,6 +285,8 @@ class Skills(commands.Cog):
         thievery: str = ability_param("thievery"),
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
 
         # pj_skills: dict[str, dict[str, str | int]]
@@ -302,7 +295,7 @@ class Skills(commands.Cog):
         try:
             pj_name = sh_pj.get_pj_data(sh_pj.get_pj_row(user_id), PJ_COL.Name)
         except CharacterNotFoundError as e:
-            return await interaction.followup.send(e)
+            return await interaction.followup.send(f"{e}")
 
         better_args = [
             ("Perception", perception),
@@ -391,9 +384,13 @@ class Skills(commands.Cog):
         ),
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
 
         pj_name, pj_skills = sh_skills.get_pj_skills(user_id)
+        if pj_name is None:
+            return await interaction.followup.send("Error: Null character name")
 
         skill = f"Lore ({lore_subname})"
 
@@ -404,7 +401,7 @@ class Skills(commands.Cog):
             try:
                 pj_name = sh_pj.get_pj_data(sh_pj.get_pj_row(user_id), PJ_COL.Name)
             except CharacterNotFoundError as e:
-                return await interaction.followup.send(e)
+                return await interaction.followup.send(f"{e}")
             row: int = sh_skills.first_empty_skill_row()
             msg = f"Se definió la proficiencia de {pj_name} en {skill}"
         else:
@@ -417,7 +414,7 @@ class Skills(commands.Cog):
             str(user_id),
             skill,
             proficiency,
-            other_bonuses,
+            str(other_bonuses),
             other_bonuses_description,
         )
         sh_skills.update_skill_row(row, data)
@@ -440,9 +437,13 @@ class Skills(commands.Cog):
         charisma: int,
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
 
         pj_name, row, _ = sh_skills.get_pj_abilities(user_id)
+        if pj_name is None or row is None:
+            return await interaction.followup.send("Error: Character Not Found")
 
         if pj_name is None:
             # Crear nueva row
@@ -487,18 +488,18 @@ class Skills(commands.Cog):
         extra_info: bool = False,
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
 
-        pj_mods: dict[Ability, int]
         name_mods, row, pj_mods = sh_skills.get_pj_abilities(user_id)
 
-        if name_mods is None:
+        if name_mods is None or row is None or pj_mods is None:
             return await interaction.followup.send(
                 "Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             )
 
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
-        pj_skills: dict[str, dict[str, str | int]]
         name, pj_skills = sh_skills.get_pj_skills(user_id)
 
         dice = int(dndice.basic("1d20"))
@@ -507,37 +508,32 @@ class Skills(commands.Cog):
         # ABILITY
         mod_type: Ability = [ab for skill_nm, ab in SKILLS if skill_nm == skill][0]
         ability_bonus = pj_mods[mod_type]
-        ability_msg = f"[{mod_type.name}: {ability_bonus:+}]"
-
-        # EXTRA
-        extra_msg = "" if extra_modifiers == 0 else f"[Extra: {extra_modifiers:+}]"
 
         # PROFICIENCY
         pj_skill = pj_skills.get(skill, None)
         if pj_skill is None:
             prof_bonus = 0
-            prof_msg = "[Untrained?: +0]"
         else:
             prof_level: str = pj_skill["prof_level"]
             prof_bonus: int = PROF_BONUSES[prof_level]
-            prof_msg = f"[{prof_level}: +{prof_bonus}]"
 
         # OTHER
         if pj_skill is None:
-            other_msg = ""
             other_bonus = 0
         else:
             other_bonus: int = pj_skill["extra_bonus"]
-            other_descripcion: str = pj_skill["extra_descripcion"]
-            other_msg = (
-                ""
-                if (other_bonus == 0 and other_descripcion == "")
-                else f"[Other: {other_bonus:+}{f' ({other_descripcion})' if extra_info else ''}])*"
-            )
 
-        result = dice + ability_bonus + prof_bonus + other_bonus + extra_modifiers
+        total_mod = ability_bonus + prof_bonus + other_bonus + extra_modifiers
+        result = dice + total_mod
+        skill_msg = skill_description(
+            pj_mods[mod_type],
+            mod_type,
+            skill,
+            pj_skills.get(skill, None),
+            extra_info,
+        )
+        message = f"# {name_mods} {skill} roll: \n```{CODEBLOCK_LANG}\n{skill_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"
 
-        message = f"{name_mods} {skill} roll: `{result}` {nat_20_1}\n[Dice: {dice}]{ability_msg}{prof_msg}{other_msg}{extra_msg}"
         return await interaction.followup.send(message)
 
     @nextcord.slash_command(
@@ -562,19 +558,20 @@ class Skills(commands.Cog):
         extra_info: bool = False,
     ) -> Any:
         await interaction.response.defer()
+        if interaction.user is None:
+            return await interaction.followup.send("Error: Null user")
         user_id: int = interaction.user.id
 
-        pj_mods: dict[Ability, int]
         name_mods, row, pj_mods = sh_skills.get_pj_abilities(user_id)
 
-        if name_mods is None:
+        if name_mods is None or row is None or pj_mods is None:
             return await interaction.followup.send(
                 "Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             )
 
         # {skill_name: {prof_level: str, extra_bonus: int, extra_descripcion: str}}
-        pj_skills: dict[str, dict[str, str | int]]
         name, pj_skills = sh_skills.get_pj_skills(user_id)
+        lore_full_name = f"Lore ({lore_subname})"
 
         dice = int(dndice.basic("1d20"))
         nat_20_1: str = nat_20_1_message(dice)
@@ -582,38 +579,30 @@ class Skills(commands.Cog):
         # ABILITY
         mod_type: Ability = ABILITIES.Int
         ability_bonus = pj_mods[mod_type]
-        ability_msg = f"[{mod_type.name}: {ability_bonus:+}]"
 
-        # EXTRA
-        extra_msg = "" if extra_modifiers == 0 else f"[Extra: {extra_modifiers:+}]"
-
-        lore_full_name = f"Lore ({lore_subname})"
         # PROFICIENCY
         pj_skill = pj_skills.get(lore_full_name, None)
+
         if pj_skill is None:
             prof_bonus = 0
-            prof_msg = "[Untrained?: +0]"
         else:
             prof_level: str = pj_skill["prof_level"]
             prof_bonus: int = PROF_BONUSES[prof_level]
-            prof_msg = f"[{prof_level}: +{prof_bonus}]"
 
         # OTHER
         if pj_skill is None:
-            other_msg = ""
             other_bonus = 0
         else:
             other_bonus: int = pj_skill["extra_bonus"]
-            other_descripcion: str = pj_skill["extra_descripcion"]
-            other_msg = (
-                ""
-                if (other_bonus == 0 and other_descripcion == "")
-                else f"[Other: {other_bonus:+}{f' ({other_descripcion})' if extra_info else ''}])*"
-            )
 
-        result = dice + ability_bonus + prof_bonus + other_bonus + extra_modifiers
+        skill_msg = skill_description(
+            ability_bonus, ABILITIES.Int, lore_full_name, pj_skills.get(lore_full_name, None), extra_info
+        )
 
-        message = f"{name_mods} {lore_full_name} roll: `{result}` {nat_20_1}\n[Dice: {dice}]{ability_msg}{prof_msg}{other_msg}{extra_msg}"
+        total_mod = ability_bonus + prof_bonus + other_bonus + extra_modifiers
+        result = dice + total_mod
+        message = f"# {name_mods} {lore_full_name} roll: \n```{CODEBLOCK_LANG}\n{skill_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"
+
         return await interaction.followup.send(message)
 
     @set_lore.on_autocomplete("lore_subname")
@@ -624,6 +613,8 @@ class Skills(commands.Cog):
     @lore.on_autocomplete("lore_subname")
     @roll_lore.on_autocomplete("lore_subname")
     async def autocomplete_lore_subname(self: Self, interaction: nextcord.Interaction, lore_subname: str) -> Any:
+        if interaction.user is None:
+            raise ValueError("Null user")
         user_id: int = interaction.user.id
 
         filtered_lores: list[str] = filter_lores(lore_subname, user_id)
