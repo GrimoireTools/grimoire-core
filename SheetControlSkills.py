@@ -198,7 +198,7 @@ def get_pj_abilities(
     return (name, row_i0 + 1, stats)
 
 
-def update_skill_row(row_index: int, data: Tuple[str, str, int, int, str]) -> None:
+def update_skill_row(row_index: int, data: Tuple[str, str, str, str, str, str]) -> None:
     """
     Actualiza o crea una nueva row de skill.
     row_index es indexado a 1

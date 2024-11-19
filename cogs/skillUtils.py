@@ -17,7 +17,6 @@ def nat_20_1_message(dice_result: int):
 
 def skill_description(
     pj_mod_bonus: int,
-    pj_level: int,
     mod_type: Ability,
     skill_name: str,
     pj_skill: None | sh_skills.SkillRow,
@@ -63,6 +62,15 @@ def fb(bonus: int, bold: bool = False) -> str:
     RESET = "\033[0m"
     color = YELLOW if bonus == 0 else RED if bonus < 0 else BLUE
     return f"{color}{bonus:+}{RESET}"
+
+
+def format_diceroll(dice: int, total: int):
+    RED = f"\033[1;31m"
+    CYAN = f"\033[1;36m"
+    WHITE = f"\033[1;37m"
+    RESET = "\033[0m"
+    color = RED if dice == 1 else CYAN if dice == 20 else WHITE
+    return f"{color}{total}{RESET}"
 
 
 def ability_param(ability_name: str):
