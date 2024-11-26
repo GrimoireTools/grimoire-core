@@ -212,12 +212,14 @@ def job_message(skill: str, base_lvl: int) -> str:
     if skill_is_standard(skill):
         dc_adjustment = random.choice([-0, -1, -2])
         dc_message = f"{dc_adjustment:+} al DC"
+        extra_dc = 0
 
     else:
         dc_adjustment = random.choice([-1, -2, -3])
         dc_message = f"{dc_adjustment:+} al DC (+3 por skill no estandar)"
+        extra_dc = 3
 
-    dc = EARN_INCOME[lvl][0] + dc_adjustment
+    dc = EARN_INCOME[lvl][0] + dc_adjustment + extra_dc
 
     return (
         f"### Trabajo de **{skill}**:\n"
