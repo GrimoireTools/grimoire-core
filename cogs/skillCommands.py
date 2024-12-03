@@ -55,16 +55,16 @@ class Skills(commands.Cog):
                 extra_info,
             )
 
-        lores = [(skill_name, values) for skill_name, values in pj_skills.items() if skill_name.startswith("Lore")]
-        for lore_name, lore in lores:
-            pj_mod_bonus: int = pj_mods[ABILITIES.Int]
-            message += skill_description(
-                pj_mod_bonus,
-                ABILITIES.Int,
-                lore_name,
-                lore,
-                extra_info,
-            )
+        # lores = [(skill_name, values) for skill_name, values in pj_skills.items() if skill_name.startswith("Lore")]
+        # for lore_name, lore in lores:
+        #     pj_mod_bonus: int = pj_mods[ABILITIES.Int]
+        #     message += skill_description(
+        #         pj_mod_bonus,
+        #         ABILITIES.Int,
+        #         lore_name,
+        #         lore,
+        #         extra_info,
+        #     )
         message += "\n```"
         return await interaction.followup.send(message)
 
