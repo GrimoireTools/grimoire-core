@@ -15,6 +15,7 @@ from cogs import (
     reputationCommands,
     skillCommands,
     recipesCommands,
+    saveCommands,
 )
 from cogs.moneyCommands import add_money_helper
 from SheetControl import PJ_COL, gets_pj_data
@@ -40,21 +41,15 @@ async def on_ready() -> None:
     ic(f"We have logged in as {bot.user}")
 
 
-@bot.slash_command(
-    description="Entrega la info de tu personaje", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Entrega la info de tu personaje", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def status(
-    interaction: nextcord.Interaction, user: nextcord.Member = default_user_option
-) -> Any:
+async def status(interaction: nextcord.Interaction, user: nextcord.Member = default_user_option) -> Any:
     await interaction.response.defer()
     user_id: int = interaction.user.id if user is None else user.id
     try:
         pj_row = sh.get_pj_row(user_id)
     except CharacterNotFoundError:
-        return await interaction.followup.send(
-            "No se encontró un personaje con ID de discord correspondiente"
-        )
+        return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
     data = sh.get_pj_full(pj_row)
     (
         Name,
@@ -105,9 +100,7 @@ async def salary(
         pj_row = sh.get_pj_row(user_id)
         pj_name = sh.get_pj_data(pj_row, PJ_COL.Name)
     except CharacterNotFoundError:
-        return await interaction.followup.send(
-            "No se encontró un personaje con ID de discord correspondiente"
-        )
+        return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
     # level = (
     #     sh.get_level_global() if level is None else level
     # )
@@ -140,16 +133,13 @@ earn_incomeCommands.setup(bot)
 languagesCommands.setup(bot)
 skillCommands.setup(bot)
 recipesCommands.setup(bot)
+saveCommands.setup(bot)
 
 sh.update_level_global()
 
 
-@bot.slash_command(
-    description="Cambia el nivel de todos los personajes", guild_ids=[CRI_GUILD_ID]
-)
-async def update_global_level(
-    interaction: nextcord.Interaction, level: int = None
-) -> Any:
+@bot.slash_command(description="Cambia el nivel de todos los personajes", guild_ids=[CRI_GUILD_ID])
+async def update_global_level(interaction: nextcord.Interaction, level: int | None = None) -> Any:
     await interaction.response.defer()
 
     sh.update_level_global(level)
