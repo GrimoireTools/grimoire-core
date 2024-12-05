@@ -171,6 +171,11 @@ SAVES: list[Tuple[str, Ability]] = [
 SKILL_ICONS = defaultdict(
     lambda: "📚",
     {
+        # Saves
+        "Fortitude": "🛡️",
+        "Reflex": "🤸🏻‍♀️",
+        "Will": "🧠",
+        # Skills
         "Perception": "👀",
         "Acrobatics": "🛹",
         "Arcana": "🪄",
@@ -273,26 +278,29 @@ with open("Ancestries.json") as f:
     HERITAGES: dict[str, list[str]] = json.load(f)
 
 
+# "Adjustments",
+# "Blighted Boons",
+# "Contracts",
+# "Cursed Items",
+# "Customizations",
+# "Intelligent Items",
+# "Structures",
+# "Trade Goods",
+# "Artifacts",
+# "Figurehead",
+# "Vehicles",
 ITEM_CATEGORIES = [
-    # "Adjustments",
     "Adventuring Gear",
     "Alchemical Items",
     "Animals and Gear",
     "Armor",
-    "Artifacts",
     "Assistive Items",
-    # "Blighted Boons",
     "Censer",
     "Consumables",
-    # "Contracts",
-    # "Cursed Items",
-    # "Customizations",
-    "Figurehead",
     "Grafts",
     "Grimoires",
     "Held Items",
     "High-tech",
-    # "Intelligent Items",
     "Materials",
     "Other",
     "Relics",
@@ -303,11 +311,8 @@ ITEM_CATEGORIES = [
     "Snares",
     "Spellhearts",
     "Staves",
-    # "Structures",
     "Tattoos",
     "Worn Items",
-    # "Trade Goods",
-    "Vehicles",
     "Wands",
     "Weapons",
 ]
