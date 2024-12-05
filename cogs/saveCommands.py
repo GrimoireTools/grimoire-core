@@ -181,6 +181,13 @@ class Saves(commands.Cog):
         reflex: str = ability_param("reflex"),
         will: str = ability_param("will"),
         fortitude: str = ability_param("fortitude"),
+        resilient: str = nextcord.SlashOption(
+            name="resilient",
+            description="Runa de resiliencia. Si se elije alguna, se sobreescriben los bonos extra. (default No)",
+            required=False,
+            choices=["No", "Resilient (+1)", "Resilient (Greater) (+2)", "Resilient (Major) (+3)"],
+            default="No",
+        ),
     ) -> Any:
         await interaction.response.defer()
         if interaction.user is None:
@@ -196,10 +203,18 @@ class Saves(commands.Cog):
             return await interaction.followup.send(f"{e}")
 
         better_args = [
-            ("Perception", reflex),
-            ("Acrobatics", will),
-            ("Arcana", fortitude),
+            ("Reflex", reflex),
+            ("Will", will),
+            ("Fortitude", fortitude),
         ]
+
+        rune = {
+            "No": (0, ""),
+            "Resilient (+1)": (1, "Resilient"),
+            "Resilient (Greater) (+2)": (2, "Resilient (Greater)"),
+            "Resilient (Major) (+3)": (3, "Resilient (Major)"),
+        }
+        resilient_bonus, resilient_description = rune[resilient]
 
         msg = ""
         rows_and_data = []
@@ -212,15 +227,16 @@ class Saves(commands.Cog):
                 row: int = first_empty_row
                 msg += f"\nSe definió la proficiencia de {pj_name} en {save_name}"
                 first_empty_row += 1
-                extra_bonus = 0
-                extra_description = ""
+                extra_bonus = resilient_bonus
+                extra_description = resilient_description
 
             else:
+                override = resilient != "No"
                 # update existing save entry
                 row = pj_save["row"]
                 msg += f"\nSe actualizó la proficiencia de {pj_name} en {save_name}"
-                extra_bonus = pj_save["extra_bonus"]
-                extra_description = pj_save["extra_descripcion"]
+                extra_bonus = resilient_bonus if override else pj_save["extra_bonus"]
+                extra_description = resilient_description if override else pj_save["extra_descripcion"]
 
             data = (
                 pj_name,
