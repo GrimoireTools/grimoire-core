@@ -126,7 +126,7 @@ class Ability(str):
     name: str
 
     def __new__(cls: Type["Ability"], content: str, name: str) -> Any:
-        ret = super().__new__(cls, content)
+        ret = super().__new__(cls, content)  # type: ignore
         ret.name = name
         return ret
 
@@ -160,6 +160,13 @@ SKILLS: list[Tuple[str, Ability]] = [
     ("Survival", ABILITIES.Wis),
     ("Thievery", ABILITIES.Dex),
 ]
+
+SAVES: list[Tuple[str, Ability]] = [
+    ("Will", ABILITIES.Wis),
+    ("Reflex", ABILITIES.Dex),
+    ("Fortitude", ABILITIES.Con),
+]
+
 
 SKILL_ICONS = defaultdict(
     lambda: "📚",
@@ -258,12 +265,52 @@ class Recipe(TypedDict):
     name: str
     level: int
     rarity: str
-    type: str
+    tipo: str
+    requirements: str
 
 
 with open("Ancestries.json") as f:
     HERITAGES: dict[str, list[str]] = json.load(f)
 
+
+ITEM_CATEGORIES = [
+    # "Adjustments",
+    "Adventuring Gear",
+    "Alchemical Items",
+    "Animals and Gear",
+    "Armor",
+    "Artifacts",
+    "Assistive Items",
+    # "Blighted Boons",
+    "Censer",
+    "Consumables",
+    # "Contracts",
+    # "Cursed Items",
+    # "Customizations",
+    "Figurehead",
+    "Grafts",
+    "Grimoires",
+    "Held Items",
+    "High-tech",
+    # "Intelligent Items",
+    "Materials",
+    "Other",
+    "Relics",
+    "Runes",
+    "Services",
+    "Shields",
+    "Siege Weapons",
+    "Snares",
+    "Spellhearts",
+    "Staves",
+    # "Structures",
+    "Tattoos",
+    "Worn Items",
+    # "Trade Goods",
+    "Vehicles",
+    "Wands",
+    "Weapons",
+]
 
 ARCHETYPES = [
     "Scion of Domora",
