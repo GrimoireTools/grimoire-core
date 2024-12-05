@@ -178,12 +178,12 @@ class Saves(commands.Cog):
     async def set_all_saves(
         self: Self,
         interaction: nextcord.Interaction,
+        fortitude: str = ability_param("fortitude"),
         reflex: str = ability_param("reflex"),
         will: str = ability_param("will"),
-        fortitude: str = ability_param("fortitude"),
         resilient: str = nextcord.SlashOption(
             name="resilient",
-            description="Runa de resiliencia. Si se elije alguna, se sobreescriben los bonos extra. (default No)",
+            description="Runa de resiliencia. Sobreescribe bonos extra. (default No)",
             required=False,
             choices=["No", "Resilient (+1)", "Resilient (Greater) (+2)", "Resilient (Major) (+3)"],
             default="No",
@@ -203,9 +203,9 @@ class Saves(commands.Cog):
             return await interaction.followup.send(f"{e}")
 
         better_args = [
+            ("Fortitude", fortitude),
             ("Reflex", reflex),
             ("Will", will),
-            ("Fortitude", fortitude),
         ]
 
         rune = {

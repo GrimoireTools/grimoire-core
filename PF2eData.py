@@ -162,9 +162,9 @@ SKILLS: list[Tuple[str, Ability]] = [
 ]
 
 SAVES: list[Tuple[str, Ability]] = [
-    ("Will", ABILITIES.Wis),
-    ("Reflex", ABILITIES.Dex),
     ("Fortitude", ABILITIES.Con),
+    ("Reflex", ABILITIES.Dex),
+    ("Will", ABILITIES.Wis),
 ]
 
 
