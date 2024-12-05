@@ -19,3 +19,8 @@ kill_timeout = '5s'
   cpu_kind = 'shared'
   cpus = 1
   memory_mb = 512
+
+[[services.ports]]
+  handlers = ["http"]
+  port = 8080
+  force_https = true  # optional
