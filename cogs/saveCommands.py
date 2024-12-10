@@ -11,7 +11,7 @@ from SheetControl import PJ_COL, gets_pj_data
 from SheetControlSaves import gets_save_data
 from utils import CharacterNotFoundError
 from varenv import getVar
-
+from utils import log_command
 from .skillUtils import skill_description as save_description, ability_param, format_diceroll, nat_20_1_message
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
@@ -27,6 +27,7 @@ class Saves(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_save_data
+    @log_command
     async def all_saves(self: Self, interaction: nextcord.Interaction, extra_info: bool = False) -> Any:
         await interaction.response.defer()
         if interaction.user is None:
@@ -62,6 +63,7 @@ class Saves(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_save_data
+    @log_command
     async def save(
         self: Self,
         interaction: nextcord.Interaction,
@@ -106,6 +108,7 @@ class Saves(commands.Cog):
     )
     @gets_save_data
     @gets_pj_data
+    @log_command
     async def set_save(
         self: Self,
         interaction: nextcord.Interaction,
@@ -175,6 +178,7 @@ class Saves(commands.Cog):
     )
     @gets_save_data
     @gets_pj_data
+    @log_command
     async def set_all_saves(
         self: Self,
         interaction: nextcord.Interaction,
@@ -255,6 +259,7 @@ class Saves(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_save_data
+    @log_command
     async def roll_save(
         self: Self,
         interaction: nextcord.Interaction,

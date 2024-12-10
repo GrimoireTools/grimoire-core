@@ -2,6 +2,7 @@ import json
 from functools import wraps
 from typing import Any, Callable
 from icecream import ic
+from loguru import logger
 
 import gspread
 from gspread.utils import ValueRenderOption
@@ -31,7 +32,7 @@ def gets_cemetery_data(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     async def wrapped_func(*args: Any, **kwargs: Any) -> Any:
         update_recipe_data()
-        ic("Updated recipe data.")
+        logger.info("Updated recipe data.")
         await func(*args, **kwargs)
 
     return wrapped_func

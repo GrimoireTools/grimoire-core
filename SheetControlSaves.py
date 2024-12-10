@@ -2,7 +2,7 @@ import json
 from functools import wraps
 from typing import Any, Callable, Tuple, TypedDict
 from icecream import ic
-
+from loguru import logger
 import gspread
 from gspread.utils import ValueRenderOption
 
@@ -38,7 +38,7 @@ def gets_save_data(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     async def wrapped_func(*args: Any, **kwargs: Any) -> Any:
         _update_save_data()
-        ic("Updated save/ability data.")
+        logger.info("Updated save/ability data.")
         await func(*args, **kwargs)
 
     return wrapped_func

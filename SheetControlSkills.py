@@ -5,7 +5,7 @@ from icecream import ic
 
 import gspread
 from gspread.utils import ValueRenderOption
-
+from loguru import logger
 import utils
 from PF2eData import ABILITIES, SKILLS, PROF_BONUSES, Ability
 from utils import Column
@@ -38,7 +38,7 @@ def gets_skill_data(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     async def wrapped_func(*args: Any, **kwargs: Any) -> Any:
         _update_skill_data()
-        ic("Updated skill/ability data.")
+        logger.info("Updated skill/ability data.")
         await func(*args, **kwargs)
 
     return wrapped_func

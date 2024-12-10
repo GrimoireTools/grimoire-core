@@ -2,6 +2,7 @@ import json
 from functools import wraps
 from typing import Any, Callable, Iterable, Optional, Self, Type
 from icecream import ic
+from loguru import logger
 import gspread
 from gspread.utils import ValueRenderOption
 import utils
@@ -30,7 +31,7 @@ def gets_pj_data(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     async def wrapped_func(*args: Any, **kwargs: Any) -> Any:
         update_pj_data()
-        ic("Updated PC data.")
+        logger.info("Updated PC data.")
         await func(*args, **kwargs)
 
     return wrapped_func
@@ -52,6 +53,7 @@ class PJ_COL:
     Money_total: Column = Column("M")
     Languages: Column = Column("N")
     Religion: Column = Column("O")
+    Last_turn: Column = Column("P")
 
     @classmethod
     def num(cls: Type["PJ_COL"], col: str) -> int:
@@ -68,7 +70,6 @@ def whole_column_pj(column: Column) -> list[str]:
 def get_pj_row(discord_id: int) -> int:
     try:
         column = whole_column_pj(PJ_COL.Discord_id)
-        # ic(column)
         id_row = column.index(str(discord_id))
         # index del primer valor con [discord_id] de todos los ids (+1 por 0 indexed)
         return id_row

@@ -2,7 +2,7 @@ from typing import Any, Self
 
 import nextcord  # type: ignore
 from nextcord.ext import commands  # type: ignore
-
+from loguru import logger
 import SheetControl as shpj
 import SheetControlReputation as shr
 from SheetControl import PJ_COL, gets_pj_data
@@ -10,6 +10,7 @@ from SheetControlReputation import REP_COL, gets_reputation_data
 from utils import CharacterNotFoundError, default_user_option
 from varenv import getVar
 from icecream import ic
+from utils import log_command
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
 
@@ -20,6 +21,7 @@ class Reputation(commands.Cog):
 
     @nextcord.slash_command(description="Revisa tu reputación", guild_ids=[CRI_GUILD_ID])
     @gets_reputation_data
+    @log_command
     async def reputation(
         self: Self,
         interaction: nextcord.Interaction,
@@ -50,6 +52,7 @@ class Reputation(commands.Cog):
     )
     @gets_reputation_data
     @gets_pj_data
+    @log_command
     async def update_reputation(
         self: Self,
         interaction: nextcord.Interaction,
@@ -92,7 +95,6 @@ class Reputation(commands.Cog):
     async def autocomplete_faction(self: Self, interaction: nextcord.Interaction, faction: str) -> Any:
         if len(faction) == 0:
             shr.update_reputation_data()
-            ic("Updated rep data once")
         filtered_ancestries = [a for a in shr.get_all_existing_factions() if a.lower().startswith(faction.lower())]
         await interaction.response.send_autocomplete(filtered_ancestries)
 

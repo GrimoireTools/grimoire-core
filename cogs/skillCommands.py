@@ -12,7 +12,7 @@ from SheetControlSkills import gets_skill_data
 from cogs.skillUtils import filter_lores
 from utils import CharacterNotFoundError
 from varenv import getVar
-
+from utils import log_command
 from .skillUtils import *
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
@@ -28,6 +28,7 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
+    @log_command
     async def all_skills(self: Self, interaction: nextcord.Interaction, extra_info: bool = False) -> Any:
         await interaction.response.defer()
         if interaction.user is None:
@@ -54,17 +55,6 @@ class Skills(commands.Cog):
                 pj_skills.get(skill_name, None),  # type: ignore
                 extra_info,
             )
-
-        # lores = [(skill_name, values) for skill_name, values in pj_skills.items() if skill_name.startswith("Lore")]
-        # for lore_name, lore in lores:
-        #     pj_mod_bonus: int = pj_mods[ABILITIES.Int]
-        #     message += skill_description(
-        #         pj_mod_bonus,
-        #         ABILITIES.Int,
-        #         lore_name,
-        #         lore,
-        #         extra_info,
-        #     )
         message += "\n```"
         return await interaction.followup.send(message)
 
@@ -73,6 +63,7 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
+    @log_command
     async def all_lores(self: Self, interaction: nextcord.Interaction, extra_info: bool = False) -> Any:
         await interaction.response.defer()
         if interaction.user is None:
@@ -106,6 +97,7 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
+    @log_command
     async def skill(
         self: Self,
         interaction: nextcord.Interaction,
@@ -149,6 +141,7 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
+    @log_command
     async def lore(
         self: Self,
         interaction: nextcord.Interaction,
@@ -194,6 +187,7 @@ class Skills(commands.Cog):
     )
     @gets_skill_data
     @gets_pj_data
+    @log_command
     async def set_skill(
         self: Self,
         interaction: nextcord.Interaction,
@@ -263,6 +257,7 @@ class Skills(commands.Cog):
     )
     @gets_skill_data
     @gets_pj_data
+    @log_command
     async def set_all_skills(
         self: Self,
         interaction: nextcord.Interaction,
@@ -356,6 +351,7 @@ class Skills(commands.Cog):
     )
     @gets_skill_data
     @gets_pj_data
+    @log_command
     async def set_lore(
         self: Self,
         interaction: nextcord.Interaction,
@@ -426,6 +422,7 @@ class Skills(commands.Cog):
     )
     @gets_skill_data
     @gets_pj_data
+    @log_command
     async def set_modifiers(
         self: Self,
         interaction: nextcord.Interaction,
@@ -442,8 +439,6 @@ class Skills(commands.Cog):
         user_id: int = interaction.user.id
 
         pj_name, row, _ = sh_skills.get_pj_abilities(user_id)
-        if pj_name is None or row is None:
-            return await interaction.followup.send("Error: Character Not Found")
 
         if pj_name is None:
             # Crear nueva row
@@ -470,6 +465,7 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
+    @log_command
     async def roll_skill(
         self: Self,
         interaction: nextcord.Interaction,
@@ -541,6 +537,7 @@ class Skills(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_skill_data
+    @log_command
     async def roll_lore(
         self: Self,
         interaction: nextcord.Interaction,

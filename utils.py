@@ -1,7 +1,9 @@
+import functools
 from math import ceil
-from typing import Self
+from typing import Any, Self
 
-from nextcord import SlashOption
+from nextcord import SlashOption, Interaction
+from loguru import logger
 
 default_user_option = SlashOption(
     name="usuario-target",
@@ -50,11 +52,7 @@ def check_results(DC: int, result: int, dice: int) -> int:
     }
     return CHECK_RESULTS[
         (
-            (
-                0
-                if result <= DC - 10
-                else (1 if result < DC else (2 if result < DC + 10 else 3))
-            )
+            (0 if result <= DC - 10 else (1 if result < DC else (2 if result < DC + 10 else 3)))
             + (1 if dice == 20 else 0)
             - (1 if dice == 1 else 0)
         )
@@ -119,6 +117,37 @@ def try_int(val: str) -> int:
         return int(val)
     except ValueError:
         return 0
+
+
+def log_command(func):
+    @functools.wraps(func)
+    @logger.catch
+    async def logged_command(self: Any, interaction: Interaction, *args, **kwargs):
+        user = interaction.user
+        if user is not None:
+            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
+        else:
+            logger.info(f"[{func.__name__}] called by null user.")
+        logger.debug(f"[{func.__name__}] called with {kwargs}.")
+
+        await func(self, interaction, *args, **kwargs)
+
+    return logged_command
+
+
+def log_command_not_cog(func):
+    @functools.wraps(func)
+    @logger.catch
+    async def logged_command(interaction: Interaction, *args, **kwargs):
+        user = interaction.user
+        if user is not None:
+            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
+        else:
+            logger.info(f"[{func.__name__}] called by null user.")
+        logger.debug(f"[{func.__name__}] called with {kwargs}.")
+        await func(interaction, *args, **kwargs)
+
+    return logged_command
 
 
 def column_to_num(column: str) -> int:

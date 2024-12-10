@@ -2,7 +2,7 @@ import json
 from functools import wraps
 from typing import Any, Callable, Iterable, Self
 from icecream import ic
-
+from loguru import logger
 import gspread  # type: ignore
 
 import utils
@@ -30,7 +30,7 @@ def gets_reputation_data(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     async def wrapped_func(*args: Any, **kwargs: Any) -> Any:
         update_reputation_data()
-        ic("Updated reputation data.")
+        logger.info("Updated reputation data.")
         await func(*args, **kwargs)
 
     return wrapped_func
@@ -43,7 +43,7 @@ class REP_COL:
     Reputation: Column = Column("D")
 
     @classmethod
-    def num(cls: Self, col: str) -> int:
+    def num(cls: type["REP_COL"], col: str) -> int:
         return utils.column_to_num(col)
 
 
