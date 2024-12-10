@@ -2,7 +2,7 @@ import json
 from functools import wraps
 from typing import Any, Callable, Iterable, Self
 from icecream import ic
-
+from loguru import logger
 import gspread
 from gspread.utils import ValueRenderOption
 
@@ -32,7 +32,7 @@ def gets_recipe_data(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
     async def wrapped_func(*args: Any, **kwargs: Any) -> Any:
         update_recipe_data()
-        ic("Updated recipe data.")
+        logger.info("Updated recipe data.")
         await func(*args, **kwargs)
 
     return wrapped_func
@@ -43,6 +43,7 @@ class REC_COL:
     ItemRarity: Column = Column("B")
     ItemType: Column = Column("C")
     ItemLevel: Column = Column("D")
+    ItemRequirements: Column = Column("E")
 
 
 def first_empty_recipe_row() -> int:
@@ -68,8 +69,9 @@ def row_to_Recipe(row: list[str]) -> Recipe:
     recipe: Recipe = {
         "name": row[REC_COL.ItemName.excel_index()],
         "rarity": row[REC_COL.ItemRarity.excel_index()],
-        "type": row[REC_COL.ItemType.excel_index()],
-        "level": int(row[REC_COL.ItemLevel.excel_index()]),
+        "tipo": row[REC_COL.ItemType.excel_index()],
+        "level": row[REC_COL.ItemLevel.excel_index()],
+        "requirements": row[REC_COL.ItemRequirements.excel_index()],
     }
     return recipe
 
@@ -78,6 +80,6 @@ def get_all_existing_recipes() -> list[Recipe]:
     return [row_to_Recipe(row) for row in RECIPES_DATA[1:]]
 
 
-def add_recipe(item_name: str, item_level: int):
+def add_recipe(name, rarity, tipo, level, requirements) -> None:
     row_index = first_empty_recipe_row()
-    recipes_sheet.update([[item_name, item_level]], f"A{row_index}:D{row_index}")
+    recipes_sheet.update([[name, rarity, tipo, level, requirements]], f"A{row_index}:E{row_index}")

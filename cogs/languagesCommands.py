@@ -1,4 +1,5 @@
 from typing import Any, Self
+from loguru import logger
 
 import nextcord  # type: ignore
 from nextcord.ext import commands  # type: ignore
@@ -8,6 +9,7 @@ from PF2eData import LANGUAGES
 from SheetControl import PJ_COL, gets_pj_data
 from utils import CharacterNotFoundError, default_user_option
 from varenv import getVar
+from utils import log_command
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
 
@@ -18,6 +20,7 @@ class Languages(commands.Cog):
 
     @nextcord.slash_command(description="Muestra la lista de tus lenguajes", guild_ids=[CRI_GUILD_ID])
     @gets_pj_data
+    @log_command
     async def languages(
         self: Self,
         interaction: nextcord.Interaction,
@@ -46,6 +49,7 @@ class Languages(commands.Cog):
 
     @nextcord.slash_command(description="Añade un lenguaje a la lista de tu PJ", guild_ids=[CRI_GUILD_ID])
     @gets_pj_data
+    @log_command
     async def addlanguage(
         self: Self,
         interaction: nextcord.Interaction,

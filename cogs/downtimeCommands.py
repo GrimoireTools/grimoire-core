@@ -1,4 +1,5 @@
 from typing import Any, Self
+from loguru import logger
 
 import nextcord  # type: ignore
 from nextcord.ext import commands  # type: ignore
@@ -7,6 +8,7 @@ import SheetControl as sh
 from SheetControl import PJ_COL, gets_pj_data
 from utils import CharacterNotFoundError
 from varenv import getVar
+from utils import log_command
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
 
@@ -17,6 +19,7 @@ class Downtime(commands.Cog):
 
     @nextcord.slash_command(description="Cambia el Downtime de tu personaje", guild_ids=[CRI_GUILD_ID])
     @gets_pj_data
+    @log_command
     async def dt(self: Self, interaction: nextcord.Interaction, amount: int) -> Any:
         await interaction.response.defer()
         if interaction.user is None:

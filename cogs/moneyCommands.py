@@ -8,6 +8,8 @@ import utils
 from SheetControl import PJ_COL, gets_pj_data
 from utils import CharacterNotFoundError
 from varenv import getVar
+from utils import log_command
+
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
 
@@ -21,6 +23,7 @@ class Money(commands.Cog):
         guild_ids=[CRI_GUILD_ID],
     )
     @gets_pj_data
+    @log_command
     async def pay(
         self: Self,
         interaction: nextcord.Interaction,
@@ -91,6 +94,7 @@ class Money(commands.Cog):
 
     @nextcord.slash_command(description="Suma dinero a tu cuenta.", guild_ids=[CRI_GUILD_ID])
     @gets_pj_data
+    @log_command
     async def addmoney(
         self: Self,
         interaction: nextcord.Interaction,

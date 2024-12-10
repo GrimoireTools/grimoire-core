@@ -268,7 +268,7 @@ PROF_BONUSES: CallableDict[str, int] = CallableDict(
 
 class Recipe(TypedDict):
     name: str
-    level: int
+    level: str
     rarity: str
     tipo: str
     requirements: str

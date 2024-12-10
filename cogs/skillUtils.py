@@ -84,10 +84,8 @@ def ability_param(ability_name: str):
 
 
 def filter_lores(lore_subname: str, user_id: int | None) -> list[str]:
-    ic(lore_subname)
     if len(lore_subname) == 0:
         sh_skills._update_skill_data()
-        ic("Updated skill data once")
     filtered_lores = sh_skills.get_all_existing_lore_subnames(user_id)
     filtered_lores = [a for a in filtered_lores if a.lower().startswith(lore_subname.lower())]
     return filtered_lores

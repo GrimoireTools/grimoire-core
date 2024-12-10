@@ -1,9 +1,9 @@
-import logging
 from typing import Any
+from loguru import logger
 
 import nextcord  # type: ignore
 from nextcord.ext import commands  # type: ignore
-
+import sys
 import SheetControl as sh
 import utils
 from cogs import (
@@ -19,11 +19,13 @@ from cogs import (
 )
 from cogs.moneyCommands import add_money_helper
 from SheetControl import PJ_COL, gets_pj_data
-from utils import CharacterNotFoundError, default_user_option
+from utils import CharacterNotFoundError, default_user_option, log_command_not_cog
 from varenv import getVar
-
-
 from icecream import install, ic
+
+logger.remove()
+logger.add(sys.stderr, colorize=True)
+
 
 install()
 ic.configureOutput(includeContext=True)
@@ -32,17 +34,17 @@ CRI_GUILD_ID = int(getVar("GUILD_ID"))
 PANCHO_ID = getVar("PANCHO_ID")
 BOT_TOKEN = getVar("TOKEN")
 
-logging.basicConfig(level=logging.WARNING)
 bot = commands.Bot()
 
 
 @bot.event
 async def on_ready() -> None:
-    ic(f"We have logged in as {bot.user}")
+    logger.info(f"We have logged in as {bot.user}")
 
 
 @bot.slash_command(description="Entrega la info de tu personaje", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
+@log_command_not_cog
 async def status(interaction: nextcord.Interaction, user: nextcord.Member = default_user_option) -> Any:
     await interaction.response.defer()
     user_id: int = interaction.user.id if user is None else user.id
@@ -67,6 +69,7 @@ async def status(interaction: nextcord.Interaction, user: nextcord.Member = defa
         total,
         languages,
         religion,
+        last_turn,
     ) = data
     Dt_int: int = int(Dt)
     message = f"""# Status de {Name}
@@ -84,9 +87,11 @@ async def status(interaction: nextcord.Interaction, user: nextcord.Member = defa
     guild_ids=[CRI_GUILD_ID],
 )
 @gets_pj_data
+@log_command_not_cog
 async def salary(
     interaction: nextcord.Interaction,
     level: int,
+    turno: int = nextcord.SlashOption("turno", description="Turno en el que se completó la misión", required=True),
     target: nextcord.Member = default_user_option,
 ) -> Any:
     await interaction.response.defer()
@@ -113,6 +118,7 @@ async def salary(
     new_total_dt = pj_dt + sueldo_dt
 
     sh.update_pj_data_cell(pj_row, PJ_COL.Downtime, [[new_total_dt, pp, gp, sp, cp]])
+    sh.update_pj_data_cell(pj_row, PJ_COL.Last_turn, [[f"T{turno}"]])
 
     return await interaction.followup.send(
         (
@@ -139,6 +145,7 @@ sh.update_level_global()
 
 
 @bot.slash_command(description="Cambia el nivel de todos los personajes", guild_ids=[CRI_GUILD_ID])
+@log_command_not_cog
 async def update_global_level(interaction: nextcord.Interaction, level: int | None = None) -> Any:
     await interaction.response.defer()
 

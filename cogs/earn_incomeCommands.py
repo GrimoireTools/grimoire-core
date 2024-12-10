@@ -1,4 +1,5 @@
 from typing import Any, Self
+from loguru import logger
 
 import dndice
 import nextcord  # type: ignore
@@ -12,7 +13,7 @@ from PF2eData import EARN_INCOME, SKILLS, LORELESS_SKILLS, PROF
 from varenv import getVar
 import random
 from SheetControlSkills import get_pj_skill_bonus, gets_skill_data
-
+from utils import log_command
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
 
@@ -24,6 +25,7 @@ class EarnIncome(commands.Cog):
     # =====================================================================================================================
 
     @nextcord.slash_command(description="Calcula las ganancias de Earn Income", guild_ids=[CRI_GUILD_ID])
+    @log_command
     async def earn_income(
         self: Self,
         interaction: nextcord.Interaction,
@@ -73,6 +75,7 @@ class EarnIncome(commands.Cog):
     )
     @gets_skill_data
     @gets_pj_data
+    @log_command
     async def earn_income_automatic(
         self: Self,
         interaction: nextcord.Interaction,
@@ -182,6 +185,7 @@ Con un {check_value} ({dice}{(bonus + checkBonus):+} {skill_msg}) vs DC {DC}{har
     # =====================================================================================================================
 
     @nextcord.slash_command(description="Genera trabajos especiales.", guild_ids=[CRI_GUILD_ID])
+    @log_command
     async def gen_jobs(
         self: Self,
         interaction: nextcord.Interaction,

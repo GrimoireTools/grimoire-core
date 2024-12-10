@@ -26,6 +26,7 @@ from SheetControl import PJ_COL, gets_pj_data
 from SheetControlCemetery import gets_cemetery_data, add_dead_PJ
 from utils import CharacterNotFoundError
 from varenv import getVar
+from utils import log_command
 
 CRI_GUILD_ID = int(getVar("GUILD_ID"))
 
@@ -36,6 +37,7 @@ class Unregister(commands.Cog):
 
     @gets_cemetery_data
     @gets_pj_data
+    @log_command
     async def retire(
         self: Self,
         interaction: nextcord.Interaction,
