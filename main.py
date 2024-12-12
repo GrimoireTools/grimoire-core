@@ -1,3 +1,4 @@
+import math
 from typing import Any
 from loguru import logger
 
@@ -151,6 +152,22 @@ async def update_global_level(interaction: nextcord.Interaction, level: int | No
 
     sh.update_level_global(level)
     return await interaction.followup.send("Nivel global actualizado")
+
+
+@bot.slash_command(description="Calcula el costo de DT de hacer múltiples retrain a la vez", guild_ids=[CRI_GUILD_ID])
+@log_command_not_cog
+async def retrain_info(
+    interaction: nextcord.Interaction,
+    amount: int = nextcord.SlashOption(
+        "retrains", description="Cantidad de retrains simultaneaos", required=True, min_value=1
+    ),
+) -> Any:
+    await interaction.response.defer()
+
+    cost = 7 + math.ceil(7 * (math.log(amount * 1.5 - 0.5)))
+    return await interaction.followup.send(
+        f"Hacer {amount} retrain{'s' if amount > 1 else ''} a la vez costará {cost} días de DT"
+    )
 
 
 bot.run(BOT_TOKEN)
