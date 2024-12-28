@@ -132,7 +132,7 @@ def delete_row(row: int) -> None:
     pj_sheet.delete_rows(row)
 
 
-LEVEL_GLOBAL = 7
+LEVEL_GLOBAL = 9
 
 
 def update_level_global(new_value: Optional[int] = None) -> None:
