@@ -54,6 +54,8 @@ CLASSES: list[str] = [
     "Thaumaturge",
     "Witch",
     "Wizard",
+    "Exemplar",
+    "Animist",
 ]
 
 EARN_INCOME: dict[int, tuple[int, tuple[float, float, float, float, float]]] = {
