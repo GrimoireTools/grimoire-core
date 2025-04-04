@@ -1,7 +1,9 @@
-from typing import Self, Type
+from typing import Literal, Self, Type
 
-from controllers.lib.utils import gp_to_coin_list, CoinsList
-from controllers.lib.base_controller import SheetsControllerBase
+from loguru import logger
+
+from controllers.lib.utils import gp_to_coin_list, CoinsList, DataNotFoundError
+from controllers.lib.base_controller import SheetsControllerBase, Value
 from controllers.lib.row import Row, r_int, r_float
 
 PJ_SHEET_ID = 0
@@ -12,7 +14,7 @@ class PJRow(Row):
     Discord_id: str
     Player: str
     Class: str
-    Arquetypes: str
+    Archetypes: str
     Ancestry: str
     Heritage: str
     Downtime: r_int
@@ -55,16 +57,36 @@ class PJRow(Row):
         """
         return self.to_coin_list().total()
 
-    def update_money(self, coins: int | list[int] | CoinsList) -> None:
+    def update_money(self, coins: float | list[int] | CoinsList) -> None:
         """
         Actualiza el dinero en la fila
         """
-        if isinstance(coins, int):
+        if isinstance(coins, (float, int)):
             coins = gp_to_coin_list(coins)
         self.Money_pp = coins[0]
         self.Money_gp = coins[1]
         self.Money_sp = coins[2]
         self.Money_cp = coins[3]
+
+    def add_language(self, language: str) -> None:
+        """
+        Añade un idioma a la fila
+        """
+        if self.Languages in ["", None]:
+            self.Languages = language
+        else:
+            self.Languages += f", {language}"
+
+    def _ranges(
+        self, row: int, force_set: dict[str, bool] | None = None, force_skip: dict[str, bool] | None = None
+    ) -> list[dict[str, str | list[Value]]]:
+        """
+        Convierte la fila a un rango de Google Sheets
+        """
+        if force_skip is None:
+            force_skip = {}
+        force_skip["Money_total"] = True
+        return super()._ranges(row, force_set, force_skip)
 
 
 class PJsController(SheetsControllerBase[PJRow]):
@@ -78,4 +100,13 @@ class PJsController(SheetsControllerBase[PJRow]):
         return coin_list
 
     def get_pj_row(self, user_id: int) -> PJRow:
-        return self.get_row(self.find_pj_row_index(user_id))
+        try:
+            return self.get_row(self.find_pj_row_index(user_id))
+        except ValueError as e:
+            raise DataNotFoundError(f"Character with user_id {user_id} not found") from None
+
+    def character_exists(self, user_id: int) -> bool:
+        try:
+            return self.get_pj_row(user_id) is not None
+        except DataNotFoundError:
+            return False

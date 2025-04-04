@@ -1,12 +1,12 @@
 from typing import Any, Self
 from nextcord import SlashOption, Member, Interaction
 
-from controllers.PJsController import PJRow, PJsController
+from controllers.pjs_controller import PJRow, PJsController
 from controllers.lib.utils import not_none, parse_float_arg
 from controllers.lib.cog import Cog, standard_command
 
 
-class Money(Cog):
+class MoneyCommands(Cog):
 
     @standard_command("Resta dinero de tu cuenta. Puedes transferir a otra persona.")
     async def pay(
@@ -29,15 +29,14 @@ class Money(Cog):
         user_id: int = not_none(interaction.user).id
         pj = sh.get_pj_row(user_id)
 
-        transfer_id = transfertarget.id if transfertarget else None
-        target_pj = sh.get_pj_row(transfertarget.id) if transfertarget else None
-
         total = pj.calc_money()
-
         if amount > total:
             return await interaction.send("No tienes suficiente dinero para esta transacción")
 
         pj_coins = sh.set_money(user_id, total - amount)
+
+        transfer_id = transfertarget.id if transfertarget else None
+        target_pj = sh.get_pj_row(transfertarget.id) if transfertarget else None
 
         if target_pj is not None and transfer_id is not None:
             target_total = target_pj.calc_money()
