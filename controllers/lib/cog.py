@@ -16,6 +16,9 @@ class Cog(commands.Cog):
 
 
 def standard_command(description: str):
+    if len(description) > 100:
+        raise ValueError(f"Description must be less than 100 characters, length is {len(description)}: '{description}'")
+
     def decorator(func):
         @slash_command(description=description, guild_ids=[CRI_GUILD_ID])
         @log_command

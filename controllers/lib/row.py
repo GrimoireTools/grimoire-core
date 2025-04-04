@@ -4,7 +4,8 @@ from abc import ABC
 from dataclasses import dataclass, field
 import types
 from typing import Any, Type, TypeVar, Union, get_args, get_origin, get_type_hints
-import utils
+import json
+from .utils import num_to_column, column_to_num
 
 Col = int | str
 Value = str | int | float
@@ -12,7 +13,7 @@ T = TypeVar("T")
 
 
 def rangeify(row: int, start: int, end: int):
-    return f"{utils.num_to_column(start + 1)}{row}:{utils.num_to_column(end + 1)}{row}"
+    return f"{num_to_column(start + 1)}{row}:{num_to_column(end + 1)}{row}"
 
 
 def row_none_default(cls=None, **kwargs):
@@ -51,10 +52,10 @@ class Row(ABC):
         keys = list(hints.keys())
         return cls(**{keys[i]: value for i, value in enumerate(row)})
 
-    def __init__(self, **kwargs) -> types.NoneType:
+    def __init__(self, **kwargs: Any) -> types.NoneType:
         """Initializes the class with none, some or all of its attributes.
 
-        Attribtues not given are set to None.
+        Attributes not given are set to None.
         """
         hints = get_type_hints(self)
         for name, type_hint in hints.items():
@@ -114,12 +115,13 @@ class Row(ABC):
     @classmethod
     def col_letter(cls, name: str) -> str:
         try:
-            return utils.num_to_column(list(cls.__annotations__).index(name) + 1)
+            return num_to_column(list(cls.__annotations__).index(name) + 1)
         except ValueError:
             raise ValueError(f"Column {name} not found in {cls.__name__}")
 
     @classmethod
     def col_index(cls, col: str) -> int:
+        """Return the index of a column with the given name."""
         try:
             return list(cls.__annotations__).index(col)
         except ValueError:
@@ -164,11 +166,12 @@ class Row(ABC):
 
         def app_range(start: int, end: int, current_values: list[Value]) -> None:
             if current_values:
-                coords = f"{utils.num_to_column(col_start + 1)}{row}" if start == end else rangeify(row, start, end)
+                coords = f"{num_to_column(col_start + 1)}{row}" if start == end else rangeify(row, start, end)
                 coord_ranges.append(coords)
                 val_ranges.append(current_values)
 
-        for i, (key, val) in enumerate(values.items()):
+        for key, val in values.items():
+            i = self.col_index(key)
             skippable = check_skippable(key)
             if skippable:
                 if in_range:
@@ -196,3 +199,13 @@ RowType = TypeVar("RowType", bound=Row)
 r_int = Union[int, None]
 r_float = Union[float, None]
 r_str = Union[str, None]
+
+
+class JsonData(dict):
+    def __init__(self, data=None):
+        if isinstance(data, str):
+            parsed = json.loads(data)
+            if isinstance(parsed, list):
+                parsed = {i: v for i, v in enumerate(parsed)}
+            data = parsed
+        super().__init__(data or {})

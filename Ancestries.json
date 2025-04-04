@@ -88,11 +88,14 @@
         "Strong Oak",
         "Thorned Rose"
     ],
-    "Gnoll": [
-        "Ant Gnoll",
-        "Great Gnoll",
-        "Sweetbreath Gnoll",
-        "Witch Gnoll"
+    "Kholo": [
+        "Ant Kholo",
+        "Cave Kholo",
+        "Dog Kholo",
+        "Great Kholo",
+        "Sweetbreath Kholo",
+        "Winter Kholo",
+        "Witch Kholo"
     ],
     "Gnome": [
         "Chameleon Gnome",
@@ -296,5 +299,4 @@
         "Beastkin",
         "Reflection"
     ]
-
 }

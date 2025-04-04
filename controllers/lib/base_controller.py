@@ -2,8 +2,7 @@ from typing import (
     Generic,
     Type,
 )
-
-import utils
+from .utils import DataNotFoundError, column_to_num
 from gspread.worksheet import Worksheet
 from gspread.utils import ValueRenderOption, ValueInputOption
 from .singleton import Singleton
@@ -37,9 +36,10 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     row_type: Type[RowType]
 
     def __init__(self, sheet_id: int, cls: type[RowType]):
+        """Initializes the class with the given sheet_id and row type."""
+        logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls
         self.sheet = gc.open("Megamarch").get_worksheet_by_id(sheet_id)
-        # self.fetch_data()
 
     def fetch_data(self):
         """Fetches all data from the sheet. Called each time __init__() is called."""
@@ -53,7 +53,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     def get_cell(self, row: int, col: Col) -> Value:
         """Returns a cell value. Row and col are 0-indexed. Col can optionally be the letter identifier."""
         if isinstance(col, str):
-            col = utils.column_to_num(col)
+            col = column_to_num(col)
         return self.DATA[row][col]
 
     def get_row_list(self, row: int) -> list[Value]:
@@ -68,16 +68,25 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         data_row.set_index(row)
         return data_row
 
+    def get_all_rows(self) -> list[RowType]:
+        """Returns all rows as a list of dataclass instances. Remember that the first row is generally the header."""
+        rows = []
+        for i, row in enumerate(self.DATA):
+            data_row = self._convert_row(row)
+            data_row.set_index(i)
+            rows.append(data_row)
+        return rows
+
     def get_column(self, col: Col) -> list[Value]:
         """Returns a column as a list of values. Col is 0-indexed. Col can optionally be the letter identifier."""
         if isinstance(col, str):
-            col = utils.column_to_num(col)
+            col = column_to_num(col)
         return [row[col] for row in self.DATA]
 
     def set_cell(self, row: int, col: Col, value: Value):
         """Sets a cell to a given value. Row and col are 0-indexed. Col can optinoally be the letter identifier."""
         if isinstance(col, str):
-            col = utils.column_to_num(col)
+            col = column_to_num(col)
         else:
             self.sheet.update_cell(row + 1, col + 1, value)
 
@@ -92,9 +101,26 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
             value_input_option=ValueInputOption.user_entered,
         )
 
-    def find_first_empty_row(self, col: Col) -> int:
-        """Finds the first empty row in a given column."""
+    update_row = set_row
+
+    def update_rows(self, values: list[RowType]):
+        """Updates multiple rows at once."""
+        ranges = []
+        for value in values:
+            ranges.extend(value._ranges(value.get_index()))
+        self.sheet.batch_update(
+            ranges,
+            value_input_option=ValueInputOption.user_entered,
+        )
+
+    def find_first_empty_row(self, col: Col, strict: bool = False) -> int:
+        """Finds the first empty row in a given column. Strict makes it manually look for the first empty cell, insteda of giving the length of the column."""
         column = self.get_column(col)
+        if strict:
+            for i, cell in enumerate(column):
+                if cell == "" or cell is None:
+                    return i
+            return len(column) + 1
         return len(column) + 1
 
     def col_letter(self, col_name: str) -> str:
@@ -105,14 +131,37 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         """Returns the 0-indexed column index of a given column name."""
         return self.row_type.col_index(col_name)
 
+    def find_rows_with_values(self, values: dict[str, Value | list[Value]]) -> list[RowType]:
+        """Finds all rows with values contained within the given values for each column.
+
+        The values are a dictionary where the key is the column name and the value is the value or values to search for.
+        The values can be a single value or a list of values. If a list is provided, the row will be returned if any of the values match.
+        """
+        rows = []
+        for i, row in enumerate(self.DATA):
+            meets_conditions = True
+            for col_name, value_s in values.items():
+                # Check if the column contains the value
+                col_index = self.col_index(col_name)
+                cell_value = row[col_index]
+                if isinstance(value_s, list):
+                    meets_conditions = meets_conditions and cell_value in value_s
+                else:
+                    meets_conditions = meets_conditions and cell_value == value_s
+                if not meets_conditions:
+                    break
+            if meets_conditions:
+                rows.append(self.get_row(i))
+        return rows
+
     def find_id_row_index(self, discord_id: int, col_name: str) -> int:
         """Finds the index of the first row with a given discord_id in a given column."""
         id = str(discord_id)
         i_col = self.col_index(col_name)
         for i, row in enumerate(self.DATA):
-            if row[i_col] == id:
+            if str(row[i_col]) == id:
                 return i
-        raise utils.CharacterNotFoundError
+        raise DataNotFoundError("Row with given discord_id not found")
 
     def find_pj_row_index(self, discord_id: int) -> int:
         """Finds the index of row with the given discord_id."""
@@ -132,6 +181,10 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
             value_input_option=ValueInputOption.user_entered,
         )
 
+    def insert_row(self, value: RowType, row: int = -1):
+        """Inserts a row at the end of the sheet."""
+        return self.insert_rows([value], row)
+
     def delete_rows(self, start: int, end: int = -1):
         """Deletes a row from the sheet. 0-indexed."""
         if start == -1:
@@ -144,3 +197,19 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     def delete_row(self, row: RowType):
         """Deletes a row from the sheet. 0-indexed."""
         self.delete_rows(row.get_index())
+
+    def update_or_insert(self, row: RowType) -> None:
+        """Updates a row if it already exists, otherwise inserts a new row."""
+        if row.get_index() == -1:
+            self.insert_row(row)
+        else:
+            self.update_row(row)
+
+    def update_or_insert_batch(self, rows: list[RowType]) -> None:
+        """Updates or inserts multiple rows."""
+        insert_rows = [r for r in rows if r.get_index() == -1]
+        update_rows = [r for r in rows if r.get_index() != -1]
+        if insert_rows:
+            self.insert_rows(insert_rows)
+        if update_rows:
+            self.update_rows(update_rows)

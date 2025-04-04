@@ -1,7 +1,9 @@
 import nextcord
 from PF2eData import PROF, PROF_BONUSES, SKILL_ICONS, Ability
-import SheetControlSkills as sh_skills
 from icecream import ic
+from controllers.saves_controller import SaveRow
+from controllers.skills_controller import LoreSubnames, SkillRow, SkillsController
+from controllers.lib.utils import not_none
 
 ALTERNATE = True
 
@@ -17,38 +19,41 @@ def nat_20_1_message(dice_result: int):
 
 def skill_description(
     pj_mod_bonus: int,
-    mod_type: Ability,
+    mod_type: str,
     skill_name: str,
-    pj_skill: None | sh_skills.SkillRow,
+    pj_skill: None | SkillRow | SaveRow,
     extra_info: bool,
+    additional_mod: int = 0,
 ) -> str:
     global ALTERNATE
     ALTERNATE = not ALTERNATE
     just_char = "·" if ALTERNATE else " "
-
     just_spacing = 20
+
     if pj_skill is None:
         prof_level = PROF.Untrained
         skill_title = f"{skill_name}? "
         extra_msg = ""
     else:
         skill_title = f"{skill_name} "
-        prof_level: str = str(pj_skill["prof_level"])
-        extra_bonus: int = int(pj_skill["extra_bonus"])
-        extra_descripcion: str = str(pj_skill["extra_descripcion"])
+        prof_level: str = pj_skill.Proficiency
+        extra_bonus: int = not_none(pj_skill.Extra_bonus)
+        extra_descripcion: str = pj_skill.Bonus_description
 
         extra_msg = (
             ""
             if (extra_bonus == 0 and extra_descripcion == "")
             else f"[Other: {fb(extra_bonus)}{f' ({extra_descripcion})' if extra_info else ''}]"
         )
+    additional_msg = f"[Extra: {fb(additional_mod)}]" if additional_mod != 0 else ""
     prof_bonus: int = PROF_BONUSES[prof_level]
     submsg: str = (
         f"\n{PROF.ICONS[prof_level]} {SKILL_ICONS[skill_name]} {skill_title.ljust(just_spacing, just_char)} "
         f'{f"{fb(prof_bonus + pj_mod_bonus + extra_bonus, True)} ".ljust(15)}'
-        f"[{mod_type.name}: {fb(pj_mod_bonus)}]"
+        f"[{mod_type}: {fb(pj_mod_bonus)}]"
         f"[{f'{prof_level}:'.ljust(10)} {f'{fb(prof_bonus)}]'.rjust(15)}"
         f"{extra_msg}"
+        f"{additional_msg}"
     )
     return submsg
 
@@ -85,7 +90,10 @@ def ability_param(ability_name: str):
 
 def filter_lores(lore_subname: str, user_id: int | None) -> list[str]:
     if len(lore_subname) == 0:
-        sh_skills._update_skill_data()
-    filtered_lores = sh_skills.get_all_existing_lore_subnames(user_id)
-    filtered_lores = [a for a in filtered_lores if a.lower().startswith(lore_subname.lower())]
-    return filtered_lores
+        LoreSubnames().udpate_lore_subnames()
+    if user_id:
+        lores = LoreSubnames().user_lore_subnames(user_id)
+    else:
+        lores = LoreSubnames().all_lore_subnames()
+
+    return [a for a in lores if a.lower().startswith(lore_subname.lower())]

@@ -1,12 +1,11 @@
 from typing import Any, Self
-from loguru import logger
 
 import nextcord
 
 from controllers.lib.utils import not_none
 from controllers.lib.cog import Cog, standard_command
 
-from controllers.PJsController import PJRow, PJsController
+from controllers.pjs_controller import PJsController
 
 
 class DowntimeCommands(Cog):

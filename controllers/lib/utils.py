@@ -17,7 +17,7 @@ default_user_option = SlashOption(
 )
 
 
-class CharacterNotFoundError(Exception):
+class DataNotFoundError(Exception):
     pass
 
 
@@ -115,8 +115,14 @@ def check_results(DC: int, result: int, dice: int) -> int:
         3: 3,  # crit success
         4: 3,
     }
-
-    success_rate = min(3, max(0, 2 + (result - DC + 10) // 10))
+    if result >= DC + 10:
+        success_rate = 3
+    elif result >= DC:
+        success_rate = 2
+    elif result > DC - 10:
+        success_rate = 1
+    else:
+        success_rate = 0
 
     success_rate += 1 if dice == 20 else 0  # nat20
     success_rate -= 1 if dice == 1 else 0  # nat1
@@ -223,10 +229,10 @@ def try_command(func):
             if interaction.user is None:
                 return await interaction.followup.send("Error: Null user")
             return await func(self, interaction, *args, **kwargs)
-        except CharacterNotFoundError:
-            await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
+        except DataNotFoundError as e:
+            await interaction.followup.send(f"DataNotFoundError: {e}")
         except NoneError:
-            await interaction.followup.send("Error: Null value")
+            await interaction.followup.send("None Error: not_none found None value")
 
     return try_command_func
 

@@ -10,8 +10,8 @@ LEVEL_GLOBAL = 10
 
 class SalaryRow(Row):
     Level: int
-    Base_salary: int
-    Salary: int
+    Base_salary: float
+    Salary: float
     Others: str
 
 
@@ -19,7 +19,7 @@ class SalaryController(SheetsControllerBase[SalaryRow]):
     def __init__(self):
         super().__init__(SALARY_SHEET_ID, SalaryRow)
 
-    def get_salary(self, level: int) -> int:
+    def get_salary(self, level: int) -> float:
         """
         Get the salary for a given level.
         :param level: The level of the character.
