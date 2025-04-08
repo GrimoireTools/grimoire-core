@@ -1,7 +1,7 @@
 import functools
 from math import ceil
 from typing import Any, Self
-
+from gspread.exceptions import APIError
 from nextcord import SlashOption, Interaction
 from loguru import logger
 from typing import TypeVar, Any
@@ -231,8 +231,10 @@ def try_command(func):
             return await func(self, interaction, *args, **kwargs)
         except DataNotFoundError as e:
             await interaction.followup.send(f"DataNotFoundError: {e}")
-        except NoneError:
+        except NoneError as e:
             await interaction.followup.send("None Error: not_none found None value")
+        except APIError as e:
+            await interaction.followup.send(f"API Error: {str(e)}")
 
     return try_command_func
 
