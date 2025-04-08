@@ -137,9 +137,27 @@ class VictoryPointsCommands(Cog):
             )
         )
 
+    @standard_command("Muestra los contribudores a una misión de pts de victoria.")
+    async def mission_contributors(
+        self: Self,
+        interaction: Interaction,
+        mission_name: str = SlashOption("nombre-mision", "Nombre de la misión", True),
+    ) -> None:
+        sh = VictoryPointsController()
+        mission_row = sh.get_mission_row(mission_name)
+        message = f"**Contribuyentes a la misión:** {mission_row.Mission_name} ({mission_row.Points} pts)\n"
+        contributors_sorted = sorted(mission_row.Contributions.items(), key=lambda x: x[1], reverse=True)
+        for contributor, pts in contributors_sorted:
+            message += f"- {contributor}: {pts} pts\n"
+        return await interaction.followup.send(message)
+
     @add_objective.on_autocomplete("mission_name")
     @mission_details.on_autocomplete("mission_name")
     @remove_objective.on_autocomplete("mission_name")
     @victory_points.on_autocomplete("mission_name")
+    @mission_contributors.on_autocomplete("mission_name")
     async def active_mission_names_options(self, interaction: Interaction, input: str) -> Any:
-        await interaction.response.send_autocomplete(ACTIVE_MISSION_NAMES)
+        names = ACTIVE_MISSION_NAMES
+        if input:
+            names = [name for name in ACTIVE_MISSION_NAMES if input.lower() in name.lower()]
+        await interaction.response.send_autocomplete(names)
