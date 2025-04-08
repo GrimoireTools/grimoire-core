@@ -1,4 +1,4 @@
-from typing import Any, Self
+from typing import Any, Self, TypedDict
 
 from loguru import logger
 import nextcord
@@ -12,30 +12,21 @@ from controllers.pjs_controller import PJsController, PJRow
 from controllers.lib.utils import not_none
 
 
-class HeritageDropdown(nextcord.ui.Select):
-    nombre_pj: str
-    user_id: str
-    nombre_jugador: str
-    clase: str
-    ascendencia: str
+class PartialCharacter(TypedDict):
+    Name: str
+    Discord_id: str
+    Player: str
+    Class: str
+    Ancestry: str
+    Religion: str
 
-    def __init__(
-        self: Self,
-        ancestry: str,
-        nombre_pj: str,
-        user_id: str,
-        nombre_jugador: str,
-        clase: str,
-        ascendencia: str,
-        religion: str,
-    ) -> None:
-        heritages: list[str] = HERITAGES[ancestry]
-        self.nombre_pj = nombre_pj
-        self.user_id = str(user_id)
-        self.nombre_jugador = nombre_jugador
-        self.clase = clase
-        self.ascendencia = ascendencia
-        self.religion = religion
+
+class HeritageDropdown(nextcord.ui.Select):
+    partial_pj: PartialCharacter
+
+    def __init__(self: Self, partial_pj: PartialCharacter) -> None:
+        self.partial_pj = partial_pj
+        heritages: list[str] = HERITAGES[partial_pj["Ancestry"]]
 
         options = [SelectOption(label=h) for h in heritages]
         options += [SelectOption(label=h, description="(Heritage versátil)") for h in HERITAGES["Versatile"]]
@@ -55,25 +46,24 @@ class HeritageDropdown(nextcord.ui.Select):
         await interaction.response.defer()
         self.view.stop()
         sh = PJsController()
-        pj = PJRow(
-            Name=self.nombre_pj,
-            Discord_id=self.user_id,
-            Player=self.nombre_jugador,
-            Class=self.clase,
-            Ancestry=self.ascendencia,
-            Heritage=selected_heritage,
-            Downtime=0,
-            Money_pp=0,
-            Money_gp=0,
-            Money_sp=0,
-            Money_cp=0,
-            Religion=self.religion,
-            Last_turn="-",
-            Caliban_met=0,
-        )
+        pj_dict = {
+            **self.partial_pj,
+            "Heritage": selected_heritage,
+            "Downtime": 0,
+            "Money_pp": 0,
+            "Money_gp": 0,
+            "Money_sp": 0,
+            "Money_cp": 0,
+            "Money_total": None,
+            "Last_turn": "-",
+            "Caliban_met": 0,
+            "Languages": "Originario",
+        }
+        pj = PJRow.from_dict(pj_dict)
+        logger.debug(f"Registering {pj}")
         row = sh.find_first_empty_row("A", strict=True)
         sh.insert_row(pj, row)
-        await interaction.followup.send(f"Registrado {self.nombre_pj}.")
+        await interaction.followup.send(f"Registrado {pj.Name}.")
 
 
 class RegisterDropdownView(nextcord.ui.View):
@@ -121,7 +111,14 @@ class NewCharacterCommands(Cog):
             return await interaction.followup.send(f"'{ascendencia}' no es una ascendencia válida.")
 
         heritage_dropdown = HeritageDropdown(
-            ascendencia, nombre_pj, str(user_id), nombre_jugador, clase, ascendencia, religion
+            {
+                "Name": nombre_pj,
+                "Discord_id": str(user_id),
+                "Player": nombre_jugador,
+                "Class": clase,
+                "Ancestry": ascendencia,
+                "Religion": religion,
+            }
         )
 
         view = RegisterDropdownView(heritage_dropdown)
@@ -135,7 +132,6 @@ class NewCharacterCommands(Cog):
             name="archetype",
             description="El nuevo arquetipo de tu personaje, o uno que ya tuviera para eliminarlo.",
             required=True,
-            choices=CLASSES,
         ),
     ) -> Any:
         user_id = not_none(interaction.user).id
@@ -143,6 +139,7 @@ class NewCharacterCommands(Cog):
         pj: PJRow = sh.get_pj_row(user_id)
 
         archs_list = pj.Archetypes.split(", ")
+        archs_list = [arch for arch in archs_list if arch.strip()]
         if archetype in archs_list:
             archs_list.remove(archetype)
             message = f"Eliminado {archetype} de tu lista de arquetipos"
@@ -155,14 +152,14 @@ class NewCharacterCommands(Cog):
         await interaction.followup.send(message)
 
     @register.on_autocomplete("ascendencia")
-    async def autocomplete_ancestry(self, interaction: nextcord.Interaction, ancestry: str) -> Any:
+    async def autocomplete_ancestry(self, interaction: Interaction, ancestry: str) -> Any:
         filtered_ancestries = []
         if ancestry:
             filtered_ancestries = [a for a in ANCESTRIES if a.lower().startswith(ancestry.lower())]
         await interaction.response.send_autocomplete(filtered_ancestries)
 
     @register_archetype.on_autocomplete("archetype")
-    async def autocomplete_archetype(self, interaction: nextcord.Interaction, archetype: str) -> Any:
+    async def autocomplete_archetype(self, interaction: Interaction, archetype: str) -> Any:
         filtered_archetypes = []
         if archetype:
             filtered_archetypes = [a for a in ARCHETYPES if a.lower().startswith(archetype.lower())]
