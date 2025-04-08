@@ -1,6 +1,7 @@
 """Abstract class that represents a single row in a sheet."""
 
 from abc import ABC
+from collections import OrderedDict
 from dataclasses import dataclass, field
 import types
 from typing import Any, Type, TypeVar, Union, get_args, get_origin, get_type_hints
@@ -71,7 +72,9 @@ class Row(ABC):
 
     def to_dict(self) -> dict[str, Value]:
         """Returns a dictionary representation of the row."""
-        return {k: v for k, v in self.__dict__.items() if k != "_Row__index"}
+        hints = get_type_hints(self)
+        vals = [(name, self.__getattribute__(name)) for name in hints.keys()]
+        return OrderedDict(vals)
 
     def to_list(self) -> list[Value]:
         """Returns a list representation of the row."""
