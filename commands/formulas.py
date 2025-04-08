@@ -11,18 +11,23 @@ class FormulasCommands(Cog):
     async def global_formulas(
         self: Self,
         interaction: Interaction,
+        search: str = SlashOption("search", "Texto a buscar en la lista de formulas", False, default=""),
         level: int = SlashOption(
             "item_level", "Nivel de los items de las formulas (-1 para Varios)", False, min_value=-1, max_value=25
         ),
     ) -> Any:
 
         formulas = FormulasController().get_all_rows()
-        if len(formulas) == 0:
-            await interaction.followup.send("No hay formulas globales")
-        message = f"**Todas las formulas públicas{f" de nivel {level}" if level is not None else ""}:**"
+        lvl_msg = f" de nivel {level}" if level is not None else ""
+        search_msg = f" con el texto '{search}'" if search.strip() else ""
+        message = f"**Todas las formulas públicas{lvl_msg}{search_msg}:**"
         if level is not None:
             _level = "Varios" if level == -1 else str(level)
             formulas = [r for r in formulas if r.Item_level == _level]
+        if search.strip():
+            formulas = [r for r in formulas if search.strip().lower() in r.Item_name.lower()]
+        if len(formulas) == 0:
+            await interaction.followup.send("No se encontraron formulas.")
         formulas.sort(key=(lambda r: r.Item_name))
         formulas.sort(key=(lambda r: r.Item_name))
         for r in formulas:
