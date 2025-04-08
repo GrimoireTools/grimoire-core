@@ -186,7 +186,10 @@ class Row(ABC):
                     col_start = i
                     in_range = True
                 col_end = i
-                curr_range.append(val)
+                if isinstance(val, JsonData):
+                    curr_range.append(json.dumps(val))
+                else:
+                    curr_range.append(val)
         app_range(col_start, col_end, curr_range)
 
         return [{"range": range, "values": [values]} for range, values in zip(coord_ranges, val_ranges)]
