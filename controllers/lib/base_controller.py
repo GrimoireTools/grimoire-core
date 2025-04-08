@@ -68,10 +68,11 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         data_row.set_index(row)
         return data_row
 
-    def get_all_rows(self) -> list[RowType]:
+    def get_all_rows(self, skip_first=True) -> list[RowType]:
         """Returns all rows as a list of dataclass instances. Remember that the first row is generally the header."""
         rows = []
-        for i, row in enumerate(self.DATA):
+        data = self.DATA[1:] if skip_first else self.DATA
+        for i, row in enumerate(data):
             data_row = self._convert_row(row)
             data_row.set_index(i)
             rows.append(data_row)

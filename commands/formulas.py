@@ -16,7 +16,7 @@ class FormulasCommands(Cog):
         ),
     ) -> Any:
 
-        formulas = FormulasController().get_all_rows()[1:]
+        formulas = FormulasController().get_all_rows()
         if len(formulas) == 0:
             await interaction.followup.send("No hay formulas globales")
         message = f"**Todas las formulas públicas{f" de nivel {level}" if level is not None else ""}:**"
@@ -47,7 +47,7 @@ class FormulasCommands(Cog):
         ),
     ) -> Any:
         sh_formulas = FormulasController()
-        formulas = sh_formulas.get_all_rows()[1:]
+        formulas = sh_formulas.get_all_rows()
         formula_names = [r.Item_name for r in formulas]
         if item_name in formula_names:
             await interaction.followup.send(f"*{item_name}* ya está registrado en la lista de formulas globales")
