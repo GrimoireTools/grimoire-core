@@ -43,13 +43,13 @@ class MoneyCommands(Cog):
             target_pj_coins = sh.set_money(transfer_id, target_total + amount)
             msg = (
                 f"{pj.Name} le paga {amount:.2f}gp a {target_pj.Name}.\n"
-                f"Dinero restante de {pj.Name}: {pj_coins.pretty_print()}, **Total: {pj_coins.total()}gp**\n"
-                f"Dinero restante de {target_pj.Name}: {target_pj_coins.pretty_print()}, **Total: {target_pj_coins.total()}gp**"
+                f"Dinero restante de {pj.Name}: {pj_coins.pretty_print()}, **Total: {pj_coins.total():.2f}gp**\n"
+                f"Dinero restante de {target_pj.Name}: {target_pj_coins.pretty_print()}, **Total: {target_pj_coins.total():.2f}gp**"
             )
         else:
             msg = (
                 f"{pj.Name} paga {amount:.2f}gp.\n"
-                f"Dinero restante: {pj_coins.pretty_print()}, **Total: {pj_coins.total()}gp**"
+                f"Dinero restante: {pj_coins.pretty_print()}, **Total: {pj_coins.total():.2f}gp**"
             )
         return await interaction.send(msg)
 
