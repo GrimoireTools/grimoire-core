@@ -1,10 +1,14 @@
 import functools
 from math import ceil
 from typing import Any, Self
-
+from gspread.exceptions import APIError
 from nextcord import SlashOption, Interaction
 from loguru import logger
+from typing import TypeVar, Any
 
+from .varenv import getVar
+
+CRI_GUILD_ID = int(getVar("GUILD_ID"))
 default_user_option = SlashOption(
     name="usuario-target",
     description="Usuario al que se le aplica el comando",
@@ -13,8 +17,69 @@ default_user_option = SlashOption(
 )
 
 
+class DataNotFoundError(Exception):
+    pass
+
+
+class Column(str):
+    def excel_index(self: Self) -> int:
+        """
+        Entrega el indice (indexado a 0) de la letra de la columna
+        Ejemplos:
+        - A -> 0
+        - C -> 2
+        - AA -> 26
+        """
+        return column_to_num(self)
+
+
+class CoinsList(list[int]):
+    def __init__(self, *args: int):
+        """
+        Crea una lista de monedas a partir de 4 enteros.
+        Los enteros son la cantidad de monedas de cada tipo, en orden:
+        - pp
+        - gp
+        - sp
+        - cp
+        """
+        super().__init__(args)
+        if len(args) != 4:
+            raise ValueError("MoneyList must have 4 elements")
+        self.pp = args[0]
+        self.gp = args[1]
+        self.sp = args[2]
+        self.cp = args[3]
+
+    def __repr__(self) -> str:
+        return f"MoneyList({self.pp}, {self.gp}, {self.sp}, {self.cp})"
+
+    def pretty_print(self) -> str:
+        """Xpp, Xgp, Xsp, Xcp"""
+        return f"{self.pp}pp, {self.gp}gp, {self.sp}sp, {self.cp}cp"
+
+    def total(self) -> float:
+        return self.pp * 10 + self.gp + self.sp * 0.1 + self.cp * 0.01
+
+
 def sign(num: int | float) -> int:
     return 1 if num >= 0 else -1
+
+
+T = TypeVar("T")
+
+
+class NoneError(Exception):
+    """Custom exception for None values."""
+
+    pass
+
+
+def not_none(val: T | None) -> T:
+    """Returns the value if not None, otherwise raises ValueError."""
+    if val is None:
+        raise NoneError("Value cannot be None")
+    return val
 
 
 def parse_float_arg(num: str) -> float:
@@ -25,7 +90,7 @@ def parse_float_arg(num: str) -> float:
         raise ValueError(f"{num} no es un número válido")
 
 
-def gp_to_coin_list(num: float) -> list[int]:
+def gp_to_coin_list(num: float) -> CoinsList:
     """Given an amount of gold, returns its representation in coins, minimizing the total amount of coins."""
 
     num = (1 if num >= 0 else -1) * int(round(abs(float(num)) * 100))
@@ -35,7 +100,7 @@ def gp_to_coin_list(num: float) -> list[int]:
     sp = num % 100 // 10
     cp = num % 10
 
-    return [pp, gp, sp, cp]
+    return CoinsList(pp, gp, sp, cp)
 
 
 def check_results(DC: int, result: int, dice: int) -> int:
@@ -50,13 +115,19 @@ def check_results(DC: int, result: int, dice: int) -> int:
         3: 3,  # crit success
         4: 3,
     }
-    return CHECK_RESULTS[
-        (
-            (0 if result <= DC - 10 else (1 if result < DC else (2 if result < DC + 10 else 3)))
-            + (1 if dice == 20 else 0)
-            - (1 if dice == 1 else 0)
-        )
-    ]
+    if result >= DC + 10:
+        success_rate = 3
+    elif result >= DC:
+        success_rate = 2
+    elif result > DC - 10:
+        success_rate = 1
+    else:
+        success_rate = 0
+
+    success_rate += 1 if dice == 20 else 0  # nat20
+    success_rate -= 1 if dice == 1 else 0  # nat1
+
+    return CHECK_RESULTS[success_rate]
 
 
 def result_name(result: int) -> str:
@@ -150,6 +221,24 @@ def log_command_not_cog(func):
     return logged_command
 
 
+def try_command(func):
+    @functools.wraps(func)
+    async def try_command_func(self: Any, interaction: Interaction, *args, **kwargs):
+        try:
+            await interaction.response.defer()
+            if interaction.user is None:
+                return await interaction.followup.send("Error: Null user")
+            return await func(self, interaction, *args, **kwargs)
+        except DataNotFoundError as e:
+            await interaction.followup.send(f"DataNotFoundError: {e}")
+        except NoneError as e:
+            await interaction.followup.send("None Error: not_none found None value")
+        except APIError as e:
+            await interaction.followup.send(f"API Error: {str(e)}")
+
+    return try_command_func
+
+
 def column_to_num(column: str) -> int:
     """
     Entrega el indice (indexado a 0 de la letra de la columna)
@@ -167,19 +256,3 @@ def column_to_num(column: str) -> int:
         num += letters.index(letter) + 1
 
     return num - 1
-
-
-class Column(str):
-    def excel_index(self: Self) -> int:
-        """
-        Entrega el indice (indexado a 0) de la letra de la columna
-        Ejemplos:
-        - A -> 0
-        - C -> 2
-        - AA -> 26
-        """
-        return column_to_num(self)
-
-
-class CharacterNotFoundError(Exception):
-    pass

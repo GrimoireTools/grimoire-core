@@ -1,7 +1,8 @@
 from collections import defaultdict
 import json
 from typing import Any, Callable, Generic, Self, Tuple, Type, TypeVar, TypedDict
-from SheetControl import get_level_global
+
+from controllers.salary_controller import get_level_global
 
 RELIGIONS: list[str] = [
     "La Labor",
@@ -10,7 +11,7 @@ RELIGIONS: list[str] = [
     "La Prisión",
     "El Arquitecto",
     "El Potencial",
-    "Ninguna",
+    "Ninguno",
     "Otro",
 ]
 
@@ -96,7 +97,7 @@ ANCESTRIES: list[str] = [
     "Fetchling",
     "Fleshwarp",
     "Ghoran",
-    "Gnoll",
+    "Kholo",
     "Gnome",
     "Goblin",
     "Goloma",
@@ -266,14 +267,6 @@ PROF_BONUSES: CallableDict[str, int] = CallableDict(
         PROF.Legendary: lambda: 8 + get_level_global(),
     }
 )
-
-
-class Recipe(TypedDict):
-    name: str
-    level: str
-    rarity: str
-    tipo: str
-    requirements: str
 
 
 with open("Ancestries.json") as f:
