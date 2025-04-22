@@ -35,11 +35,11 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     sheet: Worksheet
     row_type: Type[RowType]
 
-    def __init__(self, sheet_id: int, cls: type[RowType]):
+    def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Megamarch"):
         """Initializes the class with the given sheet_id and row type."""
         logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls
-        self.sheet = gc.open("Megamarch").get_worksheet_by_id(sheet_id)
+        self.sheet = gc.open(doc).get_worksheet_by_id(sheet_id)
 
     def fetch_data(self):
         """Fetches all data from the sheet. Called each time __init__() is called."""

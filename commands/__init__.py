@@ -1,5 +1,6 @@
 from loguru import logger
 from nextcord.ext.commands import Bot
+from commands.consent_form import ConsentFormCommands
 from commands.delete_character import DeleteCharacterCommands
 from commands.downtime import DowntimeCommands
 from commands.earn_income import EarnIncomeCommands
@@ -32,6 +33,7 @@ def setup_all_commands(bot: Bot):
         DeleteCharacterCommands,
         InfoCommands,
         SalaryCommands,
+        ConsentFormCommands,
     ]
 
     for command_class in command_classes:
