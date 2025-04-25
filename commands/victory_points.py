@@ -125,15 +125,47 @@ class VictoryPointsCommands(Cog):
         sh_vp = VictoryPointsController()
         mission = sh_vp.get_mission_row(mission_name)
         old_total = mission.Points
-        old, new = mission.add_points(user_id, points)
+        old_contr, new_contr = mission.add_points(user_id, points)
         sh_vp.set_row(mission)
 
+        objectives_sorted = sorted(mission.Objectives.items(), key=lambda x: x[1])
+        completed_objectives = []
+        uncompleted_objectives = []
+        for objective_name, needed_pts in objectives_sorted:
+            was_completed = old_total >= needed_pts
+            is_completed = mission.Points >= needed_pts
+            if not was_completed and is_completed:
+                completed_objectives.append(objective_name)
+            elif was_completed and not is_completed:
+                uncompleted_objectives.append(objective_name)
+
+        completion_msg = ""
+        if completed_objectives:
+            plural = len(completed_objectives) > 1
+            completion_msg += "".join(
+                [
+                    f"¡Se ha{"n" if plural else ""} completado {"los" if plural else "el"} objetivo{'s' if plural else ''} ",
+                    ", ".join(completed_objectives),
+                    "!\n",
+                ]
+            )
+        if uncompleted_objectives:
+            plural = len(uncompleted_objectives) > 1
+            completion_msg += "".join(
+                [
+                    f"¡Se ha{"n" if plural else ""} fallado {"los" if plural else "el"} objetivo{'s' if plural else ''} ",
+                    ", ".join(uncompleted_objectives),
+                    "!\n",
+                ]
+            )
+
         name, contr = mission.user_contribution(user_id)
+
         return await interaction.followup.send(
             (
                 f"{name} {"añade" if points else "quita"} {abs(points)} puntos de victoria a la misión *{mission_name}*.\n"
                 f"Total de puntos de victoria: {old_total} -> {mission.Points}\n"
-                f"Contribución de {name}: {old} -> {new}"
+                f"Contribución de {name}: {old_contr} -> {new_contr}\n{completion_msg}"
             )
         )
 

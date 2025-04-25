@@ -28,7 +28,7 @@ class VictoryPointsRow(Row):
     def add_points(self: Self, user_id: int, amount: int):
         """
         Adds points to the row.
-        Returns the previous and new points.
+        Returns the previous and new point contributions of the contributing PJ.
         """
         old = 0
         new = amount
