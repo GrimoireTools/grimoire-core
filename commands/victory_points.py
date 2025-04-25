@@ -179,7 +179,9 @@ class VictoryPointsCommands(Cog):
         mission_row = sh.get_mission_row(mission_name)
         message = f"**Contribuyentes a la misión:** {mission_row.Mission_name} ({mission_row.Points} pts)\n"
         contributors_sorted = sorted(
-            [(v["name"], v["points"]) for _, v in mission_row.Contributions.items()], key=lambda x: x[1], reverse=True
+            [(v["name"], v["points"]) for _, v in mission_row.Contributions.items() if v["points"] != 0],
+            key=lambda x: x[1],
+            reverse=True,
         )
         for contributor, pts in contributors_sorted:
             message += f"- {contributor}: {pts} pts\n"
