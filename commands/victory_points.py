@@ -163,7 +163,7 @@ class VictoryPointsCommands(Cog):
 
         return await interaction.followup.send(
             (
-                f"{name} {"añade" if points else "quita"} {abs(points)} puntos de victoria a la misión *{mission_name}*.\n"
+                f"{name} {"añade" if points >= 0 else "quita"} {abs(points)} puntos de victoria a la misión *{mission_name}*.\n"
                 f"Total de puntos de victoria: {old_total} -> {mission.Points}\n"
                 f"Contribución de {name}: {old_contr} -> {new_contr}\n{completion_msg}"
             )
