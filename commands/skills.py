@@ -223,6 +223,8 @@ class SkillCommands(Cog):
                     Discord_id=user_id,
                     Skill_name=skill_name,
                     Proficiency=prof_value,
+                    Extra_bonus=0,
+                    Bonus_description="",
                 )
             else:
                 # update existing skill entry
