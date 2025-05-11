@@ -7,7 +7,7 @@ from commands.utils.skill_utils import *
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
 from controllers.pjs_controller import PJsController
-from controllers.skills_controller import SkillsController, skill_mod_type
+from controllers.skills_controller import SkillRow, SkillsController, skill_mod_type
 from controllers.modifiers_controller import ModifiersController, ModifiersRow
 
 CODEBLOCK_LANG = "ansi"
@@ -377,7 +377,84 @@ class SkillCommands(Cog):
 
         return await interaction.followup.send(message)
 
+    @standard_command("Muestra los primeros n PJs con la mejor skill seleccionada")
+    async def skill_ranking(
+        self: Self,
+        interaction: Interaction,
+        skill: str = SlashOption(
+            name="skill",
+            description="La skill de tu personaje que quieres usar",
+            required=True,
+            choices=[skill[0] for skill in SKILLS if skill[0] != "Lore"],
+        ),
+        n: int = SlashOption(
+            name="n",
+            description="Cantidad de PJs a mostrar",
+            required=False,
+            default=5,
+            min_value=1,
+        ),
+    ) -> Any:
+        sh_skills = SkillsController()
+        sh_mods = ModifiersController()
+
+        all_skills: list[SkillRow] = sh_skills.find_rows_with_values(
+            {
+                "Skill_name": skill,
+            }
+        )
+        all_bonuses = [
+            (sk.PJ_name, sk.Proficiency, sk.total_bonus(sh_mods.get_mods_row(int(sk.Discord_id))))
+            for sk in all_skills
+            if sk is not None and sh_mods.mods_row_exists(int(sk.Discord_id))
+        ]
+        sorted_bonuses = sorted(all_bonuses, key=lambda x: x[2], reverse=True)
+        message: str = f"# Ranking de {skill}:\n```{CODEBLOCK_LANG}\n"
+        for i, (pj_name, prof, bonus) in enumerate(sorted_bonuses[:n]):
+            message += f"{i + 1}. {pj_name} ({prof}) {bonus:+}\n"
+        message += "```"
+        return await interaction.followup.send(message)
+
+    @standard_command("Muestra los primeros n PJs con la mejor lore skill seleccionada")
+    async def lore_ranking(
+        self: Self,
+        interaction: Interaction,
+        lore_subname: str = SlashOption(
+            name="lore",
+            description="El lore de tu personaje (sin 'Lore ')",
+            required=True,
+        ),
+        n: int = SlashOption(
+            name="n",
+            description="Cantidad de PJs a mostrar",
+            required=False,
+            default=5,
+            min_value=1,
+        ),
+    ) -> Any:
+        skill = f"Lore ({lore_subname})"
+        sh_skills = SkillsController()
+        sh_mods = ModifiersController()
+
+        all_skills: list[SkillRow] = sh_skills.find_rows_with_values(
+            {
+                "Skill_name": skill,
+            }
+        )
+        all_bonuses = [
+            (sk.PJ_name, sk.Proficiency, sk.total_bonus(sh_mods.get_mods_row(int(sk.Discord_id))))
+            for sk in all_skills
+            if sk is not None and sh_mods.mods_row_exists(int(sk.Discord_id))
+        ]
+        sorted_bonuses = sorted(all_bonuses, key=lambda x: x[2], reverse=True)
+        message: str = f"# Ranking de {skill}:\n```{CODEBLOCK_LANG}\n"
+        for i, (pj_name, prof, bonus) in enumerate(sorted_bonuses[:n]):
+            message += f"{i + 1}. {pj_name} ({prof}) {bonus:+}\n"
+        message += "```"
+        return await interaction.followup.send(message)
+
     @set_lore.on_autocomplete("lore_subname")
+    @lore_ranking.on_autocomplete("lore_subname")
     async def autocomplete_set_lore_subname(self: Self, interaction: Interaction, lore_subname: str) -> Any:
         filtered_lores: list[str] = filter_lores(lore_subname, None)
         await interaction.response.send_autocomplete(filtered_lores)

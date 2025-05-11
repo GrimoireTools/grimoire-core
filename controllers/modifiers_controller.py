@@ -36,3 +36,11 @@ class ModifiersController(SheetsControllerBase[ModifiersRow]):
             raise DataNotFoundError(
                 f"Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             ) from None
+
+    def mods_row_exists(self, user_id: int) -> bool:
+        """Checks if the modifiers row exists for a given user_id."""
+        try:
+            r = self.get_mods_row(user_id)
+            return r is not None and True
+        except DataNotFoundError:
+            return False
