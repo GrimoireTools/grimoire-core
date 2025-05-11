@@ -23,13 +23,9 @@ async def on_ready() -> None:
     print(f"We have logged in as {bot.user}")
 
 
-@bot.slash_command(
-    description="Registra un nuevo personaje de Dungeonmarch.", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Registra un nuevo personaje de Dungeonmarch.", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def registrar(
-    interaction: nextcord.Interaction, nombre_pj: str, nombre_jugador: str
-) -> Any:
+async def registrar(interaction: nextcord.Interaction, nombre_pj: str, nombre_jugador: str) -> Any:
     await interaction.response.defer()
     # Conseguir el ID del usuario
     user_id: int = interaction.user.id
@@ -52,9 +48,7 @@ async def registrar(
     await interaction.followup.send(f"Registrado {nombre_pj} en la fila {pj_row + 1}")
 
 
-@bot.slash_command(
-    description="Entrega la info de tu personaje", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Entrega la info de tu personaje", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
 async def resumen(
     interaction: nextcord.Interaction,
@@ -66,9 +60,7 @@ async def resumen(
     try:
         pj_row = sh.get_pj_row(user_id)
     except sh.CharacterNotFoundError:
-        return await interaction.followup.send(
-            "No se encontró un personaje con ID de discord correspondiente"
-        )
+        return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
     data = sh.get_pj_full(pj_row)
     print(data)
     (
@@ -106,7 +98,7 @@ async def resumen(
 - Raza: {Race}, {Subrace}
 - Deidad: {deidad}, {piedad} de piedad
 - Renombre: {renombre}
-- Dinero: {pp}pp, {gp}gp, {ep}ep, {sp}sp, {cp}cp, **Total: {total}gp**
+- Dinero: {pp}pp, {gp}gp, {ep}ep, {sp}sp, {cp}cp, **Total: {total:.2f}gp**
 - Downtime: {Dt // 1} semanas y {round(Dt % 1 * 10)} dias
 """
     if full_data:
@@ -120,13 +112,9 @@ async def resumen(
     return await interaction.followup.send(message)
 
 
-@bot.slash_command(
-    description="Cambia el Downtime de tu personaje", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Cambia el Downtime de tu personaje", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def downtime(
-    interaction: nextcord.Interaction, amount_dt: str, user: nextcord.Member = None
-) -> Any:
+async def downtime(interaction: nextcord.Interaction, amount_dt: str, user: nextcord.Member = None) -> Any:
     await interaction.response.defer()
     user_id: int = interaction.user.id if user is None else user.id
     try:
@@ -137,16 +125,12 @@ async def downtime(
         pj_row = sh.get_pj_row(user_id)
         pj_name = sh.get_pj_data(pj_row, PJ_COL.Personaje)
     except sh.CharacterNotFoundError:
-        return await interaction.followup.send(
-            "No se encontró un personaje con ID de discord correspondiente"
-        )
+        return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
 
     pj_dt = float(sh.get_pj_data(pj_row, PJ_COL.Downtime))
 
     if pj_dt + amount < 0:
-        return await interaction.followup.send(
-            "No tienes suficiente downtime para esta transacción"
-        )
+        return await interaction.followup.send("No tienes suficiente downtime para esta transacción")
 
     new_total = pj_dt + amount
 
@@ -178,17 +162,10 @@ async def pagar(
     try:
         pj_row = sh.get_pj_row(user_id)
         pj_name = sh.get_pj_data(pj_row, PJ_COL.Personaje)
-        target_pj_row = sh.get_pj_row(
-            target_id) if transfertarget is not None else None
-        target_pj_name = (
-            sh.get_pj_data(target_pj_row, PJ_COL.Personaje)
-            if transfertarget is not None
-            else None
-        )
+        target_pj_row = sh.get_pj_row(target_id) if transfertarget is not None else None
+        target_pj_name = sh.get_pj_data(target_pj_row, PJ_COL.Personaje) if transfertarget is not None else None
     except sh.CharacterNotFoundError:
-        return await interaction.followup.send(
-            "No se encontró un personaje con ID de discord correspondiente"
-        )
+        return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
     if amount < 0:
         return await interaction.followup.send("Debes pagar una cantidad positiva de dinero")
 
@@ -196,9 +173,7 @@ async def pagar(
     pp, gp, ep, sp, cp, total = pj_coins
 
     if total - amount < 0:
-        return await interaction.followup.send(
-            "No tienes suficiente dinero para esta transacción"
-        )
+        return await interaction.followup.send("No tienes suficiente dinero para esta transacción")
 
     paid_coins = utils.pay_priority(pj_coins, amount)
     ppp, pgp, pep, psp, pcp = paid_coins
@@ -235,9 +210,7 @@ async def pagar(
 
 @bot.slash_command(description="Suma dinero a tu cuenta.", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def añadirdinero(
-    interaction: nextcord.Interaction, amount_str: str, user: nextcord.Member = None
-) -> Any:
+async def añadirdinero(interaction: nextcord.Interaction, amount_str: str, user: nextcord.Member = None) -> Any:
     await interaction.response.defer()
     try:
         amount: float = utils.parse_float_arg(amount_str)
@@ -249,9 +222,7 @@ async def añadirdinero(
         pj_row = sh.get_pj_row(user_id)
         pj_name = sh.get_pj_data(pj_row, PJ_COL.Personaje)
     except sh.CharacterNotFoundError:
-        return await interaction.followup.send(
-            "No se encontró un personaje con ID de discord correspondiente"
-        )
+        return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
     if amount < 0:
         return await interaction.followup.send("Debes ganar una cantidad positiva de dinero")
 
@@ -276,9 +247,7 @@ def add_money(amount, pj_row):
 
 
 def simple_value_update_command(value_row: str, value_name: str) -> Any:
-    async def command(
-        interaction: nextcord.Interaction, amount: int = 0, user: nextcord.Member = None
-    ) -> Any:
+    async def command(interaction: nextcord.Interaction, amount: int = 0, user: nextcord.Member = None) -> Any:
         await interaction.response.defer()
         user_id: int = interaction.user.id if user is None else user.id
 
@@ -286,9 +255,7 @@ def simple_value_update_command(value_row: str, value_name: str) -> Any:
             pj_row = sh.get_pj_row(user_id)
             pj_name = sh.get_pj_data(pj_row, PJ_COL.Personaje)
         except sh.CharacterNotFoundError:
-            return await interaction.followup.send(
-                "No se encontró un personaje con ID de discord correspondiente"
-            )
+            return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
 
         pj_value = sh.get_pj_data(pj_row, value_row)
         pj_value = 0 if pj_value == "" else int(pj_value)
@@ -306,79 +273,51 @@ def simple_value_update_command(value_row: str, value_name: str) -> Any:
     return command
 
 
-@bot.slash_command(
-    description="Revisa o actualiza tu devoción", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Revisa o actualiza tu devoción", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def devocion(
-    interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None
-) -> Any:
+async def devocion(interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None) -> Any:
     command = simple_value_update_command(PJ_COL.Devocion, "devoción")
     return await command(interaction, amount, user)
 
 
-@bot.slash_command(
-    description="Revisa o actualiza tu renombre", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Revisa o actualiza tu renombre", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def renombre(
-    interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None
-) -> Any:
+async def renombre(interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None) -> Any:
     command = simple_value_update_command(PJ_COL.Renombre, "renombre")
     return await command(interaction, amount, user)
 
 
-@bot.slash_command(
-    description="Revisa o actualiza tu favor divino", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Revisa o actualiza tu favor divino", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def favordivino(
-    interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None
-) -> Any:
+async def favordivino(interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None) -> Any:
     command = simple_value_update_command(PJ_COL.DivineFavor, "favor divino")
     return await command(interaction, amount, user)
 
 
-@bot.slash_command(
-    description="Revisa o actualiza tu reputación", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Revisa o actualiza tu reputación", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def reputacion(
-    interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None
-) -> Any:
+async def reputacion(interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None) -> Any:
     command = simple_value_update_command(PJ_COL.Reputacion, "reputación")
     return await command(interaction, amount, user)
 
 
-@bot.slash_command(
-    description="Revisa o actualiza tu crianza", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Revisa o actualiza tu crianza", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def crianza(
-    interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None
-) -> Any:
+async def crianza(interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None) -> Any:
     command = simple_value_update_command(PJ_COL.Crianza, "crianza")
     return await command(interaction, amount, user)
 
 
-@bot.slash_command(
-    description="Revisa o actualiza tu expresión", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Revisa o actualiza tu expresión", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def expresion(
-    interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None
-) -> Any:
+async def expresion(interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None) -> Any:
     command = simple_value_update_command(PJ_COL.Expresion, "expresión")
     return await command(interaction, amount, user)
 
 
-@bot.slash_command(
-    description="Revisa o actualiza tu infamia", guild_ids=[CRI_GUILD_ID]
-)
+@bot.slash_command(description="Revisa o actualiza tu infamia", guild_ids=[CRI_GUILD_ID])
 @gets_pj_data
-async def infamia(
-    interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None
-) -> Any:
+async def infamia(interaction: nextcord.Interaction, amount: int, user: nextcord.Member = None) -> Any:
     command = simple_value_update_command(PJ_COL.Infamia, "infamia")
     return await command(interaction, amount, user)
 
@@ -389,9 +328,7 @@ async def infamia(
 )
 @gets_pj_data
 @gets_sueldo_data
-async def completarmision(
-    interaction: nextcord.Interaction, mision: int, user: nextcord.Member = None
-) -> Any:
+async def completarmision(interaction: nextcord.Interaction, mision: int, user: nextcord.Member = None) -> Any:
     await interaction.response.defer()
     user_id: int = interaction.user.id if user is None else user.id
     amt = sueldo_info(mision)
@@ -402,9 +339,7 @@ async def completarmision(
             pj_row = sh.get_pj_row(user_id)
             pj_name = sh.get_pj_data(pj_row, PJ_COL.Personaje)
         except sh.CharacterNotFoundError:
-            return await interaction.followup.send(
-                "No se encontró un personaje con ID de discord correspondiente"
-            )
+            return await interaction.followup.send("No se encontró un personaje con ID de discord correspondiente")
 
         pp, gp, ep, sp, cp, new_total = add_money(amt, pj_row)
 
