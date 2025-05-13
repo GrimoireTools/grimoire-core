@@ -34,6 +34,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     DATA: list[list[Value]]
     sheet: Worksheet
     row_type: Type[RowType]
+    marker_col: int = 1  # Columna que se revisa para saber si la fila existe
 
     def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Megamarch"):
         """Initializes the class with the given sheet_id and row type."""
@@ -45,6 +46,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         """Fetches all data from the sheet. Called each time __init__() is called."""
         logger.debug("Fetching data from sheet...")
         self.DATA = self.sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
+        self._after_fetch()
 
     def _after_fetch(self):
         """Called after fetching data. Override this method to perform any additional processing."""
@@ -77,6 +79,9 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         rows = []
         data = self.DATA[skip:]
         for i, row in enumerate(data):
+            if row[self.marker_col] == "":
+                # Skip empty rows
+                continue
             data_row = self._convert_row(row)
             data_row.set_index(i)
             rows.append(data_row)

@@ -1,7 +1,11 @@
+"""
+Caliban es una entidad que se manifiesta en la mente de los personajes, un eco de sus pensamientos y emociones.
+Es un susurro que invita a la curiosidad, un misterio que se despliega en la imaginación.
+Es un reflejo de lo que los personajes son y lo que desean ser, una presencia que nunca se ve, pero siempre se siente.
+Existe solo cuando se le piensa, y su forma cambia con cada pensamiento.
+"""
+
 import random
-
-from loguru import logger
-
 
 messages = [
     "Soy solo un suspiro entre tus pensamientos.",

@@ -4,6 +4,8 @@ from nextcord import SlashOption, Member, Interaction
 from controllers.pjs_controller import PJRow, PJsController
 from controllers.lib.utils import not_none, parse_float_arg
 from controllers.lib.cog import Cog, standard_command
+from commands.utils.caliban_utils import *
+import caliban
 
 
 class MoneyCommands(Cog):
@@ -53,7 +55,10 @@ class MoneyCommands(Cog):
                 f"{pj.Name} paga {amount:.2f}gp.\n"
                 f"Dinero restante: {pj_coins.pretty_print()}, **Total: {pj_coins.total():.2f}gp**"
             )
-        return await interaction.send(msg)
+        if pj.Caliban_met == 1:
+            caliban_message = caliban.get_message_sometimes(10)
+        await interaction.send(msg)
+        await send_caliban_message(interaction, caliban_message)
 
     @standard_command("Suma dinero a tu cuenta.")
     async def addmoney(
