@@ -1,10 +1,9 @@
 import math
 from typing import Any, Self
-import caliban
 from controllers.lib.cog import standard_command, Cog
 from controllers.lib.utils import default_user_option, not_none
 from nextcord import Interaction, Member, SlashOption
-from commands.utils.caliban_utils import *
+from commands.utils.caliban_utils import caliban_speaks
 from controllers.pjs_controller import PJsController
 from controllers.salary_controller import get_level_global, update_level_global
 
@@ -17,10 +16,6 @@ class InfoCommands(Cog):
         coins = pj.to_coin_list()
         dt = not_none(pj.Downtime)
 
-        caliban_message = ""
-        if pj.Caliban_met == 1:
-            caliban_message = caliban.get_message_sometimes(40)
-
         message = f"""# Status de {pj.Name}
     - Jugador: {pj.Player}
     - Clase: {pj.Class}{", " if pj.Archetypes else ""}{pj.Archetypes}
@@ -29,7 +24,7 @@ class InfoCommands(Cog):
     - Downtime: {dt // 7} semanas y {dt % 7} dias ({dt} dias)
     """
         await interaction.followup.send(message)
-        await send_caliban_message(interaction, caliban_message)
+        await caliban_speaks(interaction, 40)
 
     @standard_command("Calcula el costo de DT de hacer múltiples retrain a la vez")
     async def retrain_info(

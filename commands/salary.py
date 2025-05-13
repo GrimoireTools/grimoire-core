@@ -5,6 +5,7 @@ from nextcord import Interaction, Member, SlashOption
 
 from controllers.pjs_controller import PJsController
 from controllers.salary_controller import SalaryController
+from commands.utils.caliban_utils import caliban_speaks
 
 AFK_GOLD = [
     34 / 2,
@@ -53,7 +54,7 @@ class SalaryCommands(Cog):
         pj.Last_turn = f"T{turno}"
         sh_pjs.set_row(pj)
 
-        return await interaction.followup.send(
+        await interaction.followup.send(
             (
                 f"{pj.Name}: Misión nivel {level} completada!"
                 f"\n Se te suma el sueldo de la misión:"
@@ -62,6 +63,7 @@ class SalaryCommands(Cog):
                 f"(ahora tienes {pj.Downtime} dias de dt)"
             )
         )
+        await caliban_speaks(interaction, 50, "mission")
 
     @standard_command("Gana el downtime y dinero obtenido en un turno en que no jugaste.")
     async def afk_salary(
