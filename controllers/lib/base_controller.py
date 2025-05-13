@@ -46,6 +46,10 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         logger.debug("Fetching data from sheet...")
         self.DATA = self.sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
 
+    def _after_fetch(self):
+        """Called after fetching data. Override this method to perform any additional processing."""
+        pass
+
     def _convert_row(self, row: list[Value]) -> RowType:
         """Converts a list of values to a dataclass instance."""
         return self.row_type.from_list(row)
@@ -68,10 +72,10 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         data_row.set_index(row)
         return data_row
 
-    def get_all_rows(self, skip_first=True) -> list[RowType]:
+    def get_all_rows(self, skip=1) -> list[RowType]:
         """Returns all rows as a list of dataclass instances. Remember that the first row is generally the header."""
         rows = []
-        data = self.DATA[1:] if skip_first else self.DATA
+        data = self.DATA[skip:]
         for i, row in enumerate(data):
             data_row = self._convert_row(row)
             data_row.set_index(i)
