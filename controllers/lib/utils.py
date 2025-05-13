@@ -234,7 +234,7 @@ def try_command(func):
         except NoneError as e:
             await interaction.followup.send("None Error: not_none found None value")
         except APIError as e:
-            await interaction.followup.send(f"API Error: {str(e)}")
+            await interaction.followup.send(f"Google API Error: {str(e)}. Prueba de nuevo en unos minutos.")
 
     return try_command_func
 
