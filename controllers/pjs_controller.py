@@ -89,9 +89,32 @@ class PJRow(Row):
         return super()._ranges(row, force_set, force_skip)
 
 
+CALIBAN_MET: dict[str, bool] = {}
+
+
+def cache_caliban(pj_rows: list[PJRow]):
+    """Caches the list of characters that have met Caliban."""
+    global CALIBAN_MET
+    CALIBAN_MET = {pj.Discord_id: pj.Caliban_met == 1 for pj in pj_rows}
+    logger.debug(f"Cached Caliban met status: {CALIBAN_MET}")
+
+
+def get_caliban_met(user_id: str | int) -> bool:
+    """Returns True if the character has met Caliban."""
+    global CALIBAN_MET
+    return CALIBAN_MET.get(str(user_id), False)
+
+
 class PJsController(SheetsControllerBase[PJRow]):
     def __init__(self):
         super().__init__(PJ_SHEET_ID, PJRow)
+
+    def _after_fetch(self):
+        """
+        After fetching the data, cache the list of characters that have met Caliban.
+        """
+        rows = self.get_all_rows()
+        cache_caliban(rows)
 
     def set_money(self, user_id: int, total_money: float):
         row = self.find_pj_row_index(user_id)
