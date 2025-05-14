@@ -17,12 +17,6 @@ class InfoCommands(Cog):
         coins = pj.to_coin_list()
         dt = not_none(pj.Downtime)
 
-        caliban_message = ""
-        if pj.Caliban_met == 1:
-            caliban_message = caliban.get_message_sometimes(40)
-            if caliban_message:
-                caliban_message = f"||*{caliban_message}*||"
-
         message = f"""# Status de {pj.Name}
     - Jugador: {pj.Player}
     - Clase: {pj.Class}{", " if pj.Archetypes else ""}{pj.Archetypes}
@@ -31,17 +25,6 @@ class InfoCommands(Cog):
     - Downtime: {dt // 7} semanas y {dt % 7} dias ({dt} dias)
     """
         await interaction.followup.send(message)
-        return (
-            await interaction.followup.send(
-                caliban_message,
-                avatar_url="https://i.imgur.com/ODo4nUl.png",
-                username="...",
-                ephemeral=True,
-                delete_after=6,
-            )
-            if caliban_message
-            else None
-        )
 
     @standard_command("Calcula el costo de DT de hacer múltiples retrain a la vez")
     async def retrain_info(
