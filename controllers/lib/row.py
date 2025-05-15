@@ -4,7 +4,7 @@ from abc import ABC
 from collections import OrderedDict
 from dataclasses import dataclass, field
 import types
-from typing import Any, Type, TypeVar, Union, get_args, get_origin, get_type_hints
+from typing import Any, Dict, Generic, Type, TypeVar, Union, get_args, get_origin, get_type_hints
 import json
 from .utils import num_to_column, column_to_num
 
@@ -207,11 +207,18 @@ r_float = Union[float, None]
 r_str = Union[str, None]
 
 
-class JsonData(dict):
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+class JsonData(Dict[K, V], Generic[K, V]):
+    """A dictionary that can be serialized to JSON."""
+
     def __init__(self, data=None):
+        """Initializes the JsonData object. If data is a list, it is converted to a dictionary with the index as the key."""
         if isinstance(data, str):
             parsed = json.loads(data)
             if isinstance(parsed, list):
                 parsed = {i: v for i, v in enumerate(parsed)}
-            data = parsed
-        super().__init__(data or {})
+            data = dict(parsed)
+        super().__init__(data or {})  # type: ignore
