@@ -1,4 +1,4 @@
-from typing import Any, Self, Tuple
+from typing import Any, Self, Tuple, TypedDict
 from PF2eData import ABILITIES, Ability
 from controllers.pjs_controller import PJsController
 from controllers.lib.base_controller import SheetsControllerBase
@@ -8,11 +8,16 @@ from controllers.lib.utils import DataNotFoundError, not_none
 MODIFIERS_SHEET_ID = 1986112206
 
 
+class Contribution(TypedDict):
+    name: str
+    points: int
+
+
 class VictoryPointsRow(Row):
     Mission_name: str
     Points: int
-    Objectives: JsonData  # {<obj_name>: points}
-    Contributions: JsonData  # {user_id (str): {name: ..., points: ...}}
+    Objectives: JsonData[str, int]  # {<obj_name>: points}
+    Contributions: JsonData[str, Contribution]  # {user_id (str): {name: ..., points: ...}}
     Active: int
 
     def user_contribution(self: Self, user_id: int) -> Tuple[str, int]:
@@ -45,7 +50,7 @@ class VictoryPointsRow(Row):
 
     def change_contribution(
         self,
-        user_id: int,
+        user_id: str,
         contribution: int,
     ) -> None:
         """
@@ -61,8 +66,8 @@ class VictoryPointsRow(Row):
             self.Contributions[user_id]["points"] += contribution
         else:
             # If the user_id does not exist, create a new entry
-            pj = PJsController().get_pj_row(user_id)
-            self.Contributions[user_id] = {"points": contribution, "pj": pj.Name}
+            pj = PJsController().get_pj_row(int(user_id))
+            self.Contributions[user_id] = {"points": contribution, "name": pj.Name}
 
     def change_objective(self, obj_name: str, obj_pts: int):
         """
