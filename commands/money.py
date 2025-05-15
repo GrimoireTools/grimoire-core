@@ -38,7 +38,9 @@ class MoneyCommands(Cog):
 
         transfer_id = transfertarget.id if transfertarget else None
         if transfer_id == user_id:
-            return await interaction.send("No puedes transferirte dinero a ti mismo")
+            await interaction.send("No puedes transferirte dinero a ti mismo")
+            return await caliban_force_speaks(interaction, "Wao, dinero infinito")
+
         target_pj = sh.get_pj_row(transfertarget.id) if transfertarget else None
 
         if target_pj is not None and transfer_id is not None:
