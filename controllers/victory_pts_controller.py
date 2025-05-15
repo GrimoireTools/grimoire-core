@@ -48,27 +48,6 @@ class VictoryPointsRow(Row):
             self.Contributions[str_id] = {"name": pj.Name, "points": new}
         return old, new
 
-    def change_contribution(
-        self,
-        user_id: str,
-        contribution: int,
-    ) -> None:
-        """
-        Adds a contribution to the row.
-        """
-
-        # Ensure that the contributions field is a dictionary
-        if not isinstance(self.Contributions, JsonData):
-            self.Contributions = JsonData({})
-
-        if user_id in self.Contributions:
-            # If the user_id already exists, update the contribution
-            self.Contributions[user_id]["points"] += contribution
-        else:
-            # If the user_id does not exist, create a new entry
-            pj = PJsController().get_pj_row(int(user_id))
-            self.Contributions[user_id] = {"points": contribution, "name": pj.Name}
-
     def change_objective(self, obj_name: str, obj_pts: int):
         """
         Adds a mission to the row.
