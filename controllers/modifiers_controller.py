@@ -1,3 +1,4 @@
+from PF2eData import Ability
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import Row, r_int
 from controllers.lib.utils import DataNotFoundError, not_none
@@ -8,18 +9,18 @@ MODIFIERS_SHEET_ID = 41455486
 class ModifiersRow(Row):
     PJ_name: str
     Discord_id: str
-    STR: r_int
-    DEX: r_int
-    CON: r_int
-    INT: r_int
-    WIS: r_int
-    CHA: r_int
+    STR: int
+    DEX: int
+    CON: int
+    INT: int
+    WIS: int
+    CHA: int
 
-    def __getitem__(self, key: str) -> int:
-        key = key.upper()
+    def __getitem__(self, ability: Ability) -> int:
+        key = ability.upper()
         if key in self.__dict__:
             return not_none(getattr(self, key))
-        raise KeyError(f"'{key}' is not a valid ability score")
+        raise KeyError(f"'{ability}' is not a valid ability modifer")
 
 
 class ModifiersController(SheetsControllerBase[ModifiersRow]):

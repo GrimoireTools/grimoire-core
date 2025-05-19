@@ -2,7 +2,7 @@ from typing import Any, Self
 from nextcord import Interaction, SlashOption
 
 import dndice
-from PF2eData import PROF, SKILLS
+from PF2eData import PROF, SKILLS, Prof, Skill
 from commands.utils.skill_utils import *
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
@@ -59,7 +59,7 @@ class SkillCommands(Cog):
     async def skill(
         self: Self,
         interaction: Interaction,
-        skill_name: str = SlashOption(
+        skill_name: Skill = SlashOption(
             name="skill",
             description="La skill de tu personaje",
             required=True,
@@ -87,7 +87,7 @@ class SkillCommands(Cog):
     async def lore(
         self: Self,
         interaction: Interaction,
-        lore_subname: str = SlashOption(
+        lore_subname: Skill = SlashOption(
             name="lore",
             description="El lore de tu personaje (sin 'Lore ')",
             required=True,
@@ -116,13 +116,13 @@ class SkillCommands(Cog):
     async def set_skill(
         self: Self,
         interaction: Interaction,
-        skill: str = SlashOption(
+        skill: Skill = SlashOption(
             name="skill",
             description="La skill de tu personaje a definir",
             required=True,
             choices=[skill[0] for skill in SKILLS if skill[0] != "Lore"],
         ),
-        proficiency: str = SlashOption(
+        proficiency: Prof = SlashOption(
             name="proficiency",
             description="El nivel de proficiencia de la skill",
             required=True,
@@ -168,51 +168,51 @@ class SkillCommands(Cog):
     async def set_all_skills(
         self: Self,
         interaction: Interaction,
-        perception: str = ability_param("perception"),
-        acrobatics: str = ability_param("acrobatics"),
-        arcana: str = ability_param("arcana"),
-        athletics: str = ability_param("athletics"),
-        crafting: str = ability_param("crafting"),
-        deception: str = ability_param("deception"),
-        diplomacy: str = ability_param("diplomacy"),
-        intimidation: str = ability_param("intimidation"),
-        medicine: str = ability_param("medicine"),
-        nature: str = ability_param("nature"),
-        occultism: str = ability_param("occultism"),
-        performance: str = ability_param("performance"),
-        religion: str = ability_param("religion"),
-        society: str = ability_param("society"),
-        stealth: str = ability_param("stealth"),
-        survival: str = ability_param("survival"),
-        thievery: str = ability_param("thievery"),
+        perception: Prof = ability_param("perception"),
+        acrobatics: Prof = ability_param("acrobatics"),
+        arcana: Prof = ability_param("arcana"),
+        athletics: Prof = ability_param("athletics"),
+        crafting: Prof = ability_param("crafting"),
+        deception: Prof = ability_param("deception"),
+        diplomacy: Prof = ability_param("diplomacy"),
+        intimidation: Prof = ability_param("intimidation"),
+        medicine: Prof = ability_param("medicine"),
+        nature: Prof = ability_param("nature"),
+        occultism: Prof = ability_param("occultism"),
+        performance: Prof = ability_param("performance"),
+        religion: Prof = ability_param("religion"),
+        society: Prof = ability_param("society"),
+        stealth: Prof = ability_param("stealth"),
+        survival: Prof = ability_param("survival"),
+        thievery: Prof = ability_param("thievery"),
     ) -> Any:
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
         sh_skills = SkillsController()
 
-        proficiencies = [
-            ("Perception", perception),
-            ("Acrobatics", acrobatics),
-            ("Arcana", arcana),
-            ("Athletics", athletics),
-            ("Crafting", crafting),
-            ("Deception", deception),
-            ("Diplomacy", diplomacy),
-            ("Intimidation", intimidation),
-            ("Medicine", medicine),
-            ("Nature", nature),
-            ("Occultism", occultism),
-            ("Performance", performance),
-            ("Religion", religion),
-            ("Society", society),
-            ("Stealth", stealth),
-            ("Survival", survival),
-            ("Thievery", thievery),
-        ]
+        proficiencies: dict[Skill, Prof] = {
+            "Perception": perception,
+            "Acrobatics": acrobatics,
+            "Arcana": arcana,
+            "Athletics": athletics,
+            "Crafting": crafting,
+            "Deception": deception,
+            "Diplomacy": diplomacy,
+            "Intimidation": intimidation,
+            "Medicine": medicine,
+            "Nature": nature,
+            "Occultism": occultism,
+            "Performance": performance,
+            "Religion": religion,
+            "Society": society,
+            "Stealth": stealth,
+            "Survival": survival,
+            "Thievery": thievery,
+        }
 
         msg = ""
         rows = []
-        for skill_name, prof_value in proficiencies:
+        for skill_name, prof_value in proficiencies.items():
             pj_skill = sh_skills.get_prof_row(user_id, skill_name)
 
             if pj_skill is None:
@@ -244,7 +244,7 @@ class SkillCommands(Cog):
             description="El nombre del lore (sin 'Lore')",
             required=True,
         ),
-        proficiency: str = SlashOption(
+        proficiency: Prof = SlashOption(
             name="proficiency",
             description="El nivel de proficiencia de la skill",
             required=True,
@@ -323,7 +323,7 @@ class SkillCommands(Cog):
     async def roll_skill(
         self: Self,
         interaction: Interaction,
-        skill: str = SlashOption(
+        skill: Skill = SlashOption(
             name="skill",
             description="La skill de tu personaje que quieres usar",
             required=True,
@@ -381,7 +381,7 @@ class SkillCommands(Cog):
     async def skill_ranking(
         self: Self,
         interaction: Interaction,
-        skill: str = SlashOption(
+        skill: Skill = SlashOption(
             name="skill",
             description="La skill de tu personaje que quieres usar",
             required=True,
@@ -470,7 +470,7 @@ class SkillCommands(Cog):
         await interaction.response.send_autocomplete(filtered_lores)
 
 
-def skill_roll_message(user_id: int, skill_name: str, extra_mod: int = 0, extra_info: bool = False) -> str:
+def skill_roll_message(user_id: int, skill_name: Skill, extra_mod: int = 0, extra_info: bool = False) -> str:
     mods_row = ModifiersController().get_mods_row(user_id)
     skill_row = SkillsController().get_prof_row(user_id, skill_name)
 

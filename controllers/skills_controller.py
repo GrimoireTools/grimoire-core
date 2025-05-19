@@ -1,5 +1,5 @@
 from typing import Tuple
-from PF2eData import PROF_BONUSES
+from PF2eData import PROF_BONUSES, SKILLS, Ability, Prof, Skill
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row, r_int
 from controllers.lib.singleton import Singleton
@@ -12,12 +12,12 @@ SAVES_SHEET_ID = 738258837
 class SkillRow(Row):
     PJ_name: str
     Discord_id: str
-    Skill_name: str
-    Proficiency: str
-    Extra_bonus: r_int
+    Skill_name: Skill
+    Proficiency: Prof
+    Extra_bonus: int
     Bonus_description: str
 
-    def mod_type(self) -> str:
+    def mod_type(self) -> Ability:
         return skill_mod_type(self.Skill_name)
 
     def is_lore(self) -> bool:
@@ -48,34 +48,15 @@ class SkillRow(Row):
         return mods[self.mod_type()] + self.prof_bonus() + not_none(self.Extra_bonus) + additional
 
 
-def skill_mod_type(skill: str | SkillRow):
+def skill_mod_type(skill: Skill | SkillRow) -> Ability:
     """
     Devuelve el tipo de modificador
     """
-    mods = {
-        "Perception": "Wis",
-        "Acrobatics": "Dex",
-        "Arcana": "Int",
-        "Athletics": "Str",
-        "Crafting": "Int",
-        "Deception": "Cha",
-        "Diplomacy": "Cha",
-        "Intimidation": "Cha",
-        "Lore": "Int",
-        "Medicine": "Wis",
-        "Nature": "Wis",
-        "Occultism": "Int",
-        "Performance": "Cha",
-        "Religion": "Wis",
-        "Society": "Int",
-        "Stealth": "Dex",
-        "Survival": "Wis",
-        "Thievery": "Dex",
-    }
+
     if isinstance(skill, SkillRow):
         skill = skill.Skill_name
-    if skill in mods:
-        return mods[skill]
+    if skill in SKILLS:
+        return SKILLS[skill]
     elif skill.lower().startswith("lore"):
         return "Int"
     else:
@@ -87,7 +68,7 @@ class SkillsController(ProficiencyControllerBase[SkillRow]):
     def __init__(self):
         super().__init__(SAVES_SHEET_ID, SkillRow, "Skill_name")
 
-    def get_skill_or_untrained(self, user_id: int, skill_name: str) -> SkillRow:
+    def get_skill_or_untrained(self, user_id: int, skill_name: Skill) -> SkillRow:
         """
         Returns the skill name and proficiency for a given user_id and skill_name.
         If the skill is not found, returns an anonymous untrained skill row.

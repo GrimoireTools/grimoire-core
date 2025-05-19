@@ -2,7 +2,7 @@ from typing import Self, Type
 
 from controllers.lib.utils import CoinsList
 from controllers.lib.base_controller import SheetsControllerBase
-from controllers.lib.row import Row, r_int, r_float
+from controllers.lib.row import Row
 from controllers.pjs_controller import PJRow
 
 CEMETERY_SHEET_ID = 100792464
@@ -16,18 +16,18 @@ class CemeteryRow(Row):
     Archetypes: str
     Ancestry: str
     Heritage: str
-    Downtime: r_int
-    Money_pp: r_int
-    Money_gp: r_int
-    Money_sp: r_int
-    Money_cp: r_int
-    Money_total: r_float
+    Downtime: int
+    Money_pp: int
+    Money_gp: int
+    Money_sp: int
+    Money_cp: int
+    Money_total: float
     Languages: str
     Religion: str
     Death_turn: str
     Death_narrator: str
     Death_cause: str
-    Lvl_at_death: r_int
+    Lvl_at_death: int
 
     def to_coin_list(self) -> CoinsList:
         coin_list = [self.Money_pp, self.Money_gp, self.Money_sp, self.Money_cp]

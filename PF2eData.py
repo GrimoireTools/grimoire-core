@@ -126,26 +126,29 @@ ANCESTRIES: list[str] = [
 
 
 Ability = Literal["Str", "Dex", "Con", "Int", "Wis", "Cha"]
-Skill = Literal[
-    "Perception",
-    "Acrobatics",
-    "Arcana",
-    "Athletics",
-    "Crafting",
-    "Deception",
-    "Diplomacy",
-    "Intimidation",
-    "Lore",
-    "Medicine",
-    "Nature",
-    "Occultism",
-    "Performance",
-    "Religion",
-    "Society",
-    "Stealth",
-    "Survival",
-    "Thievery",
-]
+Skill = (
+    str
+    | Literal[  # noqa: W503
+        "Perception",
+        "Acrobatics",
+        "Arcana",
+        "Athletics",
+        "Crafting",
+        "Deception",
+        "Diplomacy",
+        "Intimidation",
+        "Lore",
+        "Medicine",
+        "Nature",
+        "Occultism",
+        "Performance",
+        "Religion",
+        "Society",
+        "Stealth",
+        "Survival",
+        "Thievery",
+    ]
+)
 
 
 class ABILITIES:
@@ -157,28 +160,31 @@ class ABILITIES:
     Cha: Ability = "Cha"
 
 
-SKILLS: list[Tuple[str, Ability]] = [
-    ("Perception", ABILITIES.Wis),
-    ("Acrobatics", ABILITIES.Dex),
-    ("Arcana", ABILITIES.Int),
-    ("Athletics", ABILITIES.Str),
-    ("Crafting", ABILITIES.Int),
-    ("Deception", ABILITIES.Cha),
-    ("Diplomacy", ABILITIES.Cha),
-    ("Intimidation", ABILITIES.Cha),
-    ("Lore", ABILITIES.Int),
-    ("Medicine", ABILITIES.Wis),
-    ("Nature", ABILITIES.Wis),
-    ("Occultism", ABILITIES.Int),
-    ("Performance", ABILITIES.Cha),
-    ("Religion", ABILITIES.Wis),
-    ("Society", ABILITIES.Int),
-    ("Stealth", ABILITIES.Dex),
-    ("Survival", ABILITIES.Wis),
-    ("Thievery", ABILITIES.Dex),
-]
+SKILLS: dict[Skill, Ability] = {
+    "Perception": ABILITIES.Wis,
+    "Acrobatics": ABILITIES.Dex,
+    "Arcana": ABILITIES.Int,
+    "Athletics": ABILITIES.Str,
+    "Crafting": ABILITIES.Int,
+    "Deception": ABILITIES.Cha,
+    "Diplomacy": ABILITIES.Cha,
+    "Intimidation": ABILITIES.Cha,
+    "Lore": ABILITIES.Int,
+    "Medicine": ABILITIES.Wis,
+    "Nature": ABILITIES.Wis,
+    "Occultism": ABILITIES.Int,
+    "Performance": ABILITIES.Cha,
+    "Religion": ABILITIES.Wis,
+    "Society": ABILITIES.Int,
+    "Stealth": ABILITIES.Dex,
+    "Survival": ABILITIES.Wis,
+    "Thievery": ABILITIES.Dex,
+}
+LORELESS_SKILLS: list[Skill] = [sk for sk in SKILLS.keys() if sk != "Lore"]
 
-SAVES: list[Tuple[str, Ability]] = [
+
+Save = Literal["Fortitude", "Reflex", "Will"]
+SAVES: list[Tuple[Save, Ability]] = [
     ("Fortitude", ABILITIES.Con),
     ("Reflex", ABILITIES.Dex),
     ("Will", ABILITIES.Wis),
@@ -213,18 +219,19 @@ SKILL_ICONS = defaultdict(
     },
 )
 
-LORELESS_SKILLS: list[Tuple[str, Ability]] = list(filter(lambda x: x[0] != "Lore", SKILLS))
+
+Prof = Literal["Untrained", "Untr Impr", "Trained", "Expert", "Master", "Legendary"]
 
 
 class PROF:
-    Untrained: str = "Untrained"
-    Improvised: str = "Untr Impr"
-    Trained: str = "Trained"
-    Expert: str = "Expert"
-    Master: str = "Master"
-    Legendary: str = "Legendary"
+    Untrained: Prof = "Untrained"
+    Improvised: Prof = "Untr Impr"
+    Trained: Prof = "Trained"
+    Expert: Prof = "Expert"
+    Master: Prof = "Master"
+    Legendary: Prof = "Legendary"
 
-    ICONS: dict[str, str] = {
+    ICONS: dict[Prof, str] = {
         Untrained: "🌑",
         Improvised: "🌑",
         Trained: "🌘",
@@ -233,8 +240,7 @@ class PROF:
         Legendary: "🌕",
     }
 
-    max_length: int = len("Legendary")
-    profs_list: list[str] = [
+    profs_list: list[Prof] = [
         Untrained,
         Improvised,
         Trained,
@@ -242,6 +248,7 @@ class PROF:
         Master,
         Legendary,
     ]
+    max_length: int = max(map(len, profs_list))
 
 
 K = TypeVar("K")
@@ -271,7 +278,7 @@ def improvised_prof_bonus() -> int:
     return lvl - 2
 
 
-PROF_BONUSES: CallableDict[str, int] = CallableDict(
+PROF_BONUSES: CallableDict[Prof, int] = CallableDict(
     {
         PROF.Untrained: 0,
         PROF.Improvised: improvised_prof_bonus,

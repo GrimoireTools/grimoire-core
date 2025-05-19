@@ -2,10 +2,10 @@ from typing import Any, Self
 from nextcord import Interaction, SlashOption
 
 import dndice
-from PF2eData import PROF, SAVES, SKILLS
+from PF2eData import PROF, SAVES, Prof, Save
 from commands.utils.skill_utils import *
 from controllers.lib.cog import Cog, standard_command
-from controllers.lib.utils import DataNotFoundError, not_none
+from controllers.lib.utils import not_none
 from controllers.pjs_controller import PJsController
 from controllers.saves_controller import SavesController, save_mod_type
 from controllers.modifiers_controller import ModifiersController, ModifiersRow
@@ -39,7 +39,7 @@ class SaveCommands(Cog):
     async def save(
         self: Self,
         interaction: Interaction,
-        save_name: str = SlashOption(
+        save_name: Save = SlashOption(
             name="save",
             description="La save de tu personaje",
             required=True,
@@ -67,13 +67,13 @@ class SaveCommands(Cog):
     async def set_save(
         self: Self,
         interaction: Interaction,
-        save: str = SlashOption(
+        save: Save = SlashOption(
             name="save",
             description="La save de tu personaje a definir",
             required=True,
             choices=[save[0] for save in SAVES],
         ),
-        proficiency: str = SlashOption(
+        proficiency: Prof = SlashOption(
             name="proficiency",
             description="El nivel de proficiencia de la save",
             required=True,
@@ -119,9 +119,9 @@ class SaveCommands(Cog):
     async def set_all_saves(
         self: Self,
         interaction: Interaction,
-        fortitude: str = ability_param("fortitude"),
-        reflex: str = ability_param("reflex"),
-        will: str = ability_param("will"),
+        fortitude: Prof = ability_param("fortitude"),
+        reflex: Prof = ability_param("reflex"),
+        will: Prof = ability_param("will"),
         resilient: str = SlashOption(
             name="resilient",
             description="Runa de resiliencia. Sobreescribe bonos extra. (default No)",
@@ -134,11 +134,11 @@ class SaveCommands(Cog):
         pj = PJsController().get_pj_row(user_id)
         sh_saves = SavesController()
 
-        proficiencies = [
-            ("Fortitude", fortitude),
-            ("Reflex", reflex),
-            ("Will", will),
-        ]
+        proficiencies: dict[Save, Prof] = {
+            "Fortitude": fortitude,
+            "Reflex": reflex,
+            "Will": will,
+        }
 
         rune = {
             "No": (0, ""),
@@ -150,7 +150,7 @@ class SaveCommands(Cog):
 
         msg = ""
         rows = []
-        for save_name, prof_value in proficiencies:
+        for save_name, prof_value in proficiencies.items():
             pj_save = sh_saves.get_prof_row(user_id, save_name)
 
             if pj_save is None:
@@ -180,7 +180,7 @@ class SaveCommands(Cog):
     async def roll_save(
         self: Self,
         interaction: Interaction,
-        save: str = SlashOption(
+        save: Save = SlashOption(
             name="save",
             description="La save de tu personaje que quieres usar",
             required=True,
@@ -206,7 +206,7 @@ class SaveCommands(Cog):
         return await interaction.followup.send(message)
 
 
-def save_roll_message(user_id: int, save_name: str, extra_mod: int = 0, extra_info: bool = False) -> str:
+def save_roll_message(user_id: int, save_name: Save, extra_mod: int = 0, extra_info: bool = False) -> str:
     mods_row = ModifiersController().get_mods_row(user_id)
     save_row = SavesController().get_prof_row(user_id, save_name)
 

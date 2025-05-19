@@ -7,7 +7,7 @@ import dndice
 from nextcord import Interaction, SlashOption
 
 
-from PF2eData import EARN_INCOME, SKILLS, LORELESS_SKILLS, PROF
+from PF2eData import EARN_INCOME, LORELESS_SKILLS, PROF
 import random
 
 from controllers.lib.utils import not_none, check_results, result_name
@@ -70,7 +70,7 @@ class EarnIncomeCommands(Cog):
             "skill",
             "Skill utilizada. Trained Only.",
             True,
-            choices=[sk_name for sk_name, _ in LORELESS_SKILLS],
+            choices=[sk_name for sk_name in LORELESS_SKILLS],
         ),
         downtime_used: int = SlashOption(
             "downtime-used",
@@ -230,7 +230,7 @@ class EarnIncomeCommands(Cog):
             "Como recordatorio, todos los trabajos con skills que no sean Crafting, Performance o Lore tienen un +3 al DC\n\n"
         )
         chosen_skills = random.sample(LORELESS_SKILLS, tasksAmt)
-        job_messages = [job_message(sk, taskLevel) for (sk, _ab) in chosen_skills]
+        job_messages = [job_message(sk, taskLevel) for sk in chosen_skills]
         message += "\n".join(job_messages)
 
         await interaction.followup.send(message)

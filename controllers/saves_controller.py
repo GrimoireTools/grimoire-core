@@ -1,4 +1,4 @@
-from PF2eData import PROF_BONUSES
+from PF2eData import PROF_BONUSES, Ability, Prof, Save
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row, r_int
 
@@ -8,12 +8,12 @@ SAVES_SHEET_ID = 1756443107
 class SaveRow(Row):
     PJ_name: str
     Discord_id: str
-    Save_name: str
-    Proficiency: str
-    Extra_bonus: r_int
+    Save_name: Save
+    Proficiency: Prof
+    Extra_bonus: int
     Bonus_description: str
 
-    def mod_type(self) -> str:
+    def mod_type(self) -> Ability:
         return save_mod_type(self.Save_name)
 
     def prof_bonus(self) -> int:
@@ -31,18 +31,18 @@ class SavesController(ProficiencyControllerBase[SaveRow]):
         super().__init__(SAVES_SHEET_ID, SaveRow, "Save_name")
 
 
-def save_mod_type(skill: str | SaveRow):
+def save_mod_type(save: Save | SaveRow) -> Ability:
     """
     Devuelve el tipo de modificador
     """
-    mods = {
+    mods: dict[Save, Ability] = {
         "Fortitude": "Con",
         "Reflex": "Dex",
         "Will": "Wis",
     }
-    if isinstance(skill, SaveRow):
-        skill = skill.Save_name
-    if skill in mods:
-        return mods[skill]
+    if isinstance(save, SaveRow):
+        save = save.Save_name
+    if save in mods:
+        return mods[save]
     else:
-        raise ValueError(f"'{skill}' is not a valid skill name")
+        raise ValueError(f"'{save}' is not a valid save name")

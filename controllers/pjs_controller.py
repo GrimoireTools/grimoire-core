@@ -4,7 +4,7 @@ from loguru import logger
 
 from controllers.lib.utils import gp_to_coin_list, CoinsList, DataNotFoundError
 from controllers.lib.base_controller import SheetsControllerBase, Value
-from controllers.lib.row import Row, r_int, r_float
+from controllers.lib.row import Row
 
 PJ_SHEET_ID = 0
 
@@ -17,16 +17,16 @@ class PJRow(Row):
     Archetypes: str
     Ancestry: str
     Heritage: str
-    Downtime: r_int
-    Money_pp: r_int
-    Money_gp: r_int
-    Money_sp: r_int
-    Money_cp: r_int
-    Money_total: r_float
+    Downtime: int
+    Money_pp: int
+    Money_gp: int
+    Money_sp: int
+    Money_cp: int
+    Money_total: float
     Languages: str
     Religion: str
     Last_turn: str
-    Caliban_met: r_int
+    Caliban_met: int
 
     @classmethod
     def from_coin_list(cls: Type[Self], coin_list: list[int] | CoinsList) -> Self:
@@ -89,20 +89,42 @@ class PJRow(Row):
         return super()._ranges(row, force_set, force_skip)
 
 
-CALIBAN_MET: dict[str, bool] = {}
+CALIBAN_CACHE: dict[str, bool] = {}
 
 
 def cache_caliban(pj_rows: list[PJRow]):
     """Caches the list of characters that have met Caliban."""
-    global CALIBAN_MET
-    CALIBAN_MET = {pj.Discord_id: pj.Caliban_met == 1 for pj in pj_rows}
-    logger.debug(f"Cached Caliban met status: {CALIBAN_MET}")
+    global CALIBAN_CACHE
+    CALIBAN_CACHE = {pj.Discord_id: pj.Caliban_met == 1 for pj in pj_rows}
+    logger.debug(f"Cached Caliban met status: {CALIBAN_CACHE}")
 
 
 def get_caliban_met(user_id: str | int) -> bool:
     """Returns True if the character has met Caliban."""
-    global CALIBAN_MET
-    return CALIBAN_MET.get(str(user_id), False)
+    global CALIBAN_CACHE
+    user_id = str(user_id)
+    if user_id not in CALIBAN_CACHE:
+        PJsController()
+    return CALIBAN_CACHE.get(user_id, False)
+
+
+NAMES_CACHE: dict[str, str] = {}
+
+
+def cache_names(pj_rows: list[PJRow]):
+    """Caches the names of each character."""
+    global NAMES_CACHE
+    NAMES_CACHE = {pj.Discord_id: pj.Name for pj in pj_rows}
+    logger.debug(f"Cached names status: {NAMES_CACHE}")
+
+
+def get_cached_name(user_id: str | int) -> str:
+    """Returns the user's character's name."""
+    global NAMES_CACHE
+    user_id = str(user_id)
+    if user_id not in NAMES_CACHE:
+        PJsController()
+    return NAMES_CACHE.get(user_id, "Cache miss")
 
 
 class PJsController(SheetsControllerBase[PJRow]):
@@ -115,6 +137,7 @@ class PJsController(SheetsControllerBase[PJRow]):
         """
         rows = self.get_all_rows()
         cache_caliban(rows)
+        cache_names(rows)
 
     def set_money(self, user_id: int, total_money: float):
         row = self.find_pj_row_index(user_id)
