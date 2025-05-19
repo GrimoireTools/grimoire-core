@@ -12,7 +12,7 @@ from controllers.dt_log_controller import DtLogController
 class DowntimeCommands(Cog):
 
     @standard_command("Cambia el Downtime de tu personaje")
-    async def dgm_dt(self: Self, interaction: Interaction, amount: str) -> Any:
+    async def dt(self: Self, interaction: Interaction, amount: str) -> Any:
         amt = parse_float_arg(amount)
         sh = PJsController()
         user_id: int = not_none(interaction.user).id
@@ -35,7 +35,7 @@ class DowntimeCommands(Cog):
         )
 
     @standard_command("Escribe una entrada en el log de DT")
-    async def dgm_dt_log(self: Self, interaction: Interaction, turn: int, text: str) -> Any:
+    async def dt_log(self: Self, interaction: Interaction, turn: int, text: str) -> Any:
         user_id: int = not_none(interaction.user).id
         name = get_cache_name(user_id)
         DtLogController().set_log(user_id, turn, text)
@@ -43,11 +43,11 @@ class DowntimeCommands(Cog):
         return await interaction.followup.send(f"Log de DT añadido a {name} en el turno {turn}:\n{text}")
 
     @standard_command("Muestra el log de DT")
-    async def dgm_log_check(
+    async def dt_log_check(
         self: Self,
         interaction: Interaction,
-        turn: int = SlashOption("turno", "Turno desde donde checkear el log (havia atrás)"),
-        amount: int = SlashOption("cantidad-logs", "Cantidad de logs a mostrar", default=1),
+        turn: int = SlashOption("turno", "Turno desde donde checkear el log (havia atrás)", default=999),
+        amount: int = SlashOption("cantidad-logs", "Cantidad de logs a mostrar", default=5),
     ) -> Any:
         user_id: int = not_none(interaction.user).id
         logs = DtLogController().get_user_logs(user_id)

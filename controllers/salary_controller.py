@@ -11,7 +11,7 @@ class SalaryRow(Row):
     Salary: float
 
     def contains(self, val: int):
-        return self.Start_level >= val and val >= self.End_level
+        return self.Start_level <= val and val <= self.End_level
 
 
 class SalaryController(SheetsControllerBase[SalaryRow]):
@@ -28,6 +28,7 @@ class SalaryController(SheetsControllerBase[SalaryRow]):
             raise ValueError("Turn must be 1 or higher")
 
         rows = self.get_all_rows()
+
         for r in rows:
             if r.contains(turn):
                 return r.Salary

@@ -1,11 +1,13 @@
 import nextcord
-from system_data import PROFS_LIST, Attr, Prof, PROF, PROF_BONUSES, SKILL_ICONS, Skill
+from system_data import PROFS_LIST, ROLL, Attr, Prof, PROF, PROF_BONUSES, SKILL_ICONS, RollType, Skill
 from icecream import ic
 from controllers.saves_controller import SaveRow
 from controllers.skills_controller import SkillRow, SkillsController
 from controllers.lib.utils import not_none
+from dndice import basic, compile
 
 ALTERNATE = True
+c_d20 = compile("1d20")
 
 
 def nat_20_1_message(dice_result: int):
@@ -69,11 +71,51 @@ def fb(bonus: int, bold: bool = False) -> str:
     return f"{color}{bonus:+}{RESET}"
 
 
-def format_diceroll(dice: int, total: int):
-    RED = f"\033[1;31m"
-    CYAN = f"\033[1;36m"
-    WHITE = f"\033[1;37m"
-    RESET = "\033[0m"
+def _d20() -> int:
+    """
+    Rolls a d20 and returns the result.
+    """
+    return int(basic(c_d20))
+
+
+def d20(roll_type: RollType = ROLL.NORMAL) -> tuple[int, str]:
+    """
+    Rolls a d20 with the given roll type.
+    """
+    match roll_type:
+        case ROLL.DISADV:
+            res = _d20(), _d20()
+            mi = min(res)
+            ma = max(res)
+            return mi, f"{format_diceroll(ma, ma, False)}, {format_diceroll(mi, mi, underline=True)}"
+        case ROLL.NORMAL:
+            res = _d20()
+            return res, format_diceroll(res, res)
+        case ROLL.ADV:
+            res = _d20(), _d20()
+            mi = min(res)
+            ma = max(res)
+            return ma, f"{format_diceroll(ma, ma, underline=True)}, {format_diceroll(mi, mi, False)}"
+        case ROLL.TRIPLE_ADV:
+            res = sorted([_d20(), _d20(), _d20()])
+            mi = res[0]
+            mid = res[1]
+            ma = res[2]
+            return (
+                ma,
+                f"{format_diceroll(ma, ma, underline=True)}, {format_diceroll(mid, mid, False)},{format_diceroll(mi, mi, False)}",
+            )
+        case _:
+            raise ValueError(f"'{roll_type}' is not a valid roll type")
+
+
+def format_diceroll(dice: int, total: int, bold: bool = True, underline: bool = False) -> str:
+    b = 1 if bold else 0
+    b = 4 if underline else b
+    RED = f"\033[{b};31m"
+    CYAN = f"\033[{b};36m"
+    WHITE = f"\033[{b};37m"
+    RESET = f"\033[0m"
     color = RED if dice == 1 else CYAN if dice == 20 else WHITE
     return f"{color}{total}{RESET}"
 

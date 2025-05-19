@@ -1,6 +1,5 @@
-from typing import Any, Self, TypedDict
+from typing import Any, Self
 
-from loguru import logger
 import nextcord
 from nextcord import SelectOption, Interaction, SlashOption
 
@@ -45,8 +44,8 @@ class SubraceDropdown(nextcord.ui.Select):
         pj = PJRow.from_dict(self.partial_pj)
         sh.insert_row(pj, sh.find_first_empty_row("A", strict=True))
         return await interaction.followup.send(
-            f"Registrado {pj.Name}.\nUtiliza `/dgm_set_ability_scores` para definir los Ability Scores de tu personaje,"
-            f" `/dgm_set_all_skills` para definir tus skills y `dgm_set_all_saves` para definir tus saves."
+            f"Registrado {pj.Name}.\nUtiliza `/set_ability_scores` para definir los Ability Scores de tu personaje,"
+            f" `/set_all_skills` para definir tus skills y `set_all_saves` para definir tus saves."
         )
 
 
@@ -59,7 +58,7 @@ class RegisterDropdownView(nextcord.ui.View):
 class NewCharacterCommands(Cog):
 
     @standard_command("Registra un nuevo personaje de Megamarch.")
-    async def dgm_register(
+    async def register(
         self: Self,
         interaction: Interaction,
         nombre_pj: str,
@@ -97,15 +96,24 @@ class NewCharacterCommands(Cog):
         if race not in RACES:
             return await interaction.followup.send(f"'{race}' no es una raza válida.")
 
-        partial_pj = PJRow.partial_create(nombre_pj, user_id, nombre_jugador, clase, race, deity, alignment, deity)
+        partial_pj = PJRow.partial_create(
+            name=nombre_pj,
+            discord_id=user_id,
+            player=nombre_jugador,
+            title="",
+            clase=clase,
+            race=race,
+            alignment=alignment,
+            god=deity,
+        )
 
         if len(RACES[race]) == 0:
             partial_pj["Subrace"] = ""
             row = PJRow.from_dict(partial_pj)
             sh.insert_row(row, sh.find_first_empty_row("A", strict=True))
             return await interaction.followup.send(
-                f"Registrado {row.Name}.\nUtiliza `/dgm_set_ability_scores` para definir los Ability Scores de tu personaje,"
-                f" `/dgm_set_all_skills` para definir tus skills y `dgm_set_all_saves` para definir tus saves."
+                f"Registrado {row.Name}.\nUtiliza `/set_ability_scores` para definir los Ability Scores de tu personaje,"
+                f" `/set_all_skills` para definir tus skills y `set_all_saves` para definir tus saves."
             )
 
         heritage_dropdown = SubraceDropdown(partial_pj)
@@ -114,7 +122,7 @@ class NewCharacterCommands(Cog):
         await interaction.followup.send("Selecciona una subraza para tu personaje", view=view)
 
     @standard_command("Edita las clases de tu personaje.")
-    async def dgm_class(
+    async def edit_class(
         self: Self,
         interaction: Interaction,
         clase: Class = SlashOption(
@@ -126,7 +134,7 @@ class NewCharacterCommands(Cog):
         nivel: int = SlashOption(name="nivel", description="La cantidad de niveles en la clase", required=True),
         subclass: str = SlashOption(
             name="subclase",
-            description="La subclase de tu personaje. Solo rellena este campo si quieres sambiar la subclase de tu clase.",
+            description="La subclase de tu personaje. Escribe el nombre de la clase para buscar las subclases.",
             required=False,
             default="",
         ),
@@ -148,14 +156,48 @@ class NewCharacterCommands(Cog):
             f"Clase {f"*{subclass}* " if subclass else ""}{clase} registrada con nivel {nivel}."
         )
 
-    @dgm_register.on_autocomplete("raza")
+    @standard_command("Elimina una clase de tu personaje.")
+    async def remove_class(
+        self: Self,
+        interaction: Interaction,
+        clase: Class = SlashOption(
+            name="clase",
+            description="La clase de tu personaje a eliminar.",
+            required=True,
+            choices=CLASSES.keys(),
+        ),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj_row = sh.get_pj_row(user_id)
+        if clase in pj_row.Classes:
+            del pj_row.Classes[clase]
+            sh.update_row(pj_row)
+            await interaction.followup.send(f"Clase {clase} eliminada.")
+        else:
+            await interaction.followup.send(f"'{clase}' no es una clase válida para '{pj_row.Name}'.")
+
+    @standard_command("Cambia el título de tu personaje.")
+    async def set_title(
+        self: Self,
+        interaction: Interaction,
+        title: str = SlashOption(name="titulo", description="El nuevo título de tu personaje", required=True),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj_row = sh.get_pj_row(user_id)
+        pj_row.Title = title
+        sh.update_row(pj_row)
+        await interaction.followup.send(f"Título de {pj_row.Name} cambiado a '{title}'.")
+
+    @register.on_autocomplete("race")
     async def autocomplete_ancestry(self, interaction: Interaction, ancestry: str) -> Any:
         filtered_ancestries = []
         if ancestry:
             filtered_ancestries = [a for a in RACES.keys() if a.lower().startswith(ancestry.lower())]
         await interaction.response.send_autocomplete(filtered_ancestries)
 
-    @dgm_class.on_autocomplete("subclass")
+    @edit_class.on_autocomplete("subclass")
     async def autocomplete_subclasses(self, interaction: Interaction, clase: str) -> Any:
         filtered_subclasses = []
         if clase:

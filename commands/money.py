@@ -9,7 +9,7 @@ from controllers.lib.cog import Cog, standard_command
 class MoneyCommands(Cog):
 
     @standard_command("Resta dinero de tu cuenta. Puedes transferir a otra persona.")
-    async def dgm_pay(
+    async def pagar(
         self: Self,
         interaction: Interaction,
         amount_str: str = SlashOption("money-gp", "Dinero restado a tu cuenta, en gp", True),
@@ -38,6 +38,9 @@ class MoneyCommands(Cog):
         transfer_id = transfertarget.id if transfertarget else None
         target_pj = sh.get_pj_row(transfertarget.id) if transfertarget else None
 
+        if transfer_id == user_id:
+            return await interaction.send("No puedes transferirte dinero a ti mismo")
+
         if target_pj is not None and transfer_id is not None:
             target_total = target_pj.calc_money()
             target_pj_coins = sh.set_money(transfer_id, target_total + amount)
@@ -54,7 +57,7 @@ class MoneyCommands(Cog):
         return await interaction.send(msg)
 
     @standard_command("Suma dinero a tu cuenta.")
-    async def dgm_addmoney(
+    async def ganar_dinero(
         self: Self,
         interaction: Interaction,
         amount_str: str = SlashOption("money-gp", "Dinero añadido a tu cuenta, en gp", True),

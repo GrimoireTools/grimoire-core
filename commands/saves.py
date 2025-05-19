@@ -2,13 +2,13 @@ from typing import Any, Self
 from nextcord import Interaction, SlashOption
 
 import dndice
-from system_data import ATTRS, ROLL, ROLL_TYPES, Prof, Attr, PROFS_LIST, ATTRS_LIST, RollType, d20
+from system_data import ATTRS, ROLL, ROLL_TYPES, Prof, Attr, PROFS_LIST, ATTRS_LIST, RollType
 from commands.utils.skill_utils import *
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
 from controllers.pjs_controller import PJsController
 from controllers.saves_controller import SavesController
-from controllers.attributes_controller import AttributesController, AttributesRow
+from controllers.attributes_controller import AttributesController, AttributesRow, mod_bonus
 
 CODEBLOCK_LANG = "ansi"
 
@@ -16,7 +16,7 @@ CODEBLOCK_LANG = "ansi"
 class SaveCommands(Cog):
 
     @standard_command("Muestra la información de todas las saves de tu personaje")
-    async def dgm_all_saves(self: Self, interaction: Interaction, extra_info: bool = False) -> Any:
+    async def all_saves(self: Self, interaction: Interaction, extra_info: bool = False) -> Any:
         user_id = not_none(interaction.user).id
         mods_row = AttributesController().get_mods_row(user_id)
         all_save_rows = SavesController().get_all_prof_rows(user_id)
@@ -36,7 +36,7 @@ class SaveCommands(Cog):
         return await interaction.followup.send(message)
 
     @standard_command("Muestra la información de una save de tu personaje")
-    async def dgm_save(
+    async def save(
         self: Self,
         interaction: Interaction,
         save_name: Attr = SlashOption(
@@ -64,7 +64,7 @@ class SaveCommands(Cog):
         return await interaction.followup.send(message)
 
     @standard_command("Define la proficiencia de una save de tu personaje")
-    async def dgm_set_save(
+    async def set_save(
         self: Self,
         interaction: Interaction,
         save: Attr = SlashOption(
@@ -116,7 +116,7 @@ class SaveCommands(Cog):
         return await interaction.followup.send(msg)
 
     @standard_command("Define las proficiencias de todas las saves de tu personaje")
-    async def dgm_set_all_saves(
+    async def set_all_saves(
         self: Self,
         interaction: Interaction,
         strength: Prof = ability_param("Strength"),
@@ -173,7 +173,7 @@ class SaveCommands(Cog):
         return await interaction.followup.send(msg)
 
     @standard_command("Tira un save check con el save seleccionado")
-    async def dgm_roll_save(
+    async def roll_save(
         self: Self,
         interaction: Interaction,
         save: Attr = SlashOption(
@@ -210,10 +210,10 @@ def save_roll_message(
     mods_row = AttributesController().get_mods_row(user_id)
     save_row = SavesController().get_prof_row(user_id, save_name)
 
-    dice = d20(advantage)
+    dice, dice_str = d20(advantage)
 
     # ABILITY
-    ability_bonus = mods_row[save_name]
+    ability_bonus = mod_bonus(mods_row[save_name])
 
     # PROFICIENCY
     if save_row is None:
@@ -232,4 +232,4 @@ def save_roll_message(
         save_row,
         extra_info,
     )
-    return f"# {mods_row.PJ_name} {save_name} roll: \n```{CODEBLOCK_LANG}\n{save_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"
+    return f"# {mods_row.PJ_name} {save_name} roll: \n```{CODEBLOCK_LANG}\n{save_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[{dice}{total_mod:+} ({dice_str})]```"

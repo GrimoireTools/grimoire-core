@@ -3,11 +3,11 @@ import dndice
 
 Prof = Literal["Untrained", "Half Proficient", "Proficent", "Expert"]
 
-RollType = Literal["Advantage", "Normal", "Advantage", "Triple Advantage"]
+RollType = Literal["Disadvantage", "Normal", "Advantage", "Triple Advantage"]
 
 
 class ROLL:
-    DISADV: RollType = "Advantage"
+    DISADV: RollType = "Disadvantage"
     NORMAL: RollType = "Normal"
     ADV: RollType = "Advantage"
     TRIPLE_ADV: RollType = "Triple Advantage"
@@ -31,13 +31,6 @@ roll_expr: dict[RollType, str] = {
     ROLL.ADV: "2d20h1",
     ROLL.TRIPLE_ADV: "3d20h1",
 }
-
-
-def d20(roll_type: RollType = ROLL.NORMAL) -> int:
-    """
-    Rolls a d20 with the given roll type.
-    """
-    return int(dndice.basic(roll_expr[roll_type]))
 
 
 class PROF:

@@ -162,7 +162,7 @@ class PJRow(Row):
         classes = self.Classes
         if not classes:
             return "Sin clases"
-        classes = [f"{cls} {subclass} {level}" for cls, (subclass, level) in classes.items()]
+        classes = [f"{subclass} {cls} {level}".strip() for cls, (subclass, level) in classes.items()]
         return ", ".join(classes)
 
     def resource(self, resource: Resource, set_add: int | None = None, relative: bool = True) -> int:
@@ -193,6 +193,8 @@ def cache_names(pj_rows: list[PJRow]):
 def get_cache_name(user_id: str | int) -> str:
     """Returns the cached name associated with a user_id."""
     global NAMES_CACHE
+    if not NAMES_CACHE:
+        PJsController()
     return NAMES_CACHE.get(str(user_id), "Desconocido")
 
 

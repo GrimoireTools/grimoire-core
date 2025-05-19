@@ -13,7 +13,7 @@ CODEBLOCK_LANG = "ansi"
 class AttributesCommands(Cog):
 
     @standard_command("Define los Ability Scores de tu personaje")
-    async def dgm_set_ability_scores(
+    async def set_ability_scores(
         self: Self,
         interaction: Interaction,
         strength: int,

@@ -8,7 +8,7 @@ from controllers.pjs_controller import PJsController
 
 class InfoCommands(Cog):
     @standard_command(description="Entrega la info de tu personaje")
-    async def dgm_info(
+    async def info(
         self: Self, interaction: Interaction, user: Member = default_user_option, full_data: bool = False
     ) -> Any:
         user_id = not_none(interaction.user).id if user is None else user.id
@@ -16,11 +16,11 @@ class InfoCommands(Cog):
         coins = pj.to_coin_list()
         dt = not_none(pj.Downtime)
 
-        message = f"""# Status de {pj.Name} {pj.Title}
+        message = f"""# Status de {pj.Name}{"," if pj.Title else ""} {pj.Title}
 - Jugador: {pj.Player}
 - Clases: {pj.pretty_classes()}
 - Raza: {pj.Race}, {pj.Subrace}
-- Deidad: {pj.God}, {pj.Devotion} de Devociṕn
+- Deidad: {pj.God}, {pj.Devotion} de Devoción
 - Renombre: {pj.Renown}
 - Dinero: {pj.to_coin_list().pretty_print()}, **Total: {pj.Money_total:.2f}gp**
 - Downtime: {pj.Downtime // 1} semanas y {round(pj.Downtime % 1 * 10)} dias

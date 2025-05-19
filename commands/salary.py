@@ -10,7 +10,7 @@ from controllers.salary_controller import SalaryController
 class SalaryCommands(Cog):
 
     @standard_command("Gana el downtime y dinero esperado de terminar una misión")
-    async def dgm_salary(
+    async def salario(
         self: Self,
         interaction: Interaction,
         turno: int = SlashOption("turno", description="Turno en el que se completó la misión", required=True),
@@ -35,6 +35,6 @@ class SalaryCommands(Cog):
                 f"\n Se te suma el sueldo de la misión:"
                 f" {sueldo_gp: .2f}gp (ahora tienes {new_money: .2f}gp)"
                 f"\n Se te suman {sueldo_dt} días de dt "
-                f"(ahora tienes {pj.Downtime} dias de dt)"
+                f"(ahora tienes {pj.Downtime} semanas de dt)"
             )
         )

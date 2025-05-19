@@ -7,8 +7,8 @@ from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
 from controllers.pjs_controller import PJsController
 from controllers.skills_controller import SkillRow, SkillsController, skill_mod_type
-from controllers.attributes_controller import AttributesController, AttributesRow
-from system_data import ROLL, ROLL_TYPES, SKILLS, RollType, d20
+from controllers.attributes_controller import AttributesController, AttributesRow, mod_bonus
+from system_data import ROLL, ROLL_TYPES, SKILLS, RollType
 
 CODEBLOCK_LANG = "ansi"
 
@@ -197,7 +197,7 @@ class SkillCommands(Cog):
             name="skill",
             description="La skill de tu personaje que quieres usar",
             required=True,
-            choices=[skill[0] for skill in SKILLS if skill[0] != "Lore"],
+            choices=SKILLS.keys(),
         ),
         advantage: RollType = SlashOption(
             name="ventaja",
@@ -265,11 +265,11 @@ def skill_roll_message(
     mods_row = AttributesController().get_mods_row(user_id)
     skill_row = SkillsController().get_prof_row(user_id, skill_name)
 
-    dice = d20(advantage)
+    dice, dice_str = d20(advantage)
 
     # ABILITY
     mod_type: str = skill_mod_type(skill_name)
-    ability_bonus = mods_row[mod_type]
+    ability_bonus = mod_bonus(mods_row[mod_type])
 
     # PROFICIENCY
     if skill_row is None:
@@ -282,4 +282,4 @@ def skill_roll_message(
     total_mod = ability_bonus + prof_bonus + other_bonus + extra_mod
     result = dice + total_mod
     skill_msg = skill_description(ability_bonus, mod_type, skill_name, skill_row, extra_info, extra_mod)
-    return f"# {mods_row.PJ_name} {skill_name} roll: \n```{CODEBLOCK_LANG}\n{skill_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"
+    return f"# {mods_row.PJ_name} {skill_name} roll: \n```{CODEBLOCK_LANG}\n{skill_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[{dice}{total_mod:+} ({dice_str})]```"

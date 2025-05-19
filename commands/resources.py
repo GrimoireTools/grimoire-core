@@ -12,11 +12,11 @@ from controllers.dt_log_controller import DtLogController
 class ResourcesCommands(Cog):
 
     @standard_command("Le suma o resta a un recurso de tu personaje")
-    async def dgm_resource(
+    async def resource(
         self: Self,
         interaction: Interaction,
         resource: Resource = SlashOption("recurso", "Recurso a editar", choices=RESOURCES),
-        amount: int = SlashOption("cantidad", "Cantidad a sumar o restar", default=0),
+        amount: int = SlashOption("cantidad", "Cantidad a sumar o restar"),
     ) -> Any:
         sh = PJsController()
         user_id: int = not_none(interaction.user).id
