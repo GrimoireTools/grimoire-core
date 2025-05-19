@@ -5,40 +5,35 @@ import nextcord
 from nextcord import SelectOption, Interaction, SlashOption
 
 
-from system_data import CLASSES, GODS, RACES
+from system_data import ALIGNMENTS, CLASSES, GODS, RACES, Class
 
 from controllers.lib.cog import standard_command, Cog
 from controllers.pjs_controller import PJsController, PJRow
 from controllers.lib.utils import not_none
 
-
-class PartialCharacter(TypedDict):
-    Name: str
-    Discord_id: str
-    Player: str
-    Class: str
-    Ancestry: str
-    Religion: str
+SUBCLASSES: list[str] = []
+for cls, subs in CLASSES.items():
+    for sub in subs:
+        SUBCLASSES.append(f"{cls} - {sub}")
 
 
 class SubraceDropdown(nextcord.ui.Select):
-    partial_pj: PartialCharacter
 
-    def __init__(self: Self, partial_pj: PartialCharacter) -> None:
+    partial_pj: dict[str, Any]
+
+    def __init__(self: Self, partial_pj: dict[str, Any]) -> None:
         self.partial_pj = partial_pj
-        heritages: list[str] = HERITAGES[partial_pj["Ancestry"]]
+        subrace: list[str] = RACES[partial_pj["Race"]]
 
-        options = [SelectOption(label=h) for h in heritages]
-        options += [SelectOption(label=h, description="(Heritage versátil)") for h in HERITAGES["Versatile"]]
         super().__init__(
             placeholder="Opciones de heritage",
             min_values=1,
             max_values=1,
-            options=options,
+            options=[SelectOption(label=h) for h in subrace],
         )
 
     async def callback(self: Self, interaction: Interaction) -> None:
-        selected_heritage: str = self.values[0]
+        selected_subrace: str = self.values[0]
         try:
             assert self.view is not None
         except AssertionError:
@@ -46,24 +41,13 @@ class SubraceDropdown(nextcord.ui.Select):
         await interaction.response.defer()
         self.view.stop()
         sh = PJsController()
-        pj_dict = {
-            **self.partial_pj,
-            "Heritage": selected_heritage,
-            "Downtime": 0,
-            "Money_pp": 0,
-            "Money_gp": 0,
-            "Money_sp": 0,
-            "Money_cp": 0,
-            "Money_total": None,
-            "Last_turn": "-",
-            "Caliban_met": 0,
-            "Languages": "Originario",
-        }
-        pj = PJRow.from_dict(pj_dict)
-        logger.debug(f"Registering {pj}")
-        row = sh.find_first_empty_row("A", strict=True)
-        sh.insert_row(pj, row)
-        await interaction.followup.send(f"Registrado {pj.Name}.")
+        self.partial_pj["Subrace"] = selected_subrace
+        pj = PJRow.from_dict(self.partial_pj)
+        sh.insert_row(pj, sh.find_first_empty_row("A", strict=True))
+        return await interaction.followup.send(
+            f"Registrado {pj.Name}.\nUtiliza `/dgm_set_ability_scores` para definir los Ability Scores de tu personaje,"
+            f" `/dgm_set_all_skills` para definir tus skills y `dgm_set_all_saves` para definir tus saves."
+        )
 
 
 class RegisterDropdownView(nextcord.ui.View):
@@ -75,27 +59,30 @@ class RegisterDropdownView(nextcord.ui.View):
 class NewCharacterCommands(Cog):
 
     @standard_command("Registra un nuevo personaje de Megamarch.")
-    async def register(
+    async def dgm_register(
         self: Self,
         interaction: Interaction,
         nombre_pj: str,
         nombre_jugador: str,
-        clase: str = SlashOption(
+        clase: Class = SlashOption(
             name="clase",
             description="La clase de tu personaje",
             required=True,
-            choices=CLASSES,
+            choices=CLASSES.keys(),
         ),
-        ascendencia: str = SlashOption(
-            name="ascendencia",
+        race: str = SlashOption(
+            name="raza",
             description="La ascendencia de tu personaje (escribe para el autocomplete)",
             required=True,
         ),
-        religion: str = SlashOption(
-            name="religión",
+        deity: str = SlashOption(
+            name="deidad",
             description="La religión de tu personaje",
             required=True,
-            choices=RELIGIONS,
+            choices=GODS,
+        ),
+        alignment: str = SlashOption(
+            name="alineamiento", description="El alineamiento de tu personaje", required=True, choices=ALIGNMENTS
         ),
     ) -> Any:
         user_id = not_none(interaction.user).id
@@ -106,34 +93,72 @@ class NewCharacterCommands(Cog):
                 "Ya tienes un personaje, muevelo al cementerio para registrar uno nuevo."
             )
 
-        ascendencia = ascendencia.capitalize()
-        if ascendencia not in ANCESTRIES:
-            return await interaction.followup.send(f"'{ascendencia}' no es una ascendencia válida.")
+        race = race.capitalize()
+        if race not in RACES:
+            return await interaction.followup.send(f"'{race}' no es una raza válida.")
 
-        heritage_dropdown = SubraceDropdown(
-            {
-                "Name": nombre_pj,
-                "Discord_id": str(user_id),
-                "Player": nombre_jugador,
-                "Class": clase,
-                "Ancestry": ascendencia,
-                "Religion": religion,
-            }
-        )
+        partial_pj = PJRow.partial_create(nombre_pj, user_id, nombre_jugador, clase, race, deity, alignment, deity)
+
+        if len(RACES[race]) == 0:
+            partial_pj["Subrace"] = ""
+            row = PJRow.from_dict(partial_pj)
+            sh.insert_row(row, sh.find_first_empty_row("A", strict=True))
+            return await interaction.followup.send(
+                f"Registrado {row.Name}.\nUtiliza `/dgm_set_ability_scores` para definir los Ability Scores de tu personaje,"
+                f" `/dgm_set_all_skills` para definir tus skills y `dgm_set_all_saves` para definir tus saves."
+            )
+
+        heritage_dropdown = SubraceDropdown(partial_pj)
 
         view = RegisterDropdownView(heritage_dropdown)
-        await interaction.followup.send("Selecciona un heritage para tu personaje", view=view)
+        await interaction.followup.send("Selecciona una subraza para tu personaje", view=view)
 
-    @register.on_autocomplete("ascendencia")
+    @standard_command("Edita las clases de tu personaje.")
+    async def dgm_class(
+        self: Self,
+        interaction: Interaction,
+        clase: Class = SlashOption(
+            name="clase",
+            description="La clase de tu personaje. Selecciona una clase que ya tengas o añade una nueva.",
+            required=True,
+            choices=CLASSES.keys(),
+        ),
+        nivel: int = SlashOption(name="nivel", description="La cantidad de niveles en la clase", required=True),
+        subclass: str = SlashOption(
+            name="subclase",
+            description="La subclase de tu personaje. Solo rellena este campo si quieres sambiar la subclase de tu clase.",
+            required=False,
+            default="",
+        ),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        subclass = subclass.split(" - ")[-1] if subclass else ""
+        sh = PJsController()
+        pj_row = sh.get_pj_row(user_id)
+        if subclass in CLASSES[clase]:
+            pj_row.Classes[clase] = (subclass, nivel)
+        elif subclass == "":
+            old_subclass = pj_row.Classes.get(clase, ("", 0))[0]
+            pj_row.Classes[clase] = (old_subclass, nivel)
+        else:
+            return await interaction.followup.send(f"'{subclass}' no es una subclase válida para '{clase}'.")
+
+        sh.update_row(pj_row)
+        await interaction.followup.send(
+            f"Clase {f"*{subclass}* " if subclass else ""}{clase} registrada con nivel {nivel}."
+        )
+
+    @dgm_register.on_autocomplete("raza")
     async def autocomplete_ancestry(self, interaction: Interaction, ancestry: str) -> Any:
         filtered_ancestries = []
         if ancestry:
-            filtered_ancestries = [a for a in ANCESTRIES if a.lower().startswith(ancestry.lower())]
+            filtered_ancestries = [a for a in RACES.keys() if a.lower().startswith(ancestry.lower())]
         await interaction.response.send_autocomplete(filtered_ancestries)
 
-    @register_archetype.on_autocomplete("archetype")
-    async def autocomplete_archetype(self, interaction: Interaction, archetype: str) -> Any:
-        filtered_archetypes = []
-        if archetype:
-            filtered_archetypes = [a for a in ARCHETYPES if a.lower().startswith(archetype.lower())]
-        await interaction.response.send_autocomplete(filtered_archetypes)
+    @dgm_class.on_autocomplete("subclass")
+    async def autocomplete_subclasses(self, interaction: Interaction, clase: str) -> Any:
+        filtered_subclasses = []
+        if clase:
+
+            filtered_subclasses = [c for c in SUBCLASSES if c.lower().startswith(clase.lower())]
+        await interaction.response.send_autocomplete(filtered_subclasses)

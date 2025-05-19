@@ -61,6 +61,48 @@ class PJRow(Row):
     Infamy: int
 
     @classmethod
+    def partial_create(
+        cls: Type[Self],
+        name: str,
+        discord_id: int,
+        player: str,
+        title: str,
+        clase: str,
+        race: str,
+        alignment: str,
+        god: str,
+    ) -> dict:
+        """
+        Crea un personaje parcial, al que le falta solamente la subraza y completar los nieveles de las clases.
+        """
+        return {
+            "Name": name,
+            "Discord_id": discord_id,
+            "Player": player,
+            "Title": title,
+            "Classes": {clase: ["", 1]},
+            "Race": race,
+            "Alignment": alignment,
+            "Downtime": 0,
+            "Money_pp": 0,
+            "Money_gp": 0,
+            "Money_ep": 0,
+            "Money_sp": 0,
+            "Money_cp": 0,
+            "Money_total": None,
+            "Last_turn": "-",
+            "God": god,
+            "Devotion": 0,
+            "Renown": 0,
+            "Divine_favor": 0,
+            "Reputation": 0,
+            "Crianza": 0,
+            "Expression": 0,
+            "Mecenas": 0,
+            "Infamy": 0,
+        }
+
+    @classmethod
     def from_coin_list(cls: Type[Self], coin_list: list[int] | CoinsList) -> Self:
         """
         Convierte una lista de monedas a una fila
@@ -143,7 +185,7 @@ NAMES_CACHE: dict[str, str] = {}
 
 
 def cache_names(pj_rows: list[PJRow]):
-    """Caches the list of characters that have met Caliban."""
+    """Caches the name of the character of each player."""
     global NAMES_CACHE
     NAMES_CACHE = {pj.Discord_id: pj.Name for pj in pj_rows}
 
