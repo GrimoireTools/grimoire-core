@@ -7,7 +7,7 @@ from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
 from controllers.pjs_controller import PJsController
 from controllers.skills_controller import SkillRow, SkillsController, skill_mod_type
-from controllers.modifiers_controller import ModifiersController, ModifiersRow
+from controllers.attributes_controller import AttributesController, AttributesRow
 from system_data import ROLL, ROLL_TYPES, SKILLS, RollType, d20
 
 CODEBLOCK_LANG = "ansi"
@@ -18,7 +18,7 @@ class SkillCommands(Cog):
     @standard_command("Muestra la información de todas las skills de tu personaje")
     async def all_skills(self: Self, interaction: Interaction, extra_info: bool = False) -> Any:
         user_id = not_none(interaction.user).id
-        mods_row = ModifiersController().get_mods_row(user_id)
+        mods_row = AttributesController().get_mods_row(user_id)
         all_skill_rows = SkillsController().get_all_prof_rows(user_id)
 
         message: str = f"# Skills de {mods_row.PJ_name}:\n```{CODEBLOCK_LANG}\n"
@@ -49,7 +49,7 @@ class SkillCommands(Cog):
     ) -> Any:
         user_id = not_none(interaction.user).id
         mod_type = skill_mod_type(skill_name)
-        mods_row = ModifiersController().get_mods_row(user_id)
+        mods_row = AttributesController().get_mods_row(user_id)
         skill_row = SkillsController().get_prof_row(user_id, skill_name)
 
         message: str = f"## {skill_name} de {mods_row.PJ_name}:\n"
@@ -239,7 +239,7 @@ class SkillCommands(Cog):
         ),
     ) -> Any:
         sh_skills = SkillsController()
-        sh_mods = ModifiersController()
+        sh_mods = AttributesController()
 
         all_skills: list[SkillRow] = sh_skills.find_rows_with_values(
             {
@@ -262,7 +262,7 @@ class SkillCommands(Cog):
 def skill_roll_message(
     user_id: int, skill_name: Skill, extra_mod: int = 0, extra_info: bool = False, advantage: RollType = ROLL.NORMAL
 ) -> str:
-    mods_row = ModifiersController().get_mods_row(user_id)
+    mods_row = AttributesController().get_mods_row(user_id)
     skill_row = SkillsController().get_prof_row(user_id, skill_name)
 
     dice = d20(advantage)

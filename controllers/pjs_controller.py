@@ -7,7 +7,7 @@ from controllers.lib.base_controller import SheetsControllerBase, Value
 from controllers.lib.row import JsonData, Row
 from system_data import Class
 
-PJ_SHEET_ID = 0
+PJ_SHEET_ID = 1585623869
 
 Resource = Literal["Devoción", "Renombre", "Favor Divino", "Reputación", "Crianza", "Expresión", "Mecenas", "Infamia"]
 RESOURCES: list[Resource] = [

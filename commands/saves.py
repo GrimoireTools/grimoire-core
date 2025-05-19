@@ -8,7 +8,7 @@ from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
 from controllers.pjs_controller import PJsController
 from controllers.saves_controller import SavesController
-from controllers.modifiers_controller import ModifiersController, ModifiersRow
+from controllers.attributes_controller import AttributesController, AttributesRow
 
 CODEBLOCK_LANG = "ansi"
 
@@ -18,7 +18,7 @@ class SaveCommands(Cog):
     @standard_command("Muestra la información de todas las saves de tu personaje")
     async def dgm_all_saves(self: Self, interaction: Interaction, extra_info: bool = False) -> Any:
         user_id = not_none(interaction.user).id
-        mods_row = ModifiersController().get_mods_row(user_id)
+        mods_row = AttributesController().get_mods_row(user_id)
         all_save_rows = SavesController().get_all_prof_rows(user_id)
 
         message: str = f"# Saves de {mods_row.PJ_name}:\n```{CODEBLOCK_LANG}\n"
@@ -49,7 +49,7 @@ class SaveCommands(Cog):
     ) -> Any:
         user_id = not_none(interaction.user).id
         mod_type = save_name
-        mods_row = ModifiersController().get_mods_row(user_id)
+        mods_row = AttributesController().get_mods_row(user_id)
         save_row = SavesController().get_prof_row(user_id, save_name)
 
         message: str = f"## {save_name} de {mods_row.PJ_name}:\n"
@@ -207,7 +207,7 @@ class SaveCommands(Cog):
 def save_roll_message(
     user_id: int, save_name: Attr, extra_mod: int = 0, extra_info: bool = False, advantage: RollType = ROLL.NORMAL
 ) -> str:
-    mods_row = ModifiersController().get_mods_row(user_id)
+    mods_row = AttributesController().get_mods_row(user_id)
     save_row = SavesController().get_prof_row(user_id, save_name)
 
     dice = d20(advantage)

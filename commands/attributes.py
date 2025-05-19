@@ -5,7 +5,7 @@ from commands.utils.skill_utils import *
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
 from controllers.pjs_controller import PJsController
-from controllers.modifiers_controller import ModifiersController, ModifiersRow
+from controllers.attributes_controller import AttributesController, AttributesRow
 
 CODEBLOCK_LANG = "ansi"
 
@@ -25,11 +25,11 @@ class AttributesCommands(Cog):
     ) -> Any:
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
-        sh_mods = ModifiersController()
+        sh_mods = AttributesController()
         try:
             mods_row = sh_mods.get_mods_row(user_id)
         except DataNotFoundError:
-            mods_row = ModifiersRow(
+            mods_row = AttributesRow(
                 PJ_name=pj.Name,
                 Discord_id=user_id,
             )

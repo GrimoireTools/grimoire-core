@@ -1,10 +1,10 @@
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row
 from controllers.lib.utils import not_none
-from controllers.modifiers_controller import ModifiersRow
+from controllers.attributes_controller import AttributesRow
 from system_data import SKILLS, Attr, Prof, Skill, PROF_BONUSES
 
-SAVES_SHEET_ID = 738258837
+SAVES_SHEET_ID = 625988153
 
 
 class SkillRow(Row):
@@ -27,7 +27,7 @@ class SkillRow(Row):
         else:
             raise ValueError(f"'{self.Proficiency}' is not a valid proficiency type")
 
-    def modifiers_description(self, mods: ModifiersRow, additional: int = 0) -> str:
+    def modifiers_description(self, mods: AttributesRow, additional: int = 0) -> str:
         """
         Devuelve el modificador y la descripción del bono
         """
@@ -36,7 +36,7 @@ class SkillRow(Row):
         more = f"[Other: {additional:+}]" if additional != "" else ""
         return f"[{mod_type}: {mods[mod_type]:+}][{self.Proficiency}: {self.prof_bonus():+}]{extra}{more}"
 
-    def total_bonus(self, mods: ModifiersRow, additional: int = 0) -> int:
+    def total_bonus(self, mods: AttributesRow, additional: int = 0) -> int:
         """
         Devuelve el modificador total
         """

@@ -3,7 +3,7 @@ from controllers.lib.base_controller import SheetsControllerBase
 from controllers.pjs_controller import get_cache_name
 from controllers.lib.row import Row
 
-DT_LOG_SHEET_ID = 1681819644
+DT_LOG_SHEET_ID = 1238095842
 
 
 class DtLogRow(Row):

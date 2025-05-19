@@ -2,7 +2,7 @@ from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import Row
 from controllers.lib.utils import DataNotFoundError, not_none
 
-MODIFIERS_SHEET_ID = 41455486
+MODIFIERS_SHEET_ID = 478854727
 
 
 def mod_bonus(score: int) -> int:
@@ -12,7 +12,7 @@ def mod_bonus(score: int) -> int:
     return (score - 10) // 2
 
 
-class ModifiersRow(Row):
+class AttributesRow(Row):
     PJ_name: str
     Discord_id: str
     STR: int
@@ -40,11 +40,11 @@ class ModifiersRow(Row):
         )
 
 
-class ModifiersController(SheetsControllerBase[ModifiersRow]):
+class AttributesController(SheetsControllerBase[AttributesRow]):
     def __init__(self):
-        super().__init__(MODIFIERS_SHEET_ID, ModifiersRow)
+        super().__init__(MODIFIERS_SHEET_ID, AttributesRow)
 
-    def get_mods_row(self, user_id: int) -> ModifiersRow:
+    def get_mods_row(self, user_id: int) -> AttributesRow:
         """Gets the modifiers row for a given user_id."""
         try:
             return self.get_row(self.find_pj_row_index(user_id))

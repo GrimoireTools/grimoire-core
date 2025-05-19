@@ -2,7 +2,7 @@ from system_data import PROF_BONUSES, Attr, Prof
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row
 
-SAVES_SHEET_ID = 1756443107
+SAVES_SHEET_ID = 1223745213
 
 
 class SaveRow(Row):
