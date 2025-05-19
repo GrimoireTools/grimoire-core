@@ -1,5 +1,3 @@
-from typing import Self, Tuple
-from PF2eData import ABILITIES, Ability
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import Row, r_int
 from controllers.lib.utils import DataNotFoundError, not_none

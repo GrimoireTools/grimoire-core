@@ -1,6 +1,6 @@
 from collections import defaultdict
 import json
-from typing import Any, Callable, Generic, Self, Tuple, Type, TypeVar, TypedDict
+from typing import Any, Callable, Generic, Literal, Self, Tuple, Type, TypeVar, TypedDict
 
 from controllers.salary_controller import get_level_global
 
@@ -125,22 +125,36 @@ ANCESTRIES: list[str] = [
 ]
 
 
-class Ability(str):
-    name: str
-
-    def __new__(cls: Type["Ability"], content: str, name: str) -> Any:
-        ret = super().__new__(cls, content)  # type: ignore
-        ret.name = name
-        return ret
+Ability = Literal["Str", "Dex", "Con", "Int", "Wis", "Cha"]
+Skill = Literal[
+    "Perception",
+    "Acrobatics",
+    "Arcana",
+    "Athletics",
+    "Crafting",
+    "Deception",
+    "Diplomacy",
+    "Intimidation",
+    "Lore",
+    "Medicine",
+    "Nature",
+    "Occultism",
+    "Performance",
+    "Religion",
+    "Society",
+    "Stealth",
+    "Survival",
+    "Thievery",
+]
 
 
 class ABILITIES:
-    Str = Ability("C", "Str")
-    Dex = Ability("D", "Dex")
-    Con = Ability("E", "Con")
-    Int = Ability("F", "Int")
-    Wis = Ability("G", "Wis")
-    Cha = Ability("H", "Cha")
+    Str: Ability = "Str"
+    Dex: Ability = "Dex"
+    Con: Ability = "Con"
+    Int: Ability = "Int"
+    Wis: Ability = "Wis"
+    Cha: Ability = "Cha"
 
 
 SKILLS: list[Tuple[str, Ability]] = [

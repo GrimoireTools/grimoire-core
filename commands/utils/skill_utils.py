@@ -1,5 +1,5 @@
 import nextcord
-from PF2eData import PROF, PROF_BONUSES, SKILL_ICONS, Ability
+from PF2eData import PROF, PROF_BONUSES, SKILL_ICONS
 from icecream import ic
 from controllers.saves_controller import SaveRow
 from controllers.skills_controller import LoreSubnames, SkillRow, SkillsController

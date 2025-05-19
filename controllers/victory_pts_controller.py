@@ -1,5 +1,4 @@
 from typing import Any, Self, Tuple, TypedDict
-from PF2eData import ABILITIES, Ability
 from controllers.pjs_controller import PJsController
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import JsonData, Row
