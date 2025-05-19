@@ -4,7 +4,7 @@ from abc import ABC
 from collections import OrderedDict
 from dataclasses import dataclass, field
 import types
-from typing import Any, Dict, Generic, Type, TypeVar, Union, get_args, get_origin, get_type_hints
+from typing import Any, Dict, Generic, Literal, Type, TypeVar, Union, get_args, get_origin, get_type_hints
 import json
 from .utils import num_to_column, column_to_num
 
@@ -112,6 +112,16 @@ class Row(ABC):
                 except (ValueError, TypeError):
                     pass
             raise ValueError(f"Value {value} could not be casted to any of the types in the Union: {_types}")
+        elif get_origin(_type) is Literal:
+            lit_vals = get_args(_type)
+            for lit_val in lit_vals:
+                try:
+                    val = type(lit_val)(value)
+                    if val == lit_val:
+                        return val
+                except (ValueError, TypeError):
+                    continue
+            raise ValueError(f"Value {value} is not in the Literal: {lit_vals}")
         else:
             return _type(value)
 
