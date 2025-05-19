@@ -61,7 +61,7 @@ class CoinsList(list[int]):
         return f"{self.pp}pp, {self.gp}gp, {self.ep}, {self.sp}sp, {self.cp}cp"
 
     def total(self) -> float:
-        return self.pp * 10 + self.gp + self.ep + self.sp * 0.1 + self.cp * 0.01
+        return self.pp * 10 + self.gp + self.ep * 0.5 + self.sp * 0.1 + self.cp * 0.01
 
 
 def sign(num: int | float) -> int:
@@ -166,8 +166,7 @@ def log_command(func):
     async def logged_command(self: Any, interaction: Interaction, *args, **kwargs):
         user = interaction.user
         if user is not None:
-            logger.info(
-                f"[{func.__name__}] called by {user.name} ({user.id}).")
+            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
         else:
             logger.info(f"[{func.__name__}] called by null user.")
         logger.debug(f"[{func.__name__}] called with {kwargs}.")
@@ -183,8 +182,7 @@ def log_command_not_cog(func):
     async def logged_command(interaction: Interaction, *args, **kwargs):
         user = interaction.user
         if user is not None:
-            logger.info(
-                f"[{func.__name__}] called by {user.name} ({user.id}).")
+            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
         else:
             logger.info(f"[{func.__name__}] called by null user.")
         logger.debug(f"[{func.__name__}] called with {kwargs}.")
@@ -223,8 +221,7 @@ def column_to_num(column: str) -> int:
     num: int = 0
     for letter in column.lower():
         if letter not in letters:
-            raise ValueError(
-                "Column must have only roman alphabet characters.")
+            raise ValueError("Column must have only roman alphabet characters.")
         num *= len(letters)
         num += letters.index(letter) + 1
 

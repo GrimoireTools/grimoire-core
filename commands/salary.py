@@ -10,20 +10,18 @@ from controllers.salary_controller import SalaryController
 class SalaryCommands(Cog):
 
     @standard_command("Gana el downtime y dinero esperado de terminar una misión")
-    async def salary(
+    async def dgm_salary(
         self: Self,
         interaction: Interaction,
-        turno: int = SlashOption("turno", description="Turno en el que se completó la misión", required=True), ,
+        turno: int = SlashOption("turno", description="Turno en el que se completó la misión", required=True),
         target: Member = default_user_option,
     ) -> Any:
-        user_id = not_none(
-            interaction.user).id if target is None else target.id
+        user_id = not_none(interaction.user).id if target is None else target.id
         sh_pjs = PJsController()
         pj = sh_pjs.get_pj_row(user_id)
         sh_salary = SalaryController()
 
-        sueldo_gp, sueldo_dt = sh_salary.get_salary(
-            turno), sh_salary.get_downtime()
+        sueldo_gp, sueldo_dt = sh_salary.get_salary(turno), sh_salary.get_downtime()
         new_money = not_none(pj.Money_total) + sueldo_gp
         pj.update_money(new_money)
 

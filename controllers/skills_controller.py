@@ -1,21 +1,21 @@
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row
-from controllers.lib.singleton import Singleton
-from controllers.lib.utils import not_none, PROF_BONUSES
+from controllers.lib.utils import not_none
 from controllers.modifiers_controller import ModifiersRow
-from system_data import Attr
+from system_data import SKILLS, Attr, Prof, Skill, PROF_BONUSES
+
 SAVES_SHEET_ID = 738258837
 
 
 class SkillRow(Row):
     PJ_name: str
     Discord_id: str
-    Skill_name: str
-    Proficiency: str
+    Skill_name: Skill
+    Proficiency: Prof
     Extra_bonus: int
     Bonus_description: str
 
-    def mod_type(self) -> str:
+    def mod_type(self) -> Attr:
         return skill_mod_type(self.Skill_name)
 
     def prof_bonus(self) -> int:
@@ -25,8 +25,7 @@ class SkillRow(Row):
         if self.Proficiency in PROF_BONUSES:
             return PROF_BONUSES[self.Proficiency]
         else:
-            raise ValueError(
-                f"'{self.Proficiency}' is not a valid proficiency type")
+            raise ValueError(f"'{self.Proficiency}' is not a valid proficiency type")
 
     def modifiers_description(self, mods: ModifiersRow, additional: int = 0) -> str:
         """
@@ -48,30 +47,11 @@ def skill_mod_type(skill: str | SkillRow):
     """
     Devuelve el tipo de modificador
     """
-    mods: dict[str, Attr] = {
-        "Acrobatics": "Dex",
-        "Animal Handling": "Wis",
-        "Arcana": "Int",
-        "Athletics": "Str",
-        "Deception": "Cha",
-        "History": "Int",
-        "Insight": "Wis",
-        "Intimidation": "Cha",
-        "Investigation": "Int",
-        "Medicine": "Wis",
-        "Nature": "Int",
-        "Perception": "Wis",
-        "Performance": "Cha",
-        "Persuasion": "Cha",
-        "Religion": "Int",
-        "Sleight of Hand": "Dex",
-        "Stealth": "Dex",
-        "Survival": "Wis",
-    }
+
     if isinstance(skill, SkillRow):
         skill = skill.Skill_name
-    if skill in mods:
-        return mods[skill]
+    if skill in SKILLS:
+        return SKILLS[skill]
     else:
         raise ValueError(f"'{skill}' is not a valid skill name")
 

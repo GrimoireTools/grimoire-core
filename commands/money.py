@@ -9,7 +9,7 @@ from controllers.lib.cog import Cog, standard_command
 class MoneyCommands(Cog):
 
     @standard_command("Resta dinero de tu cuenta. Puedes transferir a otra persona.")
-    async def pay(
+    async def dgm_pay(
         self: Self,
         interaction: Interaction,
         amount_str: str = SlashOption("money-gp", "Dinero restado a tu cuenta, en gp", True),
@@ -54,7 +54,7 @@ class MoneyCommands(Cog):
         return await interaction.send(msg)
 
     @standard_command("Suma dinero a tu cuenta.")
-    async def addmoney(
+    async def dgm_addmoney(
         self: Self,
         interaction: Interaction,
         amount_str: str = SlashOption("money-gp", "Dinero añadido a tu cuenta, en gp", True),

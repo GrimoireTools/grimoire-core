@@ -5,7 +5,7 @@ import nextcord
 from nextcord import SelectOption, Interaction, SlashOption
 
 
-from PF2eData import ANCESTRIES, CLASSES, HERITAGES, RELIGIONS, ARCHETYPES
+from system_data import CLASSES, GODS, RACES
 
 from controllers.lib.cog import standard_command, Cog
 from controllers.pjs_controller import PJsController, PJRow
@@ -21,7 +21,7 @@ class PartialCharacter(TypedDict):
     Religion: str
 
 
-class HeritageDropdown(nextcord.ui.Select):
+class SubraceDropdown(nextcord.ui.Select):
     partial_pj: PartialCharacter
 
     def __init__(self: Self, partial_pj: PartialCharacter) -> None:
@@ -67,7 +67,7 @@ class HeritageDropdown(nextcord.ui.Select):
 
 
 class RegisterDropdownView(nextcord.ui.View):
-    def __init__(self: Self, heritage_dropdown: HeritageDropdown) -> None:
+    def __init__(self: Self, heritage_dropdown: SubraceDropdown) -> None:
         super().__init__()
         self.add_item(heritage_dropdown)
 
@@ -110,7 +110,7 @@ class NewCharacterCommands(Cog):
         if ascendencia not in ANCESTRIES:
             return await interaction.followup.send(f"'{ascendencia}' no es una ascendencia válida.")
 
-        heritage_dropdown = HeritageDropdown(
+        heritage_dropdown = SubraceDropdown(
             {
                 "Name": nombre_pj,
                 "Discord_id": str(user_id),
@@ -123,33 +123,6 @@ class NewCharacterCommands(Cog):
 
         view = RegisterDropdownView(heritage_dropdown)
         await interaction.followup.send("Selecciona un heritage para tu personaje", view=view)
-
-    @standard_command("Registra un nuevo arquetipo para tu personaje. Si seleccionas uno que ya tienes se elimina.")
-    async def register_archetype(
-        self: Self,
-        interaction: Interaction,
-        archetype: str = SlashOption(
-            name="archetype",
-            description="El nuevo arquetipo de tu personaje, o uno que ya tuviera para eliminarlo.",
-            required=True,
-        ),
-    ) -> Any:
-        user_id = not_none(interaction.user).id
-        sh = PJsController()
-        pj: PJRow = sh.get_pj_row(user_id)
-
-        archs_list = pj.Archetypes.split(", ")
-        archs_list = [arch for arch in archs_list if arch.strip()]
-        if archetype in archs_list:
-            archs_list.remove(archetype)
-            message = f"Eliminado {archetype} de tu lista de arquetipos"
-        else:
-            archs_list.append(archetype)
-            message = f"Añadido {archetype} a tu lista de arquetipos"
-
-        pj.Archetypes = ", ".join(archs_list)
-        sh.update_row(pj)
-        await interaction.followup.send(message)
 
     @register.on_autocomplete("ascendencia")
     async def autocomplete_ancestry(self, interaction: Interaction, ancestry: str) -> Any:

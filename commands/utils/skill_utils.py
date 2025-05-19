@@ -1,8 +1,8 @@
 import nextcord
-from PF2eData import PROF, PROF_BONUSES, SKILL_ICONS, Ability
+from system_data import PROFS_LIST, Attr, Prof, PROF, PROF_BONUSES, SKILL_ICONS, Skill
 from icecream import ic
 from controllers.saves_controller import SaveRow
-from controllers.skills_controller import LoreSubnames, SkillRow, SkillsController
+from controllers.skills_controller import SkillRow, SkillsController
 from controllers.lib.utils import not_none
 
 ALTERNATE = True
@@ -19,8 +19,8 @@ def nat_20_1_message(dice_result: int):
 
 def skill_description(
     pj_mod_bonus: int,
-    mod_type: str,
-    skill_name: str,
+    attribute: Attr,
+    skill_name: Skill | Attr,
     pj_skill: None | SkillRow | SaveRow,
     extra_info: bool,
     additional_mod: int = 0,
@@ -31,12 +31,12 @@ def skill_description(
     just_spacing = 20
 
     if pj_skill is None:
-        prof_level = PROF.Untrained
+        prof_level = PROF.NONE
         skill_title = f"{skill_name}? "
         extra_msg = ""
     else:
         skill_title = f"{skill_name} "
-        prof_level: str = pj_skill.Proficiency
+        prof_level = pj_skill.Proficiency
         extra_bonus: int = not_none(pj_skill.Extra_bonus)
         extra_descripcion: str = pj_skill.Bonus_description
 
@@ -50,7 +50,7 @@ def skill_description(
     submsg: str = (
         f"\n{PROF.ICONS[prof_level]} {SKILL_ICONS[skill_name]} {skill_title.ljust(just_spacing, just_char)} "
         f'{f"{fb(prof_bonus + pj_mod_bonus + extra_bonus, True)} ".ljust(15)}'
-        f"[{mod_type}: {fb(pj_mod_bonus)}]"
+        f"[{attribute}: {fb(pj_mod_bonus)}]"
         f"[{f'{prof_level}:'.ljust(10)} {f'{fb(prof_bonus)}]'.rjust(15)}"
         f"{extra_msg}"
         f"{additional_msg}"
@@ -82,7 +82,7 @@ def ability_param(ability_name: str):
     ability_name = ability_name.lower()
     return nextcord.SlashOption(
         name=ability_name,
-        description=f"El nivel de proficiencia de {ability_name.capitalize()}",
+        description=f"Tu nivel de proficiencia en {ability_name.capitalize()}",
         required=True,
-        choices=PROF.profs_list,
+        choices=PROFS_LIST,
     )

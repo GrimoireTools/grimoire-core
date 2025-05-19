@@ -5,6 +5,13 @@ from controllers.lib.utils import DataNotFoundError, not_none
 MODIFIERS_SHEET_ID = 41455486
 
 
+def mod_bonus(score: int) -> int:
+    """
+    Devuelve el bono de modificador
+    """
+    return (score - 10) // 2
+
+
 class ModifiersRow(Row):
     PJ_name: str
     Discord_id: str
@@ -20,6 +27,17 @@ class ModifiersRow(Row):
         if key in self.__dict__:
             return not_none(getattr(self, key))
         raise KeyError(f"'{key}' is not a valid ability score")
+
+    def pretty(self) -> str:
+        """Returns a pretty string representation of the row."""
+        return (
+            f"- Fuerza: **{mod_bonus(self.STR):+}** ({self.STR:+})\n"
+            f"- Destreza: **{mod_bonus(self.DEX):+}** ({self.DEX:+})\n"
+            f"- Constitución: **{mod_bonus(self.CON):+}** ({self.CON:+})\n"
+            f"- Inteligencia: **{mod_bonus(self.INT):+}** ({self.INT:+})\n"
+            f"- Sabiduría: **{mod_bonus(self.WIS):+}** ({self.WIS:+})\n"
+            f"- Carisma: **{mod_bonus(self.CHA):+}** ({self.CHA:+})\n"
+        )
 
 
 class ModifiersController(SheetsControllerBase[ModifiersRow]):
