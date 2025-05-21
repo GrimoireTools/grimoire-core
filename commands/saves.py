@@ -26,7 +26,7 @@ class SaveCommands(Cog):
         for save_row in all_save_rows:
             mod_type = save_row.mod_type()
             message += skill_description(
-                mods_row[mod_type],
+                mod_bonus(mods_row[mod_type]),
                 mod_type,
                 save_row.Save_name,
                 save_row,
@@ -54,7 +54,7 @@ class SaveCommands(Cog):
 
         message: str = f"## {save_name} de {mods_row.PJ_name}:\n"
         message += f"```{CODEBLOCK_LANG}\n{skill_description(
-            mods_row[mod_type],
+            mod_bonus(mods_row[mod_type]),
             mod_type,
             save_name,
             save_row,
@@ -199,7 +199,8 @@ class SaveCommands(Cog):
     ) -> Any:
         user_id = not_none(interaction.user).id
 
-        message = save_roll_message(user_id, save, extra_modifiers, extra_info, advantage)
+        message = save_roll_message(
+            user_id, save, extra_modifiers, extra_info, advantage)
 
         return await interaction.followup.send(message)
 

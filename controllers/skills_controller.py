@@ -25,7 +25,8 @@ class SkillRow(Row):
         if self.Proficiency in PROF_BONUSES:
             return PROF_BONUSES[self.Proficiency]
         else:
-            raise ValueError(f"'{self.Proficiency}' is not a valid proficiency type")
+            raise ValueError(
+                f"'{self.Proficiency}' is not a valid proficiency type")
 
     def modifiers_description(self, mods: AttributesRow, additional: int = 0) -> str:
         """
@@ -40,7 +41,7 @@ class SkillRow(Row):
         """
         Devuelve el modificador total
         """
-        return mods[self.mod_type()] + self.prof_bonus() + not_none(self.Extra_bonus) + additional
+        return (mods[self.mod_type()] - 10) // 2 + self.prof_bonus() + not_none(self.Extra_bonus) + additional
 
 
 def skill_mod_type(skill: str | SkillRow):

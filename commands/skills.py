@@ -26,7 +26,7 @@ class SkillCommands(Cog):
         for skill_row in [sk for sk in all_skill_rows]:
             mod_type = skill_row.mod_type()
             message += skill_description(
-                mods_row[mod_type],
+                mod_bonus(mods_row[mod_type]),
                 mod_type,
                 skill_row.Skill_name,
                 skill_row,
@@ -54,7 +54,7 @@ class SkillCommands(Cog):
 
         message: str = f"## {skill_name} de {mods_row.PJ_name}:\n"
         message += f"```{CODEBLOCK_LANG}\n{skill_description(
-            mods_row[mod_type],
+            mod_bonus(mods_row[mod_type]),
             mod_type,
             skill_name,
             skill_row,
@@ -216,7 +216,8 @@ class SkillCommands(Cog):
     ) -> Any:
         user_id = not_none(interaction.user).id
 
-        message = skill_roll_message(user_id, skill, extra_modifiers, extra_info, advantage)
+        message = skill_roll_message(
+            user_id, skill, extra_modifiers, extra_info, advantage)
 
         return await interaction.followup.send(message)
 
@@ -247,7 +248,8 @@ class SkillCommands(Cog):
             }
         )
         all_bonuses = [
-            (sk.PJ_name, sk.Proficiency, sk.total_bonus(sh_mods.get_mods_row(int(sk.Discord_id))))
+            (sk.PJ_name, sk.Proficiency, sk.total_bonus(
+                sh_mods.get_mods_row(int(sk.Discord_id))))
             for sk in all_skills
             if sk is not None and sh_mods.mods_row_exists(int(sk.Discord_id))
         ]
@@ -281,5 +283,6 @@ def skill_roll_message(
 
     total_mod = ability_bonus + prof_bonus + other_bonus + extra_mod
     result = dice + total_mod
-    skill_msg = skill_description(ability_bonus, mod_type, skill_name, skill_row, extra_info, extra_mod)
+    skill_msg = skill_description(
+        ability_bonus, mod_type, skill_name, skill_row, extra_info, extra_mod)
     return f"# {mods_row.PJ_name} {skill_name} roll: \n```{CODEBLOCK_LANG}\n{skill_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[{dice}{total_mod:+} ({dice_str})]```"
