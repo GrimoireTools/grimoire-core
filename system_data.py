@@ -417,6 +417,7 @@ GODS: list[str] = [
     "Runder",
     "Rodhia",
     "Mulekos",
+    "Ateo/Sin Deidad"
 ]
 
 RACES: dict[str, list[str]] = {
@@ -480,4 +481,5 @@ RACES: dict[str, list[str]] = {
     "Satyr": [],
     "Sea Elf": [],
     "Shadar-Kai": [],
+    "Shifter": [],
 }

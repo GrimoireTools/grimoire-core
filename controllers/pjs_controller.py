@@ -1,7 +1,5 @@
 from typing import Literal, Self, Type, TypedDict
 
-from loguru import logger
-
 from controllers.lib.utils import gp_to_coin_list, CoinsList, DataNotFoundError
 from controllers.lib.base_controller import SheetsControllerBase, Value
 from controllers.lib.row import JsonData, Row
@@ -9,7 +7,8 @@ from system_data import Class
 
 PJ_SHEET_ID = 1585623869
 
-Resource = Literal["Devoción", "Renombre", "Favor Divino", "Reputación", "Crianza", "Expresión", "Mecenas", "Infamia"]
+Resource = Literal["Devoción", "Renombre", "Favor Divino",
+                   "Reputación", "Crianza", "Expresión", "Mecenas", "Infamia"]
 RESOURCES: list[Resource] = [
     "Devoción",
     "Renombre",
@@ -121,7 +120,8 @@ class PJRow(Row):
         """
         Convierte la fila a una lista de monedas
         """
-        coin_list = [self.Money_pp, self.Money_gp, self.Money_ep, self.Money_sp, self.Money_cp]
+        coin_list = [self.Money_pp, self.Money_gp,
+                     self.Money_ep, self.Money_sp, self.Money_cp]
         if None in coin_list:
             raise ValueError("Coin list incomplete")
         return CoinsList(*coin_list)  # type: ignore
@@ -162,7 +162,8 @@ class PJRow(Row):
         classes = self.Classes
         if not classes:
             return "Sin clases"
-        classes = [f"{subclass} {cls} {level}".strip() for cls, (subclass, level) in classes.items()]
+        classes = [f"{subclass} {cls} {level}".strip()
+                   for cls, (subclass, level) in classes.items()]
         return ", ".join(classes)
 
     def resource(self, resource: Resource, set_add: int | None = None, relative: bool = True) -> int:
@@ -219,7 +220,8 @@ class PJsController(SheetsControllerBase[PJRow]):
         try:
             return self.get_row(self.find_pj_row_index(user_id))
         except ValueError as e:
-            raise DataNotFoundError(f"Character with user_id {user_id} not found") from None
+            raise DataNotFoundError(
+                f"Character with user_id {user_id} not found") from None
 
     def character_exists(self, user_id: int) -> bool:
         try:

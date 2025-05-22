@@ -30,7 +30,7 @@ class DowntimeCommands(Cog):
         return await interaction.followup.send(
             (
                 f"{pj.Name} {'gana' if amt > 0 else 'gasta'} {abs(amt)} semanas de downtime."
-                f" Ahora tiene {new_total // 7} semanas y {new_total % 7} dias ({new_total} total)"
+                f" Ahora tiene {int(new_total // 1)} semanas y {int((new_total % 1) * 10)} dias ({new_total} total)"
             )
         )
 
@@ -46,8 +46,10 @@ class DowntimeCommands(Cog):
     async def dt_log_check(
         self: Self,
         interaction: Interaction,
-        turn: int = SlashOption("turno", "Turno desde donde checkear el log (havia atrás)", default=999),
-        amount: int = SlashOption("cantidad-logs", "Cantidad de logs a mostrar", default=5),
+        turn: int = SlashOption(
+            "turno", "Turno desde donde checkear el log (havia atrás)", default=999),
+        amount: int = SlashOption(
+            "cantidad-logs", "Cantidad de logs a mostrar", default=5),
     ) -> Any:
         user_id: int = not_none(interaction.user).id
         logs = DtLogController().get_user_logs(user_id)
