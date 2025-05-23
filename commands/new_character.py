@@ -92,7 +92,6 @@ class NewCharacterCommands(Cog):
                 "Ya tienes un personaje, muevelo al cementerio para registrar uno nuevo."
             )
 
-        race = race.capitalize()
         if race not in RACES:
             return await interaction.followup.send(f"'{race}' no es una raza válida.")
 
@@ -131,7 +130,8 @@ class NewCharacterCommands(Cog):
             required=True,
             choices=CLASSES.keys(),
         ),
-        nivel: int = SlashOption(name="nivel", description="La cantidad de niveles en la clase", required=True),
+        nivel: int = SlashOption(
+            name="nivel", description="La cantidad de niveles en la clase", required=True),
         subclass: str = SlashOption(
             name="subclase",
             description="La subclase de tu personaje. Escribe el nombre de la clase para buscar las subclases.",
@@ -181,7 +181,8 @@ class NewCharacterCommands(Cog):
     async def set_title(
         self: Self,
         interaction: Interaction,
-        title: str = SlashOption(name="titulo", description="El nuevo título de tu personaje", required=True),
+        title: str = SlashOption(
+            name="titulo", description="El nuevo título de tu personaje", required=True),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -194,7 +195,8 @@ class NewCharacterCommands(Cog):
     async def autocomplete_ancestry(self, interaction: Interaction, ancestry: str) -> Any:
         filtered_ancestries = []
         if ancestry:
-            filtered_ancestries = [a for a in RACES.keys() if a.lower().startswith(ancestry.lower())]
+            filtered_ancestries = [a for a in RACES.keys(
+            ) if a.lower().startswith(ancestry.lower())]
         await interaction.response.send_autocomplete(filtered_ancestries)
 
     @edit_class.on_autocomplete("subclass")
@@ -202,5 +204,6 @@ class NewCharacterCommands(Cog):
         filtered_subclasses = []
         if clase:
 
-            filtered_subclasses = [c for c in SUBCLASSES if c.lower().startswith(clase.lower())]
+            filtered_subclasses = [
+                c for c in SUBCLASSES if c.lower().startswith(clase.lower())]
         await interaction.response.send_autocomplete(filtered_subclasses)
