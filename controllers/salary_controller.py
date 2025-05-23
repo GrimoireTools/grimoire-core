@@ -34,8 +34,8 @@ class SalaryController(SheetsControllerBase[SalaryRow]):
                 return r.Salary
         return 0
 
-    def get_downtime(self) -> int:
+    def get_downtime(self) -> float:
         """
         Get the downtime awarded to characters per turn.
         """
-        return 15
+        return 1.5
