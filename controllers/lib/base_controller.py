@@ -83,7 +83,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
                 # Skip empty rows
                 continue
             data_row = self._convert_row(row)
-            data_row.set_index(i)
+            data_row.set_index(i + 1)
             rows.append(data_row)
         return rows
 

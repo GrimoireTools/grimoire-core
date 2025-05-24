@@ -417,7 +417,6 @@ GODS: list[str] = [
     "Runder",
     "Rodhia",
     "Mulekos",
-    "Ateo/Sin Deidad"
 ]
 
 RACES: dict[str, list[str]] = {
