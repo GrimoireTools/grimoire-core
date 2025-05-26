@@ -2,7 +2,6 @@ from collections import defaultdict
 import json
 from typing import Any, Callable, Generic, Literal, Self, Tuple, Type, TypeVar, TypedDict
 
-from controllers.salary_controller import get_level_global
 
 RELIGIONS: list[str] = [
     "La Labor",
@@ -126,29 +125,26 @@ ANCESTRIES: list[str] = [
 
 
 Ability = Literal["Str", "Dex", "Con", "Int", "Wis", "Cha"]
-Skill = (
-    str
-    | Literal[  # noqa: W503
-        "Perception",
-        "Acrobatics",
-        "Arcana",
-        "Athletics",
-        "Crafting",
-        "Deception",
-        "Diplomacy",
-        "Intimidation",
-        "Lore",
-        "Medicine",
-        "Nature",
-        "Occultism",
-        "Performance",
-        "Religion",
-        "Society",
-        "Stealth",
-        "Survival",
-        "Thievery",
-    ]
-)
+Skill = Literal[  # noqa: W503
+    "Perception",
+    "Acrobatics",
+    "Arcana",
+    "Athletics",
+    "Crafting",
+    "Deception",
+    "Diplomacy",
+    "Intimidation",
+    "Lore",
+    "Medicine",
+    "Nature",
+    "Occultism",
+    "Performance",
+    "Religion",
+    "Society",
+    "Stealth",
+    "Survival",
+    "Thievery",
+]
 
 
 class ABILITIES:
@@ -249,45 +245,6 @@ class PROF:
         Legendary,
     ]
     max_length: int = max(map(len, profs_list))
-
-
-K = TypeVar("K")
-V = TypeVar("V")
-
-
-class CallableDict(dict, Generic[K, V]):
-    def __init__(self, *args: dict[K, V | Callable[[], V]], **kwargs: V | Callable[[], V]) -> None:
-        super().__init__(*args, **kwargs)
-
-    def __getitem__(self, key: K) -> V:
-        value = super().__getitem__(key)
-        if callable(value):
-            return value()  # type: ignore
-        return value
-
-    def __setitem__(self, key: V, value: V | Callable[[], V]) -> None:
-        super().__setitem__(key, value)
-
-
-def improvised_prof_bonus() -> int:
-    lvl = get_level_global()
-    if lvl >= 7:
-        return lvl
-    if lvl >= 5:
-        return lvl - 1
-    return lvl - 2
-
-
-PROF_BONUSES: CallableDict[Prof, int] = CallableDict(
-    {
-        PROF.Untrained: 0,
-        PROF.Improvised: improvised_prof_bonus,
-        PROF.Trained: lambda: 2 + get_level_global(),
-        PROF.Expert: lambda: 4 + get_level_global(),
-        PROF.Master: lambda: 6 + get_level_global(),
-        PROF.Legendary: lambda: 8 + get_level_global(),
-    }
-)
 
 
 with open("Ancestries.json") as f:
