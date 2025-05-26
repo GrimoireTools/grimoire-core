@@ -1,10 +1,11 @@
-from typing import Literal, Self, Type
+from typing import Any, Literal, Self, Type, TypeVar, TypedDict
 
 from loguru import logger
 
 from controllers.lib.utils import gp_to_coin_list, CoinsList, DataNotFoundError
 from controllers.lib.base_controller import SheetsControllerBase, Value
 from controllers.lib.row import Row
+from controllers.lvl_groups_controller import LEVEL_GROUPS, LevelGroup, get_cached_lvl_group
 
 PJ_SHEET_ID = 0
 
@@ -27,6 +28,7 @@ class PJRow(Row):
     Religion: str
     Last_turn: str
     Caliban_met: int
+    Level_group: LevelGroup
 
     @classmethod
     def from_coin_list(cls: Type[Self], coin_list: list[int] | CoinsList) -> Self:
@@ -41,6 +43,12 @@ class PJRow(Row):
                 "Money_cp": coin_list[3],
             }
         )
+
+    def level(self) -> int:
+        """
+        Devuelve el nivel del personaje
+        """
+        return get_cached_lvl_group(self.Level_group)
 
     def to_coin_list(self) -> CoinsList:
         """
@@ -89,42 +97,64 @@ class PJRow(Row):
         return super()._ranges(row, force_set, force_skip)
 
 
-CALIBAN_CACHE: dict[str, bool] = {}
+class PjCache(TypedDict):
+    Level: int
+    Caliban: bool
+    Name: str
+    Level_group: LevelGroup
 
 
-def cache_caliban(pj_rows: list[PJRow]):
+PJ_CACHE: dict[str, PjCache] = {}
+
+
+def cache_pjs(pj_rows: list[PJRow]):
     """Caches the list of characters that have met Caliban."""
-    global CALIBAN_CACHE
-    CALIBAN_CACHE = {pj.Discord_id: pj.Caliban_met == 1 for pj in pj_rows}
-    logger.debug(f"Cached Caliban met status: {CALIBAN_CACHE}")
+    global PJ_CACHE
+    PJ_CACHE = {
+        pj.Discord_id: {
+            "Level": pj.level(),
+            "Caliban": pj.Caliban_met == 1,
+            "Name": pj.Name,
+            "Level_group": pj.Level_group,
+        }
+        for pj in pj_rows
+    }
+    logger.debug(f"Cached PJ data: {PJ_CACHE}")
+
+
+K = TypeVar("K")
+
+
+def _get_cache(user_id: str | int, key: str, default: K) -> K:
+    """Helper function to get a value from the cache."""
+    global PJ_CACHE
+    user_id = str(user_id)
+    if user_id not in PJ_CACHE:
+        PJsController()
+    if user_id not in PJ_CACHE:
+        logger.warning(f"User ID {user_id} not found in PJ_CACHE.")
+        return default
+    return PJ_CACHE[user_id].get(key, default)
 
 
 def get_caliban_met(user_id: str | int) -> bool:
     """Returns True if the character has met Caliban."""
-    global CALIBAN_CACHE
-    user_id = str(user_id)
-    if user_id not in CALIBAN_CACHE:
-        PJsController()
-    return CALIBAN_CACHE.get(user_id, False)
+    return _get_cache(user_id, "Caliban", False)
 
 
-NAMES_CACHE: dict[str, str] = {}
-
-
-def cache_names(pj_rows: list[PJRow]):
-    """Caches the names of each character."""
-    global NAMES_CACHE
-    NAMES_CACHE = {pj.Discord_id: pj.Name for pj in pj_rows}
-    logger.debug(f"Cached names status: {NAMES_CACHE}")
+def get_cached_level(user_id: str | int) -> int:
+    """Returns the user's character's level."""
+    return _get_cache(user_id, "Level", 1)
 
 
 def get_cached_name(user_id: str | int) -> str:
     """Returns the user's character's name."""
-    global NAMES_CACHE
-    user_id = str(user_id)
-    if user_id not in NAMES_CACHE:
-        PJsController()
-    return NAMES_CACHE.get(user_id, "Cache miss")
+    return _get_cache(user_id, "Name", "Desconocido")
+
+
+def get_cached_group(user_id: str | int) -> LevelGroup:
+    """Returns the user's character's group."""
+    return _get_cache(user_id, "Level_group", LEVEL_GROUPS[0])
 
 
 class PJsController(SheetsControllerBase[PJRow]):
@@ -136,8 +166,7 @@ class PJsController(SheetsControllerBase[PJRow]):
         After fetching the data, cache the list of characters that have met Caliban.
         """
         rows = self.get_all_rows()
-        cache_caliban(rows)
-        cache_names(rows)
+        cache_pjs(rows)
 
     def set_money(self, user_id: int, total_money: float):
         row = self.find_pj_row_index(user_id)

@@ -2,11 +2,12 @@ from typing import Any, Self
 from nextcord import Interaction, SlashOption
 
 import dndice
-from PF2eData import PROF, SKILLS, Prof, Skill
+from PF2eData import LORELESS_SKILLS, PROF, SKILLS, Prof, Skill
 from commands.utils.skill_utils import *
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
-from controllers.pjs_controller import PJsController
+from controllers.lvl_groups_controller import LEVEL_GROUPS, LevelGroup
+from controllers.pjs_controller import PJsController, get_cached_group
 from controllers.skills_controller import SkillRow, SkillsController, skill_mod_type
 from controllers.modifiers_controller import ModifiersController, ModifiersRow
 
@@ -26,11 +27,7 @@ class SkillCommands(Cog):
         for skill_row in [sk for sk in all_skill_rows if not sk.is_lore()]:
             mod_type = skill_row.mod_type()
             message += skill_description(
-                mods_row[mod_type],
-                mod_type,
-                skill_row.Skill_name,
-                skill_row,
-                extra_info,
+                mods_row[mod_type], mod_type, skill_row.Skill_name, skill_row, extra_info, user_id
             )
         message += "\n```"
         return await interaction.followup.send(message)
@@ -46,11 +43,7 @@ class SkillCommands(Cog):
         for skill_row in [sk for sk in all_skill_rows if sk.is_lore()]:
             mod_type = "Int"
             message += skill_description(
-                mods_row[mod_type],
-                mod_type,
-                skill_row.Skill_name,
-                skill_row,
-                extra_info,
+                mods_row[mod_type], mod_type, skill_row.Skill_name, skill_row, extra_info, user_id
             )
         message += "\n```"
         return await interaction.followup.send(message)
@@ -63,7 +56,7 @@ class SkillCommands(Cog):
             name="skill",
             description="La skill de tu personaje",
             required=True,
-            choices=[skill[0] for skill in SKILLS if skill[0] != "Lore"],
+            choices=LORELESS_SKILLS,
         ),
         extra_info: bool = False,
     ) -> Any:
@@ -79,6 +72,7 @@ class SkillCommands(Cog):
             skill_name,
             skill_row,
             extra_info,
+            user_id
         )}```"
 
         return await interaction.followup.send(message)
@@ -87,7 +81,7 @@ class SkillCommands(Cog):
     async def lore(
         self: Self,
         interaction: Interaction,
-        lore_subname: Skill = SlashOption(
+        lore_subname: str = SlashOption(
             name="lore",
             description="El lore de tu personaje (sin 'Lore ')",
             required=True,
@@ -108,6 +102,7 @@ class SkillCommands(Cog):
             skill_name,
             skill_row,
             extra_info,
+            user_id
         )}```"
 
         return await interaction.followup.send(message)
@@ -120,7 +115,7 @@ class SkillCommands(Cog):
             name="skill",
             description="La skill de tu personaje a definir",
             required=True,
-            choices=[skill[0] for skill in SKILLS if skill[0] != "Lore"],
+            choices=LORELESS_SKILLS,
         ),
         proficiency: Prof = SlashOption(
             name="proficiency",
@@ -327,7 +322,7 @@ class SkillCommands(Cog):
             name="skill",
             description="La skill de tu personaje que quieres usar",
             required=True,
-            choices=[skill[0] for skill in SKILLS if skill[0] != "Lore"],
+            choices=LORELESS_SKILLS,
         ),
         extra_modifiers: int = SlashOption(
             name="extra_modifiers",
@@ -385,7 +380,7 @@ class SkillCommands(Cog):
             name="skill",
             description="La skill de tu personaje que quieres usar",
             required=True,
-            choices=[skill[0] for skill in SKILLS if skill[0] != "Lore"],
+            choices=LORELESS_SKILLS,
         ),
         n: int = SlashOption(
             name="n",
@@ -394,15 +389,29 @@ class SkillCommands(Cog):
             default=5,
             min_value=1,
         ),
+        group: LevelGroup = SlashOption(
+            name="level_group",
+            description="El grupo de nivel al que pertenecen los PJs",
+            required=False,
+            default=None,
+            choices=LEVEL_GROUPS,
+        ),
     ) -> Any:
         sh_skills = SkillsController()
         sh_mods = ModifiersController()
+        if group is None:
+            user_id = not_none(interaction.user).id
+            group = get_cached_group(user_id)
 
         all_skills: list[SkillRow] = sh_skills.find_rows_with_values(
             {
                 "Skill_name": skill,
             }
         )
+
+        all_skills = [sk for sk in all_skills if get_cached_group(sk.Discord_id) == group]
+        if not all_skills:
+            return await interaction.followup.send(f"No hay PJs con la skill {skill} en el grupo {group}.")
         all_bonuses = [
             (sk.PJ_name, sk.Proficiency, sk.total_bonus(sh_mods.get_mods_row(int(sk.Discord_id))))
             for sk in all_skills
@@ -431,16 +440,30 @@ class SkillCommands(Cog):
             default=5,
             min_value=1,
         ),
+        group: LevelGroup = SlashOption(
+            name="level_group",
+            description="El grupo de nivel al que pertenecen los PJs",
+            required=False,
+            default=None,
+            choices=LEVEL_GROUPS,
+        ),
     ) -> Any:
         skill = f"Lore ({lore_subname})"
         sh_skills = SkillsController()
         sh_mods = ModifiersController()
+        if group is None:
+            user_id = not_none(interaction.user).id
+            group = get_cached_group(user_id)
 
         all_skills: list[SkillRow] = sh_skills.find_rows_with_values(
             {
                 "Skill_name": skill,
             }
         )
+
+        all_skills = [sk for sk in all_skills if get_cached_group(sk.Discord_id) == group]
+        if not all_skills:
+            return await interaction.followup.send(f"No hay PJs con la skill {skill} en el grupo {group}.")
         all_bonuses = [
             (sk.PJ_name, sk.Proficiency, sk.total_bonus(sh_mods.get_mods_row(int(sk.Discord_id))))
             for sk in all_skills
@@ -456,7 +479,7 @@ class SkillCommands(Cog):
     @set_lore.on_autocomplete("lore_subname")
     @lore_ranking.on_autocomplete("lore_subname")
     async def autocomplete_set_lore_subname(self: Self, interaction: Interaction, lore_subname: str) -> Any:
-        filtered_lores: list[str] = filter_lores(lore_subname, None)
+        filtered_lores: list[str] = filter_lores(lore_subname, None)[:25]
         await interaction.response.send_autocomplete(filtered_lores)
 
     @lore.on_autocomplete("lore_subname")
@@ -466,11 +489,11 @@ class SkillCommands(Cog):
             raise ValueError("Null user")
         user_id: int = interaction.user.id
 
-        filtered_lores: list[str] = filter_lores(lore_subname, user_id)
+        filtered_lores: list[str] = filter_lores(lore_subname, user_id)[:25]
         await interaction.response.send_autocomplete(filtered_lores)
 
 
-def skill_roll_message(user_id: int, skill_name: Skill, extra_mod: int = 0, extra_info: bool = False) -> str:
+def skill_roll_message(user_id: int, skill_name: Skill | str, extra_mod: int = 0, extra_info: bool = False) -> str:
     mods_row = ModifiersController().get_mods_row(user_id)
     skill_row = SkillsController().get_prof_row(user_id, skill_name)
 
@@ -490,5 +513,5 @@ def skill_roll_message(user_id: int, skill_name: Skill, extra_mod: int = 0, extr
 
     total_mod = ability_bonus + prof_bonus + other_bonus + extra_mod
     result = dice + total_mod
-    skill_msg = skill_description(ability_bonus, mod_type, skill_name, skill_row, extra_info, extra_mod)
+    skill_msg = skill_description(ability_bonus, mod_type, skill_name, skill_row, extra_info, user_id, extra_mod)
     return f"# {mods_row.PJ_name} {skill_name} roll: \n```{CODEBLOCK_LANG}\n{skill_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"

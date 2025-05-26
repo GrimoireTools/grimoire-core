@@ -5,9 +5,6 @@ from controllers.lib.row import Row, r_int
 SALARY_SHEET_ID = 1681819644
 
 
-LEVEL_GLOBAL = 10
-
-
 class SalaryRow(Row):
     Level: int
     Base_salary: float
@@ -47,33 +44,3 @@ class SalaryController(SheetsControllerBase[SalaryRow]):
         """
         row = self.get_row(3)
         return int(row.Others)
-
-    def get_global_level(self) -> int:
-        """
-        Get the global level.
-        """
-        row = self.get_row(6)
-        return int(row.Others)
-
-    def set_global_level(self, level: int) -> None:
-        """
-        Set the global level.
-        """
-        row = self.get_row(6)
-        row.Others = str(level)
-        self.set_row(row, 6)
-
-
-def update_level_global(new_value: Optional[int] = None) -> None:
-    global LEVEL_GLOBAL
-    sh = SalaryController()
-    if new_value is None:
-        LEVEL_GLOBAL = sh.get_global_level()
-    else:
-        sh.set_global_level(new_value)
-        LEVEL_GLOBAL = new_value
-
-
-def get_level_global() -> int:
-    global LEVEL_GLOBAL
-    return LEVEL_GLOBAL

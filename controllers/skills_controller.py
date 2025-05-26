@@ -1,10 +1,11 @@
 from typing import Tuple
-from PF2eData import PROF_BONUSES, SKILLS, Ability, Prof, Skill
+from PF2eData import SKILLS, Ability, Prof, Skill
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row, r_int
 from controllers.lib.singleton import Singleton
 from controllers.lib.utils import not_none
 from controllers.modifiers_controller import ModifiersRow
+from level_bonuses import PROF_BONUSES
 
 SAVES_SHEET_ID = 738258837
 
@@ -12,7 +13,7 @@ SAVES_SHEET_ID = 738258837
 class SkillRow(Row):
     PJ_name: str
     Discord_id: str
-    Skill_name: Skill
+    Skill_name: str | Skill
     Proficiency: Prof
     Extra_bonus: int
     Bonus_description: str
@@ -28,7 +29,7 @@ class SkillRow(Row):
         Devuelve el bono de competencia
         """
         if self.Proficiency in PROF_BONUSES:
-            return PROF_BONUSES[self.Proficiency]
+            return PROF_BONUSES[self.Proficiency](self.Discord_id)
         else:
             raise ValueError(f"'{self.Proficiency}' is not a valid proficiency type")
 
@@ -48,7 +49,7 @@ class SkillRow(Row):
         return mods[self.mod_type()] + self.prof_bonus() + not_none(self.Extra_bonus) + additional
 
 
-def skill_mod_type(skill: Skill | SkillRow) -> Ability:
+def skill_mod_type(skill: Skill | SkillRow | str) -> Ability:
     """
     Devuelve el tipo de modificador
     """
@@ -68,7 +69,7 @@ class SkillsController(ProficiencyControllerBase[SkillRow]):
     def __init__(self):
         super().__init__(SAVES_SHEET_ID, SkillRow, "Skill_name")
 
-    def get_skill_or_untrained(self, user_id: int, skill_name: Skill) -> SkillRow:
+    def get_skill_or_untrained(self, user_id: int, skill_name: Skill | str) -> SkillRow:
         """
         Returns the skill name and proficiency for a given user_id and skill_name.
         If the skill is not found, returns an anonymous untrained skill row.
@@ -99,11 +100,13 @@ class LoreSubnames(metaclass=Singleton):
         for row in sh_skills.DATA:
             user_id = str(row[user_col])
             skill_name = str(row[skill_col])
+            if not skill_name.lower().startswith("lore"):
+                continue
+
             if user_id in user_lores:
                 user_lores[user_id].append(skill_name[6:-1])
             else:
                 user_lores[user_id] = [skill_name[6:-1]]
-
         # Se asume que todos los lores están en formato "Lore (subname)"
         self._LORE_SUBNAMES = user_lores
 

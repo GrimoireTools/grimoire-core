@@ -1,9 +1,10 @@
 import nextcord
-from PF2eData import PROF, PROF_BONUSES, SKILL_ICONS
+from PF2eData import PROF, SKILL_ICONS
 from icecream import ic
 from controllers.saves_controller import SaveRow
 from controllers.skills_controller import LoreSubnames, SkillRow, SkillsController
 from controllers.lib.utils import not_none
+from level_bonuses import PROF_BONUSES
 
 ALTERNATE = True
 
@@ -23,6 +24,7 @@ def skill_description(
     skill_name: str,
     pj_skill: None | SkillRow | SaveRow,
     extra_info: bool,
+    user_id: str | int,
     additional_mod: int = 0,
 ) -> str:
     global ALTERNATE
@@ -34,6 +36,8 @@ def skill_description(
         prof_level = PROF.Untrained
         skill_title = f"{skill_name}? "
         extra_msg = ""
+        extra_bonus = 0
+        extra_descripcion = ""
     else:
         skill_title = f"{skill_name} "
         prof_level: str = pj_skill.Proficiency
@@ -46,7 +50,7 @@ def skill_description(
             else f"[Other: {fb(extra_bonus)}{f' ({extra_descripcion})' if extra_info else ''}]"
         )
     additional_msg = f"[Extra: {fb(additional_mod)}]" if additional_mod != 0 else ""
-    prof_bonus: int = PROF_BONUSES[prof_level]
+    prof_bonus: int = PROF_BONUSES[prof_level](user_id)
     submsg: str = (
         f"\n{PROF.ICONS[prof_level]} {SKILL_ICONS[skill_name]} {skill_title.ljust(just_spacing, just_char)} "
         f'{f"{fb(prof_bonus + pj_mod_bonus + extra_bonus, True)} ".ljust(15)}'

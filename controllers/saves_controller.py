@@ -1,6 +1,7 @@
-from PF2eData import PROF_BONUSES, Ability, Prof, Save
+from PF2eData import Ability, Prof, Save
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row, r_int
+from level_bonuses import PROF_BONUSES
 
 SAVES_SHEET_ID = 1756443107
 
@@ -21,7 +22,7 @@ class SaveRow(Row):
         Devuelve el bono de competencia
         """
         if self.Proficiency in PROF_BONUSES:
-            return PROF_BONUSES[self.Proficiency]
+            return PROF_BONUSES[self.Proficiency](self.Discord_id)
         else:
             raise ValueError(f"'{self.Proficiency}' is not a valid proficiency type")
 

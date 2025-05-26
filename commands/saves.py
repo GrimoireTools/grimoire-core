@@ -31,6 +31,7 @@ class SaveCommands(Cog):
                 save_row.Save_name,
                 save_row,
                 extra_info,
+                user_id,
             )
         message += "\n```"
         return await interaction.followup.send(message)
@@ -59,6 +60,7 @@ class SaveCommands(Cog):
             save_name,
             save_row,
             extra_info,
+            user_id
         )}```"
 
         return await interaction.followup.send(message)
@@ -226,11 +228,5 @@ def save_roll_message(user_id: int, save_name: Save, extra_mod: int = 0, extra_i
 
     total_mod = ability_bonus + prof_bonus + other_bonus + extra_mod
     result = dice + total_mod
-    save_msg = skill_description(
-        ability_bonus,
-        mod_type,
-        save_name,
-        save_row,
-        extra_info,
-    )
+    save_msg = skill_description(ability_bonus, mod_type, save_name, save_row, extra_info, user_id, extra_mod)
     return f"# {mods_row.PJ_name} {save_name} roll: \n```{CODEBLOCK_LANG}\n{save_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"
