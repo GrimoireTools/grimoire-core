@@ -14,7 +14,6 @@ from controllers.lib.utils import not_none, check_results, result_name
 from controllers.modifiers_controller import ModifiersController, ModifiersRow
 from controllers.pjs_controller import PJRow, PJsController
 from controllers.skills_controller import SkillRow, SkillsController
-from controllers.salary_controller import get_level_global
 
 
 class EarnIncomeCommands(Cog):
@@ -217,13 +216,12 @@ class EarnIncomeCommands(Cog):
         self: Self,
         interaction: Interaction,
         taskLevel: int = SlashOption(
-            "task-level", "Nivel base de los trabajos", False, min_value=0, max_value=21, default=None
+            "task-level", "Nivel base de los trabajos", True, min_value=0, max_value=21, default=None
         ),
         tasksAmt: int = SlashOption(
             "tasks-amount", "Cantidad de trabajos", False, min_value=0, max_value=10, default=4
         ),
     ) -> Any:
-        taskLevel = taskLevel if taskLevel is not None else get_level_global()
         message = (
             "# Trabajos mensuales\n"
             "Todos los trabajos duran 14 dias y se pueden hacer 1 sola vez por PJ.\n"
@@ -239,7 +237,7 @@ class EarnIncomeCommands(Cog):
     async def autocomplete_lore_subname(self: Self, interaction: Interaction, lore_subname: str) -> Any:
         user_id = not_none(interaction.user).id
 
-        filtered_lores: list[str] = filter_lores(lore_subname, user_id)
+        filtered_lores: list[str] = filter_lores(lore_subname, user_id)[:25]
         await interaction.response.send_autocomplete(filtered_lores)
 
 
