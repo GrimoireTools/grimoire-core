@@ -8,6 +8,7 @@ from nextcord import SelectOption, Interaction, SlashOption
 from PF2eData import ANCESTRIES, CLASSES, HERITAGES, RELIGIONS, ARCHETYPES
 
 from controllers.lib.cog import standard_command, Cog
+from controllers.lvl_groups_controller import LEVEL_GROUPS, LevelGroup
 from controllers.pjs_controller import PJsController, PJRow
 from controllers.lib.utils import not_none
 
@@ -19,6 +20,7 @@ class PartialCharacter(TypedDict):
     Class: str
     Ancestry: str
     Religion: str
+    Level_group: LevelGroup
 
 
 class HeritageDropdown(nextcord.ui.Select):
@@ -97,6 +99,12 @@ class NewCharacterCommands(Cog):
             required=True,
             choices=RELIGIONS,
         ),
+        group: LevelGroup = SlashOption(
+            name="level_group",
+            description="El grupo de nivel al que pertenece tu personaje",
+            required=True,
+            choices=LEVEL_GROUPS,
+        ),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -118,6 +126,7 @@ class NewCharacterCommands(Cog):
                 "Class": clase,
                 "Ancestry": ascendencia,
                 "Religion": religion,
+                "Level_group": group,
             }
         )
 

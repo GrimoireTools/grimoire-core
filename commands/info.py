@@ -4,8 +4,8 @@ from controllers.lib.cog import standard_command, Cog
 from controllers.lib.utils import default_user_option, not_none
 from nextcord import Interaction, Member, SlashOption
 from commands.utils.caliban_utils import caliban_speaks
+from controllers.lvl_groups_controller import LEVEL_GROUPS, LevelGroup, LvlGroupController
 from controllers.pjs_controller import PJsController
-from controllers.salary_controller import get_level_global, update_level_global
 
 
 class InfoCommands(Cog):
@@ -18,7 +18,7 @@ class InfoCommands(Cog):
 
         message = f"""# Status de {pj.Name}
     - Jugador: {pj.Player}
-    - Clase: {pj.Class}{", " if pj.Archetypes else ""}{pj.Archetypes}
+    - Clase: {pj.Class} Lvl {pj.level()}{", " if pj.Archetypes else ""}{pj.Archetypes}
     - Ascendencia: {pj.Ancestry}, {pj.Heritage}
     - Dinero: {coins.pretty_print()}, **Total: {coins.total():.2f}gp**
     - Downtime: {dt // 7} semanas y {dt % 7} dias ({dt} dias)
@@ -39,8 +39,22 @@ class InfoCommands(Cog):
             f"Hacer {amount} retrain{'s' if amount > 1 else ''} a la vez costará {cost} días de DT"
         )
 
-    @standard_command("Cambia el nivel de todos los personajes")
-    async def update_global_level(self: Self, interaction: Interaction, level: int | None = None) -> Any:
-        old_level = get_level_global()
-        update_level_global(level)
-        return await interaction.followup.send(f"Nivel global actualizado: {old_level} -> {level}")
+    @standard_command("Cambia el nivel de todos los personajes de un grupo")
+    async def update_group_level(
+        self: Self,
+        interaction: Interaction,
+        group: LevelGroup = SlashOption("level_group", required=True, choices=LEVEL_GROUPS),
+        level: int | None = None,
+    ) -> Any:
+        sh = LvlGroupController()
+        old_level = sh.get_level_row(group).Level
+        if level is None:
+            return await interaction.followup.send(
+                f"Nivel actual del grupo {group}: {old_level}. Usa el comando con un nivel para actualizarlo."
+            )
+        if level < 1 or level > 20:
+            return await interaction.followup.send("El nivel debe estar entre 1 y 20.")
+        if level == old_level:
+            return await interaction.followup.send(f"El nivel del grupo {group} ya es {level}.")
+        sh.set_level(group, level)
+        return await interaction.followup.send(f"Nivel del grupo {group} actualizado: {old_level} -> {level}")
