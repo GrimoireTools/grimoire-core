@@ -36,7 +36,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     row_type: Type[RowType]
     marker_col: int = 1  # Columna que se revisa para saber si la fila existe
 
-    def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Dungeonmarch"):
+    def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Megamarch"):
         """Initializes the class with the given sheet_id and row type."""
         logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls
