@@ -107,6 +107,13 @@ class PjCache(TypedDict):
 PJ_CACHE: dict[str, PjCache] = {}
 
 
+def clear_pj_cache():
+    """Clears the cached PJs."""
+    global PJ_CACHE
+    PJ_CACHE = {}
+    logger.debug("Cleared PJ cache.")
+
+
 def cache_pjs(pj_rows: list[PJRow]):
     """Caches the list of characters that have met Caliban."""
     global PJ_CACHE
