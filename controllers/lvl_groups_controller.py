@@ -2,7 +2,6 @@ from typing import Literal
 from loguru import logger
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import Row
-from controllers.pjs_controller import clear_pj_cache
 
 LEVEL_GROUPS_SHEET_ID = 753829510
 LevelGroup = Literal["Lvl Alto", "Lvl Bajo"]
@@ -66,6 +65,8 @@ class LvlGroupController(SheetsControllerBase[LvlGroupRow]):
         logger.info(f"Force caching new level value.")
 
         cache_lvl_groups(self.get_all_rows(), row)
+        from controllers.pjs_controller import clear_pj_cache
+
         clear_pj_cache()
 
         logger.info(f"Set level {level} for group '{group}'.")
