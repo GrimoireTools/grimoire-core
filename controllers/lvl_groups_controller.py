@@ -65,7 +65,7 @@ class LvlGroupController(SheetsControllerBase[LvlGroupRow]):
         logger.info(f"Force caching new level value.")
 
         cache_lvl_groups(self.get_all_rows(), row)
-        from controllers.pjs_controller import clear_pj_cache
+        from controllers.pjs_controller import clear_pj_cache  # imported here to avoid circular import issues
 
         clear_pj_cache()
 
