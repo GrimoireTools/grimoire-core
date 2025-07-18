@@ -51,7 +51,7 @@ class HeritageDropdown(nextcord.ui.Select):
         pj_dict = {
             **self.partial_pj,
             "Heritage": selected_heritage,
-            "Downtime": 0,
+            "Downtime": 14,
             "Money_pp": 0,
             "Money_gp": 0,
             "Money_sp": 0,
