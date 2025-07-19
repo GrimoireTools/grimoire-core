@@ -33,8 +33,12 @@ class InfoCommands(Cog):
         amount: int = SlashOption(
             "retrains", description="Cantidad de retrains simultaneaos", required=True, min_value=1
         ),
+        discount: bool = SlashOption(
+            "discount", description="Aplicar descuento", required=False, default=False
+        )
     ) -> Any:
-        cost = 7 + math.ceil(7 * (math.log(amount * 1.5 - 0.5)))
+        base_cost = 5 if discount else 7
+        cost = base_cost + math.ceil(base_cost * (math.log(amount * 1.5 - 0.5)))
         return await interaction.followup.send(
             f"Hacer {amount} retrain{'s' if amount > 1 else ''} a la vez costará {cost} días de DT"
         )
