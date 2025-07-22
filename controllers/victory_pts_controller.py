@@ -1,3 +1,5 @@
+"""Victory Points Controller Module."""
+
 from typing import Self, TypedDict
 from controllers.pjs_controller import PJsController
 from controllers.lib.base_controller import SheetsControllerBase
@@ -8,11 +10,15 @@ MODIFIERS_SHEET_ID = 1986112206
 
 
 class Contribution(TypedDict):
+    """TypedDict for a contribution to a Victory Points mission."""
+
     name: str
     points: int
 
 
 class VictoryPointsRow(Row):
+    """Row for a Victory Points mission."""
+
     Mission_name: str
     Description: str
     Points: int
@@ -28,7 +34,7 @@ class VictoryPointsRow(Row):
         else:
             return "Nope", 0
 
-    def add_points(self: Self, user_id: int, amount: int):
+    def add_points(self: Self, user_id: int, amount: int) -> tuple[int, int]:
         """
         Add points to the row.
 
@@ -72,6 +78,8 @@ class VictoryPointsRow(Row):
 
 
 class VictoryPointsController(SheetsControllerBase[VictoryPointsRow]):
+    """Controller for Victory Points missions."""
+
     def __init__(self) -> None:
         super().__init__(MODIFIERS_SHEET_ID, VictoryPointsRow)
 

@@ -1,3 +1,5 @@
+"""Discord bot commands for character information and status management."""
+
 import math
 from typing import Any, Self
 from controllers.lib.cog import standard_command, Cog
@@ -9,8 +11,11 @@ from controllers.pjs_controller import PJsController
 
 
 class InfoCommands(Cog):
+    """Commands related to character information and status."""
+
     @standard_command(description="Entrega la info de tu personaje")
     async def status(self: Self, interaction: Interaction, user: Member = default_user_option) -> Any:
+        """Display the status of a character, including money and downtime."""
         user_id = not_none(interaction.user).id if user is None else user.id
         pj = PJsController().get_pj_row(user_id)
         coins = pj.to_coin_list()
@@ -33,10 +38,9 @@ class InfoCommands(Cog):
         amount: int = SlashOption(
             "retrains", description="Cantidad de retrains simultaneaos", required=True, min_value=1
         ),
-        discount: bool = SlashOption(
-            "discount", description="Aplicar descuento", required=False, default=False
-        )
+        discount: bool = SlashOption("discount", description="Aplicar descuento", required=False, default=False),
     ) -> Any:
+        """Calculate the downtime cost for multiple retrains at once."""
         base_cost = 5 if discount else 7
         cost = base_cost + math.ceil(base_cost * (math.log(amount * 1.5 - 0.5)))
         return await interaction.followup.send(
@@ -47,9 +51,10 @@ class InfoCommands(Cog):
     async def update_group_level(
         self: Self,
         interaction: Interaction,
-        group: LevelGroup = SlashOption("level_group", required=True, choices=LEVEL_GROUPS),
+        group: LevelGroup = SlashOption("level_group", required=True, choices=LEVEL_GROUPS),  # noqa: B008
         level: int | None = None,
     ) -> Any:
+        """Update the level of all characters in a specified group."""
         sh = LvlGroupController()
         old_level = sh.get_level_row(group).Level
         if level is None:

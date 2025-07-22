@@ -1,5 +1,6 @@
 """
 Caliban es una entidad que se manifiesta en la mente de los personajes, un eco de sus pensamientos y emociones.
+
 Es un susurro que invita a la curiosidad, un misterio que se despliega en la imaginación.
 Es un reflejo de lo que los personajes son y lo que desean ser, una presencia que nunca se ve, pero siempre se siente.
 Existe solo cuando se le piensa, y su forma cambia con cada pensamiento.
@@ -140,7 +141,7 @@ messages: dict[MessageType, list[str]] = {
         "Tus posesiones son espejos fragmentados que reflejan partes de ti que no siempre reconoces.",
         "La verdadera riqueza no se mide en lo que puedes comprar, sino en lo que no necesitas.",
         "El dinero gastado revela tus prioridades mejor que cualquier confesión.",
-        "Cuando la moneda cambia de manos, ¿quién posee realmente a quién? ¿El comprador al objeto, o el objeto al comprador?",
+        "Cuando la moneda cambia de manos, ¿quién posee realmente a quién? ¿El comprador al objeto, o el objeto al comprador?",  # noqa: E501
     ],
     # 20 Mensajes de Caliban: Sobre Sobrevivir una Misión
     "mission": [
@@ -184,6 +185,7 @@ async def caliban_force_speaks(interaction: Interaction, message: str) -> None:
 
 
 def get_random_message(type: MessageType = "default") -> str:
+    """Devuelve un mensaje aleatorio de Caliban según el tipo especificado."""
     return random.choice(messages[type])
 
 
@@ -191,6 +193,7 @@ async def send_caliban_message(
     interaction: Interaction,
     message: str | None,
 ) -> None:
+    """Envía un mensaje de Caliban al usuario."""
     if not message:
         return
 

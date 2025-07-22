@@ -54,7 +54,9 @@ class ConsentFormCommands(Cog):
             response = sh.get_latest_response(player.id)
             if response is None:
                 await interaction.followup.send(
-                    f"{player.mention}, no has rellenado el [formulario de consentimiento](https://forms.gle/QBEYg4g3ymenvbFw8). Por favor, rellenalo. Tu id de discord es: `{player.id}`."
+                    f"{player.mention}, no has rellenado el [formulario de consentimiento]"
+                    f"(https://forms.gle/QBEYg4g3ymenvbFw8). Por favor, rellenalo. "
+                    f"Tu id de discord es: `{player.id}`."
                 )
             else:
                 notable_options = response.notable_options()

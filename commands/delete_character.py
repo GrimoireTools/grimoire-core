@@ -31,25 +31,36 @@ from controllers.skills_controller import SkillsController
 
 
 class DeleteCharacterCommands(Cog):
-    @standard_command(
-        "Manda un PJ al cementerio y elimina sus datos secundarios (skills, mods, etc)"
-    )
+    """Discord cog for character deletion and retirement commands.
+
+    Handles moving player characters to the cemetery and cleaning up
+    associated data like skills, saves, and ability modifiers.
+    """
+
+    @standard_command("Manda un PJ al cementerio y elimina sus datos secundarios (skills, mods, etc)")
     async def retire(
         self: Self,
         interaction: Interaction,
-        death_turn: int = SlashOption(
-            "turno-de-retiro", "Numero de turno en que el PJ fué retirado o murió", True
-        ),
-        death_narrator: str = SlashOption(
-            "narrador-de-muerte", "Narrador responsable de la muerte del PJ", True
-        ),
-        death_cause: str = SlashOption(
-            "causa-de-muerte", "Enemigo o situación causante de la muerte del PJ", True
-        ),
-        death_level: int = SlashOption(
-            "level-alcanzado", "Nivel en que estaba el PJ al morir o retirarse", True
-        ),
+        death_turn: int = SlashOption("turno-de-retiro", "Numero de turno en que el PJ fué retirado o murió", True),
+        death_narrator: str = SlashOption("narrador-de-muerte", "Narrador responsable de la muerte del PJ", True),
+        death_cause: str = SlashOption("causa-de-muerte", "Enemigo o situación causante de la muerte del PJ", True),
+        death_level: int = SlashOption("level-alcanzado", "Nivel en que estaba el PJ al morir o retirarse", True),
     ) -> None:
+        """Retire a character to the cemetery and clean up associated data.
+
+        Move the player's character to the cemetery sheet with death details
+        and remove all associated game data including skills, saves, and modifiers.
+
+        Args:
+            interaction: The Discord slash command interaction.
+            death_turn: Turn number when the character died or retired.
+            death_narrator: Narrator responsible for the character's death.
+            death_cause: Enemy or situation that caused the death.
+            death_level: Character level at time of death or retirement.
+
+        Raises:
+            DataNotFoundError: When character data is not found in sheets.
+        """
         user_id = not_none(interaction.user).id
         # Eliminar el personaje
         sh_pjs = PJsController()
@@ -58,9 +69,7 @@ class DeleteCharacterCommands(Cog):
 
         # Copiar el personaje al cementerio
         sh_cemetery = CemeteryController()
-        cemetery_row = CemeteryRow.from_pj_row(
-            pj, f"T{death_turn}", death_narrator, death_cause, death_level
-        )
+        cemetery_row = CemeteryRow.from_pj_row(pj, f"T{death_turn}", death_narrator, death_cause, death_level)
         sh_cemetery.insert_row(cemetery_row)
         # Eliminar todas las filas de skills
         try:
@@ -88,13 +97,11 @@ class DeleteCharacterCommands(Cog):
         except DataNotFoundError:
             pass
         # Enviar mensaje de confirmación
-        await interaction.followup.send(
-            f"El PJ {pj.Name} ha sido retirado del juego y enviado al cementerio."
-        )
+        await interaction.followup.send(f"El PJ {pj.Name} ha sido retirado del juego y enviado al cementerio.")
 
 
 def group_row_indexes(rows: Sequence[Row]) -> list[list[int]]:
-    """Calculates the continous intervals of rows, ignoring -1 indexes."""
+    """Calculate the continuous intervals of rows, ignoring -1 indexes."""
     indexes = sorted([r.get_index() for r in rows if r.get_index() != -1])
     if not indexes:
         return []

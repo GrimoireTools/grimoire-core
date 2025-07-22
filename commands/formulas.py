@@ -1,3 +1,13 @@
+"""Discord bot commands for managing Pathfinder 2e item formulas.
+
+This module provides slash commands for viewing and adding global formulas
+for crafting items in Pathfinder 2e. Users can search formulas by name,
+filter by item level, and add new formulas to the shared database.
+
+Classes:
+    FormulasCommands: Cog containing formula-related slash commands.
+"""
+
 from typing import Self, Any
 from PF2eData import ITEM_CATEGORIES
 from controllers.formulas_controller import FormulaRow, FormulasController
@@ -6,6 +16,7 @@ from nextcord import Interaction, SlashOption
 
 
 class FormulasCommands(Cog):
+    """Commands related to global formulas for items in the game."""
 
     @standard_command("Muestra la lista de formulas disponibles")
     async def global_formulas(
@@ -16,7 +27,7 @@ class FormulasCommands(Cog):
             "item_level", "Nivel de los items de las formulas (-1 para Varios)", False, min_value=-1, max_value=25
         ),
     ) -> Any:
-
+        """List all global formulas with optional search and level filter."""
         formulas = FormulasController().get_all_rows()
         lvl_msg = f" de nivel {level}" if level is not None else ""
         search_msg = f" con el texto '{search}'" if search.strip() else ""
@@ -51,6 +62,7 @@ class FormulasCommands(Cog):
             "requirements", "Requerimientos para la creación del item", False, default=""
         ),
     ) -> Any:
+        """Add a new formula to the global formulas list."""
         sh_formulas = FormulasController()
         formulas = sh_formulas.get_all_rows()
         formula_names = [r.Item_name for r in formulas]

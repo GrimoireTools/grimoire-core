@@ -1,3 +1,17 @@
+"""Earn Income command implementations for Pathfinder 2e bot.
+
+This module provides Discord slash commands for handling Earn Income activities
+in Pathfinder 2e, including manual calculations, automatic skill-based income
+generation, lore-specific income, and job generation utilities.
+
+Key features:
+- Manual earn income calculations with custom bonuses
+- Automatic skill-based earn income with database integration
+- Lore skill specialization support
+- Random job generation for campaigns
+- Experienced Professional feat support
+"""
+
 from commands.utils.skill_utils import filter_lores
 from controllers.lib.cog import standard_command, Cog
 from typing import Any, Self
@@ -16,54 +30,80 @@ from controllers.skills_controller import SkillRow, SkillsController
 
 
 class EarnIncomeCommands(Cog):
-    # =====================================================================================================================
+    """Discord commands for Pathfinder 2e Earn Income activities.
+
+    Provides slash commands for calculating income from various skills,
+    managing downtime, and generating random jobs for campaigns.
+
+    Attributes:
+        Commands support manual calculations, automatic skill-based income,
+        lore specializations, and job generation with DC adjustments.
+    """
+
+    # =====================================================================================================
 
     @standard_command("Calcula las ganancias de Earn Income.")
     async def earn_income_manual(
         self: Self,
         interaction: Interaction,
-        taskLevel: int = SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
-        profLevel: str = SlashOption(
+        task_level: int = SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
+        prof_level: str = SlashOption(
             "proficiency-level",
             "Nivel de proficiencia de la skill usada",
             True,
             choices=["Trained", "Expert", "Master", "Legendary"],
         ),
-        downtimeUsed: int = SlashOption(
+        downtime_used: int = SlashOption(
             "downtime-used",
             "Dias de downtime usados en trabajar",
             True,
             min_value=7,
             default=7,
         ),
-        checkBonus: int = SlashOption("check-bonus", "Bono al check utilizado", True),
-        dcChange: int = SlashOption(
+        check_bonus: int = SlashOption("check-bonus", "Bono al check utilizado", True),
+        dc_change: int = SlashOption(
             "dc-adjustment",
             "Cambios al DC impuestos por el DM. +3 para habilidades que no sean Performance, Crafting o Lore.",
             False,
             default=0,
         ),
     ) -> Any:
+        """Calculate manual Earn Income with custom parameters.
+
+        Process manual Earn Income calculation using provided task level,
+        proficiency, downtime, and bonuses without database integration.
+
+        Args:
+            interaction: Discord interaction object for response.
+            task_level: Level of the task being performed (0-21).
+            prof_level: Proficiency level string for the skill used.
+            downtime_used: Days of downtime spent working (minimum 7).
+            check_bonus: Total bonus applied to the skill check.
+            dc_change: GM-imposed DC adjustments (default 0).
+
+        Returns:
+            None. Sends calculation results via interaction followup.
+        """
         dice = int(dndice.basic("1d20"))
-        check_value = dice + checkBonus
-        DC = EARN_INCOME[taskLevel][0] + dcChange
-        check_result = check_results(DC, check_value, dice)
+        check_value = dice + check_bonus
+        dc = EARN_INCOME[task_level][0] + dc_change
+        check_result = check_results(dc, check_value, dice)
 
-        income, final_dt_usage = calc_job_income_and_dt(taskLevel, downtimeUsed, check_result, profLevel)
+        income, final_dt_usage = calc_job_income_and_dt(task_level, downtime_used, check_result, prof_level)
 
-        message = f"""Con un {check_value} ({dice}+{checkBonus}) vs DC {DC} (lvl {taskLevel}), obtienes un {result_name(check_result)}.
+        message = f"""Con un {check_value} ({dice}+{check_bonus}) vs DC {dc} (lvl {task_level}), obtienes un {result_name(check_result)}.
     Trabajas {final_dt_usage} dias y obtienes {income:.2f} gp al día, por un total de {income * final_dt_usage:.2f} gp.
     (debes updatearlos manualmente)
     """  # noqa: E501
         await interaction.followup.send(message)
 
-    # =====================================================================================================================
+    # =============================================================================================
 
     @standard_command("Calcula y genera las ganancias de Earn Income. El DC se calcula solo.")
     async def earn_income(
         self: Self,
         interaction: Interaction,
-        taskLevel: int = SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
+        task_level: int = SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
         skill_name: str = SlashOption(
             "skill",
             "Skill utilizada. Trained Only.",
@@ -82,6 +122,25 @@ class EarnIncomeCommands(Cog):
         ),
         dc_change: int = SlashOption("dc-adjustment", "Cambios al DC impuestos por el DM.", False, default=0),
     ) -> Any:
+        """Calculate and generate Earn Income with automatic skill integration.
+
+        Process Earn Income calculation using character's stored skill data,
+        apply modifiers, update downtime and money automatically.
+
+        Args:
+            interaction: Discord interaction object for response.
+            task_level: Level of the task being performed (0-21).
+            skill_name: Name of the skill to use from LORELESS_SKILLS.
+            downtime_used: Days of downtime spent working (minimum 7).
+            additional_bonus: Extra bonuses applied to the skill check.
+            dc_change: GM-imposed DC adjustments (default 0).
+
+        Returns:
+            None. Sends calculation results and updates character data.
+
+        Raises:
+            Sends error message if insufficient downtime or untrained skill.
+        """
         user_id = not_none(interaction.user).id
         sh_pjs = PJsController()
         pj = sh_pjs.get_pj_row(user_id)
@@ -100,13 +159,13 @@ class EarnIncomeCommands(Cog):
 
         harder_dc = skill_name not in ["Crafting", "Performance"]
         harder_dc_adjustment = 3 if harder_dc else 0
-        DC = EARN_INCOME[taskLevel][0] + dc_change + harder_dc_adjustment
+        dc = EARN_INCOME[task_level][0] + dc_change + harder_dc_adjustment
 
         dice = int(dndice.basic("1d20"))
         check_value = dice + skill.total_bonus(mods, additional_bonus)
-        check_result = check_results(DC, check_value, dice)
+        check_result = check_results(dc, check_value, dice)
 
-        income, final_dt_usage = calc_job_income_and_dt(taskLevel, downtime_used, check_result, skill.Proficiency)
+        income, final_dt_usage = calc_job_income_and_dt(task_level, downtime_used, check_result, skill.Proficiency)
 
         new_dt_total = pj_dt - final_dt_usage
         pj.Downtime = new_dt_total
@@ -116,7 +175,7 @@ class EarnIncomeCommands(Cog):
         sh_pjs.set_row(pj)
         await interaction.followup.send(
             income_message(
-                taskLevel,
+                task_level,
                 skill,
                 pj,
                 mods,
@@ -124,7 +183,7 @@ class EarnIncomeCommands(Cog):
                 pj_dt,
                 old_money,
                 harder_dc,
-                DC,
+                dc,
                 dice,
                 income,
             )
@@ -134,7 +193,7 @@ class EarnIncomeCommands(Cog):
     async def earn_income_lore(
         self: Self,
         interaction: Interaction,
-        taskLevel: int = SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
+        task_level: int = SlashOption("task-level", "Nivel del trabajo", True, min_value=0, max_value=21),
         lore: str = SlashOption(
             "lore",
             "El lore de tu personaje (sin 'Lore '). Trained Only.",
@@ -155,6 +214,27 @@ class EarnIncomeCommands(Cog):
             "experienced-professional", "Aplicar Experienced Professional.", False, default=False
         ),
     ) -> Any:
+        """Calculate and generate Earn Income with lore skill integration.
+
+        Process Earn Income calculation using character's lore skill data,
+        apply modifiers, support Experienced Professional feat, and update
+        downtime and money automatically.
+
+        Args:
+            interaction: Discord interaction object for response.
+            task_level: Level of the task being performed (0-21).
+            lore: Lore skill name without 'Lore ' prefix.
+            downtime_used: Days of downtime spent working (minimum 7).
+            additional_bonus: Extra bonuses applied to the skill check.
+            dc_change: GM-imposed DC adjustments (default 0).
+            experienced_prof: Apply Experienced Professional feat effects.
+
+        Returns:
+            None. Sends calculation results and updates character data.
+
+        Raises:
+            Sends error message if insufficient downtime or untrained skill.
+        """
         user_id = not_none(interaction.user).id
         sh_pjs = PJsController()
         pj = sh_pjs.get_pj_row(user_id)
@@ -173,13 +253,13 @@ class EarnIncomeCommands(Cog):
             not_defined = " No has definido esta skill con /set_skill." if skill.PJ_name == "Anonymous" else ""
             return await interaction.followup.send(f"No puedes hacer Earn Income con una skill Untrained.{not_defined}")
 
-        DC = EARN_INCOME[taskLevel][0] + dc_change
+        dc = EARN_INCOME[task_level][0] + dc_change
 
         dice = int(dndice.basic("1d20"))
         check_value = dice + skill.total_bonus(mods, additional_bonus)
-        check_result = check_results(DC, check_value, dice)
+        check_result = check_results(dc, check_value, dice)
 
-        income, final_dt_usage = calc_job_income_and_dt(taskLevel, downtime_used, check_result, skill.Proficiency)
+        income, final_dt_usage = calc_job_income_and_dt(task_level, downtime_used, check_result, skill.Proficiency)
         if experienced_prof:  # https://2e.aonprd.com/Feats.aspx?ID=5144
             if check_result == 1 and skill.Proficiency != PROF.Trained:
                 # Expert+: Double the income for a failure if it was not originally crit failure
@@ -196,7 +276,7 @@ class EarnIncomeCommands(Cog):
         sh_pjs.set_row(pj)
         await interaction.followup.send(
             income_message(
-                taskLevel,
+                task_level,
                 skill,
                 pj,
                 mods,
@@ -204,7 +284,7 @@ class EarnIncomeCommands(Cog):
                 pj_dt,
                 old_money,
                 False,
-                DC,
+                dc,
                 dice,
                 income,
             )
@@ -214,26 +294,29 @@ class EarnIncomeCommands(Cog):
     async def gen_jobs(
         self: Self,
         interaction: Interaction,
-        taskLevel: int = SlashOption(
+        task_level: int = SlashOption(
             "task-level", "Nivel base de los trabajos", True, min_value=0, max_value=21, default=None
         ),
-        tasksAmt: int = SlashOption(
+        tasks_amt: int = SlashOption(
             "tasks-amount", "Cantidad de trabajos", False, min_value=0, max_value=10, default=4
         ),
     ) -> Any:
+        """Generate random jobs for the campaign."""
         message = (
             "# Trabajos mensuales\n"
-            "Todos los trabajos duran 14 dias y se pueden hacer 1 sola vez por PJ.\n"
-            "Como recordatorio, todos los trabajos con skills que no sean Crafting, Performance o Lore tienen un +3 al DC\n\n"
+            "Todos los trabajos duran minimo 7 y máximo 14 dias y se pueden hacer 1 sola vez por PJ.\n"
+            "Como recordatorio, todos los trabajos con skills que no sean Crafting, Performance o Lore "
+            "tienen un +3 al DC\n\n"
         )
-        chosen_skills = random.sample(LORELESS_SKILLS, tasksAmt)
-        job_messages = [job_message(sk, taskLevel) for sk in chosen_skills]
+        chosen_skills = random.sample(LORELESS_SKILLS, tasks_amt)
+        job_messages = [job_message(sk, task_level) for sk in chosen_skills]
         message += "\n".join(job_messages)
 
         await interaction.followup.send(message)
 
     @earn_income_lore.on_autocomplete("lore")
     async def autocomplete_lore_subname(self: Self, interaction: Interaction, lore_subname: str) -> Any:
+        """Autocomplete handler for lore subnames in Earn Income lore command."""
         user_id = not_none(interaction.user).id
 
         filtered_lores: list[str] = filter_lores(lore_subname, user_id)[:25]
@@ -241,7 +324,7 @@ class EarnIncomeCommands(Cog):
 
 
 def job_message(skill: str, base_lvl: int) -> str:
-    """"""
+    """Generate a job message for a specific skill and base level."""
     lvl = min(21, base_lvl + random.choices([0, 1, 2], [0.6, 0.3, 0.1])[0])
     if skill_is_standard(skill):
         dc_adjustment = random.choice([-0, -1, -2])
@@ -262,7 +345,8 @@ def job_message(skill: str, base_lvl: int) -> str:
     )
 
 
-def calc_job_income_and_dt(taskLevel: int, downtimeUsed: int, check_result: int, prof: str) -> tuple[float, int]:
+def calc_job_income_and_dt(task_level: int, downtime_used: int, check_result: int, prof: str) -> tuple[float, int]:
+    """Calculate income and downtime usage based on task level, check result, and proficiency."""
     prof_column = ["Trained", "Expert", "Master", "Legendary"].index(prof) + 1
 
     if check_result == 0:
@@ -271,25 +355,26 @@ def calc_job_income_and_dt(taskLevel: int, downtimeUsed: int, check_result: int,
         final_dt_usage = 7
     if check_result == 1:
         # failure
-        income = EARN_INCOME[taskLevel][1][0]
+        income = EARN_INCOME[task_level][1][0]
         final_dt_usage = 7
     if check_result == 2:
         # success
-        income = EARN_INCOME[taskLevel][1][prof_column]
-        final_dt_usage = downtimeUsed
+        income = EARN_INCOME[task_level][1][prof_column]
+        final_dt_usage = downtime_used
     if check_result == 3:
         # Critical success
-        income = EARN_INCOME[taskLevel + 1][1][prof_column]
-        final_dt_usage = downtimeUsed
+        income = EARN_INCOME[task_level + 1][1][prof_column]
+        final_dt_usage = downtime_used
     return income, final_dt_usage
 
 
 def skill_is_standard(skill: str) -> bool:
+    """Check if the skill is a standard skill for Earn Income."""
     return skill == "Performance" or skill == "Crafting" or skill.startswith("Lore")
 
 
 def income_message(
-    taskLevel: int,
+    task_level: int,
     skill: SkillRow,
     pj: PJRow,
     mods: ModifiersRow,
@@ -297,15 +382,15 @@ def income_message(
     old_dt: int,
     old_money: float,
     harder_dc: bool,
-    DC: int,
+    dc: int,
     dice: int,
     income: float,
 ) -> str:
-
+    """Generate a formatted message with Earn Income results."""
     skill_name = skill.Skill_name
     skill_msg = skill.modifiers_description(mods, extra_bonus)
     bonus = skill.total_bonus(mods, extra_bonus)
-    check_result = check_results(DC, dice + bonus, dice)
+    check_result = check_results(dc, dice + bonus, dice)
     harder_dc_message = f" (con +3 al DC por usar {skill_name})" if harder_dc else ""
     new_dt = not_none(pj.Downtime)
     final_dt_usage = old_dt - new_dt
@@ -313,8 +398,10 @@ def income_message(
         "" if check_result != 0 else "\nDebido a tu crit failure, tu proximo trabajo tiene un -1 al nivel."
     )
 
-    return f"""## {pj.Name}: Earn income de {skill_name} lvl {taskLevel}
-Con un {dice + bonus} ({dice}{bonus:+} {skill_msg}) vs DC {DC}{harder_dc_message}, obtienes un {result_name(check_result)}.
+    return f"""## {pj.Name}: Earn income de {skill_name} lvl {task_level}
+Con un {dice + bonus} ({dice}{bonus:+} {skill_msg}) vs DC {dc}{harder_dc_message}, obtienes un {
+        result_name(check_result)
+    }.
     Trabajas {final_dt_usage} dias y obtienes {income:.2f} gp al día, por un total de {income * final_dt_usage:.2f} gp.
     Cambio de DT: {old_dt} -> {new_dt:.2f}
     Cambio de Dinero: {old_money:.2f} -> {pj.calc_money():.2f}{crit_fail_message}
