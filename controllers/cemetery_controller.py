@@ -47,9 +47,7 @@ class CemeteryRow(Row):
         death_cause: str,
         lvl_at_death: int,
     ) -> Self:
-        """
-        Convierte una fila de PJ a una fila de cementerio
-        """
+        """Convierte una fila de PJ a una fila de cementerio."""
         return cls.from_dict(
             {
                 "Name": pj_row.Name,
@@ -76,5 +74,5 @@ class CemeteryRow(Row):
 
 
 class CemeteryController(SheetsControllerBase[CemeteryRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(CEMETERY_SHEET_ID, CemeteryRow)

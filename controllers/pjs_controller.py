@@ -36,9 +36,7 @@ class PJRow(Row):
 
     @classmethod
     def from_coin_list(cls: type[Self], coin_list: list[int] | CoinsList) -> Self:
-        """
-        Convierte una lista de monedas a una fila
-        """
+        """Convierte una lista de monedas a una fila."""
         return cls.from_dict(
             {
                 "Money_pp": coin_list[0],
@@ -49,31 +47,23 @@ class PJRow(Row):
         )
 
     def level(self) -> int:
-        """
-        Devuelve el nivel del personaje
-        """
+        """Devuelve el nivel del personaje."""
         return get_cached_lvl_group(self.Level_group)
 
     def to_coin_list(self) -> CoinsList:
-        """
-        Convierte la fila a una lista de monedas
-        """
+        """Convierte la fila a una lista de monedas."""
         coin_list = [self.Money_pp, self.Money_gp, self.Money_sp, self.Money_cp]
         if None in coin_list:
             raise ValueError("Coin list incomplete")
         return CoinsList(*coin_list)  # type: ignore
 
     def calc_money(self) -> float:
-        """
-        Calcula el dinero total en gp
-        """
+        """Calcula el dinero total en gp."""
         return self.to_coin_list().total()
 
     def update_money(self, coins: float | list[int] | CoinsList) -> None:
-        """
-        Actualiza el dinero en la fila
-        """
-        if isinstance(coins, (float, int)):
+        """Actualiza el dinero en la fila."""
+        if isinstance(coins, float | int):
             coins = gp_to_coin_list(coins)
         self.Money_pp = coins[0]
         self.Money_gp = coins[1]
@@ -81,9 +71,7 @@ class PJRow(Row):
         self.Money_cp = coins[3]
 
     def add_language(self, language: str) -> None:
-        """
-        Añade un idioma a la fila
-        """
+        """Añade un idioma a la fila."""
         if self.Languages in ["", None]:
             self.Languages = language
         else:
@@ -95,9 +83,7 @@ class PJRow(Row):
         force_set: dict[str, bool] | None = None,
         force_skip: dict[str, bool] | None = None,
     ) -> list[dict[str, str | list[Value]]]:
-        """
-        Convierte la fila a un rango de Google Sheets
-        """
+        """Convierte la fila a un rango de Google Sheets."""
         if force_skip is None:
             force_skip = {}
         force_skip["Money_total"] = True
@@ -115,14 +101,14 @@ class PjCache(TypedDict):
 PJ_CACHE: dict[str, PjCache] = {}
 
 
-def clear_pj_cache():
+def clear_pj_cache() -> None:
     """Clears the cached PJs."""
     global PJ_CACHE
     PJ_CACHE = {}
     logger.debug("Cleared PJ cache.")
 
 
-def cache_pjs(pj_rows: list[PJRow]):
+def cache_pjs(pj_rows: list[PJRow]) -> None:
     """Caches the list of characters that have met Caliban."""
     global PJ_CACHE
     PJ_CACHE = {
@@ -141,7 +127,7 @@ def cache_pjs(pj_rows: list[PJRow]):
 K = TypeVar("K")
 
 
-def _get_cache(user_id: str | int, key: str, default: K) -> K:
+def _get_cache[K](user_id: str | int, key: str, default: K) -> K:
     """Helper function to get a value from the cache."""
     global PJ_CACHE
     user_id = str(user_id)
@@ -179,13 +165,11 @@ def get_cached_class(user_id: str | int) -> str:
 
 
 class PJsController(SheetsControllerBase[PJRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(PJ_SHEET_ID, PJRow)
 
-    def _after_fetch(self):
-        """
-        After fetching the data, cache the list of characters that have met Caliban.
-        """
+    def _after_fetch(self) -> None:
+        """After fetching the data, cache the list of characters that have met Caliban."""
         rows = self.get_all_rows()
         cache_pjs(rows)
 

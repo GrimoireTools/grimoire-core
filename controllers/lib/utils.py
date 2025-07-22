@@ -28,20 +28,20 @@ class Column(str):
         Ejemplos:
         - A -> 0
         - C -> 2
-        - AA -> 26
+        - AA -> 26.
         """
         return column_to_num(self)
 
 
 class CoinsList(list[int]):
-    def __init__(self, *args: int):
+    def __init__(self, *args: int) -> None:
         """
         Crea una lista de monedas a partir de 4 enteros.
         Los enteros son la cantidad de monedas de cada tipo, en orden:
         - pp
         - gp
         - sp
-        - cp
+        - cp.
         """
         super().__init__(args)
         if len(args) != 4:
@@ -55,7 +55,7 @@ class CoinsList(list[int]):
         return f"MoneyList({self.pp}, {self.gp}, {self.sp}, {self.cp})"
 
     def pretty_print(self) -> str:
-        """Xpp, Xgp, Xsp, Xcp"""
+        """Xpp, Xgp, Xsp, Xcp."""
         return f"{self.pp}pp, {self.gp}gp, {self.sp}sp, {self.cp}cp"
 
     def total(self) -> float:
@@ -75,7 +75,7 @@ class NoneError(Exception):
     pass
 
 
-def not_none(val: T | None) -> T:
+def not_none[T](val: T | None) -> T:
     """Returns the value if not None, otherwise raises ValueError."""
     if val is None:
         raise NoneError("Value cannot be None")
@@ -92,7 +92,7 @@ def parse_float_arg(num: str) -> float:
 
 def gp_to_coin_list(num: float) -> CoinsList:
     """Given an amount of gold, returns its representation in coins, minimizing the total amount of coins."""
-    num = (1 if num >= 0 else -1) * int(round(abs(float(num)) * 100))
+    num = (1 if num >= 0 else -1) * round(abs(float(num)) * 100)
 
     pp = num // 1000
     gp = num % 1000 // 100
@@ -170,7 +170,7 @@ def num_to_column(column_int: int) -> str:
     Ejemplos:
     - 1 -> A
     - 3 -> C
-    - 27 -> AA
+    - 27 -> AA.
     """
     if column_int <= 0:
         raise ValueError("Column must be 1 or higher.")
@@ -193,7 +193,7 @@ def try_int(val: str) -> int:
 def log_command(func):
     @functools.wraps(func)
     @logger.catch
-    async def logged_command(self: Any, interaction: Interaction, *args, **kwargs):
+    async def logged_command(self: Any, interaction: Interaction, *args, **kwargs) -> None:
         user = interaction.user
         if user is not None:
             logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
@@ -209,7 +209,7 @@ def log_command(func):
 def log_command_not_cog(func):
     @functools.wraps(func)
     @logger.catch
-    async def logged_command(interaction: Interaction, *args, **kwargs):
+    async def logged_command(interaction: Interaction, *args, **kwargs) -> None:
         user = interaction.user
         if user is not None:
             logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
@@ -245,7 +245,7 @@ def column_to_num(column: str) -> int:
     Ejemplos:
     - A -> 0
     - C -> 2
-    - AA -> 26
+    - AA -> 26.
     """
     letters: str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".lower()
     num: int = 0

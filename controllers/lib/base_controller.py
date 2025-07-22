@@ -35,19 +35,19 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     row_type: type[RowType]
     marker_col: int = 1  # Columna que se revisa para saber si la fila existe
 
-    def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Megamarch"):
+    def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Megamarch") -> None:
         """Initializes the class with the given sheet_id and row type."""
         logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls
         self.sheet = gc.open(doc).get_worksheet_by_id(sheet_id)
 
-    def fetch_data(self):
+    def fetch_data(self) -> None:
         """Fetches all data from the sheet. Called each time __init__() is called."""
         logger.debug("Fetching data from sheet...")
         self.DATA = self.sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
         self._after_fetch()
 
-    def _after_fetch(self):
+    def _after_fetch(self) -> None:
         """Called after fetching data. Override this method to perform any additional processing."""
         pass
 
@@ -92,14 +92,14 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
             col = column_to_num(col)
         return [row[col] for row in self.DATA]
 
-    def set_cell(self, row: int, col: Col, value: Value):
+    def set_cell(self, row: int, col: Col, value: Value) -> None:
         """Sets a cell to a given value. Row and col are 0-indexed. Col can optinoally be the letter identifier."""
         if isinstance(col, str):
             col = column_to_num(col)
         else:
             self.sheet.update_cell(row + 1, col + 1, value)
 
-    def set_row(self, values: RowType, row: int = -1):
+    def set_row(self, values: RowType, row: int = -1) -> None:
         """Sets a row to a given value."""
         row = row if row != -1 else values.get_index()
         if row == -1:
@@ -112,7 +112,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
 
     update_row = set_row
 
-    def update_rows(self, values: list[RowType]):
+    def update_rows(self, values: list[RowType]) -> None:
         """Updates multiple rows at once."""
         ranges = []
         for value in values:
@@ -177,7 +177,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         # By default we assume that the discord id column has the name Discord_id
         return self.find_id_row_index(discord_id, "Discord_id")
 
-    def insert_rows(self, values: list[RowType], row: int = -1):
+    def insert_rows(self, values: list[RowType], row: int = -1) -> None:
         """Inserts multiple rows at the end of the sheet."""
         if row == -1:
             row = len(self.DATA)
@@ -194,7 +194,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         """Inserts a row at the end of the sheet."""
         return self.insert_rows([value], row)
 
-    def delete_rows(self, start: int, end: int = -1):
+    def delete_rows(self, start: int, end: int = -1) -> None:
         """Deletes a row from the sheet. 0-indexed."""
         if start == -1:
             raise ValueError("Row index for deletion cannot be negative.")
@@ -203,7 +203,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         self.sheet.delete_rows(start, end)
         self.fetch_data()
 
-    def delete_row(self, row: RowType):
+    def delete_row(self, row: RowType) -> None:
         """Deletes a row from the sheet. 0-indexed."""
         self.delete_rows(row.get_index())
 

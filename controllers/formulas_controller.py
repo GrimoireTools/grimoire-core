@@ -13,5 +13,5 @@ class FormulaRow(Row):
 
 
 class FormulasController(SheetsControllerBase[FormulaRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(FORMULA_SHEET_ID, FormulaRow)

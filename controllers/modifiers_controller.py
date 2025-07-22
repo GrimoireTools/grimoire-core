@@ -24,7 +24,7 @@ class ModifiersRow(Row):
 
 
 class ModifiersController(SheetsControllerBase[ModifiersRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(MODIFIERS_SHEET_ID, ModifiersRow)
 
     def get_mods_row(self, user_id: int) -> ModifiersRow:

@@ -12,12 +12,13 @@ class SalaryRow(Row):
 
 
 class SalaryController(SheetsControllerBase[SalaryRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(SALARY_SHEET_ID, SalaryRow)
 
     def get_salary(self, level: int) -> float:
         """
         Get the salary for a given level.
+
         :param level: The level of the character.
         :return: The salary for the given level.
         """
@@ -32,14 +33,13 @@ class SalaryController(SheetsControllerBase[SalaryRow]):
     def get_salary_multiplier(self) -> float:
         """
         Get the salary multiplier.
+
         :return: The salary multiplier.
         """
         row = self.get_row(1)
         return float(row.Others)
 
     def get_downtime(self) -> int:
-        """
-        Get the downtime awarded to characters per turn.
-        """
+        """Get the downtime awarded to characters per turn."""
         row = self.get_row(3)
         return int(row.Others)

@@ -18,9 +18,7 @@ class SaveRow(Row):
         return save_mod_type(self.Save_name)
 
     def prof_bonus(self) -> int:
-        """
-        Devuelve el bono de competencia
-        """
+        """Devuelve el bono de competencia."""
         if self.Proficiency in PROF_BONUSES:
             return PROF_BONUSES[self.Proficiency](self.Discord_id)
         else:
@@ -28,14 +26,12 @@ class SaveRow(Row):
 
 
 class SavesController(ProficiencyControllerBase[SaveRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(SAVES_SHEET_ID, SaveRow, "Save_name")
 
 
 def save_mod_type(save: Save | SaveRow) -> Ability:
-    """
-    Devuelve el tipo de modificador
-    """
+    """Devuelve el tipo de modificador."""
     mods: dict[Save, Ability] = {
         "Fortitude": "Con",
         "Reflex": "Dex",

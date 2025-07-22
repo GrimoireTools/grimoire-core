@@ -169,20 +169,15 @@ messages: dict[MessageType, list[str]] = {
 
 
 async def caliban_speaks(interaction: Interaction, chance: int, type: MessageType = "default") -> None:
-    """
-    Caliban susurra un mensaje al azar (elegido según categoría) al usuario. Solo si el usuario conoce a Caliban.
-    """
+    """Caliban susurra un mensaje al azar (elegido según categoría) al usuario. Solo si el usuario conoce a Caliban."""
     user_id = not_none(interaction.user).id
-    if get_caliban_met(user_id):
-        if random.randint(1, 100) <= chance:
-            message = get_random_message(type)
-            await send_caliban_message(interaction, message)
+    if get_caliban_met(user_id) and random.randint(1, 100) <= chance:
+        message = get_random_message(type)
+        await send_caliban_message(interaction, message)
 
 
 async def caliban_force_speaks(interaction: Interaction, message: str) -> None:
-    """
-    Caliban susurra un mensaje al usuario. Solo si el usuario conoce a Caliban.
-    """
+    """Caliban susurra un mensaje al usuario. Solo si el usuario conoce a Caliban."""
     user_id = not_none(interaction.user).id
     if get_caliban_met(user_id):
         await send_caliban_message(interaction, message)

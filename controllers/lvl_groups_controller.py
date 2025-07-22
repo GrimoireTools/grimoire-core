@@ -16,7 +16,7 @@ class LvlGroupRow(Row):
 LEVEL_GROUPS_CACHE: dict[str, int] = {}
 
 
-def cache_lvl_groups(lvl_group_rows: list[LvlGroupRow], force: LvlGroupRow | None = None):
+def cache_lvl_groups(lvl_group_rows: list[LvlGroupRow], force: LvlGroupRow | None = None) -> None:
     """Caches the names of each character."""
     global LEVEL_GROUPS_CACHE
     LEVEL_GROUPS_CACHE = {gr.Group: gr.Level for gr in lvl_group_rows}
@@ -34,13 +34,11 @@ def get_cached_lvl_group(group: LevelGroup) -> int:
 
 
 class LvlGroupController(SheetsControllerBase[LvlGroupRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(LEVEL_GROUPS_SHEET_ID, LvlGroupRow)
 
-    def _after_fetch(self):
-        """
-        After fetching the data, cache the level groups.
-        """
+    def _after_fetch(self) -> None:
+        """After fetching the data, cache the level groups."""
         rows = self.get_all_rows()
         cache_lvl_groups(rows)
 
@@ -51,7 +49,7 @@ class LvlGroupController(SheetsControllerBase[LvlGroupRow]):
             return rows[0]
         raise ValueError(f"Group '{group}' not found in level groups.")
 
-    def set_level(self, group: str, level: int):
+    def set_level(self, group: str, level: int) -> None:
         """Sets the level of a given group."""
         row = self.get_level_row(group)
         if not row:

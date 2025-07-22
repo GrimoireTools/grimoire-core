@@ -17,33 +17,28 @@ class VictoryPointsRow(Row):
     Description: str
     Points: int
     Objectives: JsonData[str, int]  # {<obj_name>: points}
-    Contributions: JsonData[
-        str, Contribution
-    ]  # {user_id (str): {name: ..., points: ...}}
+    Contributions: JsonData[str, Contribution]  # {user_id (str): {name: ..., points: ...}}
     Active: int
 
     def user_contribution(self: Self, user_id: int) -> tuple[str, int]:
-        """
-        Returns the contribution of a user: the name of their PJ and the amount contributed.
-        """
+        """Return the contribution of a user: the name of their PJ and the amount contributed."""
         str_id = str(user_id)
-        if str_id in self.Contributions.keys():
-            return self.Contributions[str_id]["name"], self.Contributions[str_id][
-                "points"
-            ]
+        if str_id in self.Contributions:
+            return self.Contributions[str_id]["name"], self.Contributions[str_id]["points"]
         else:
             return "Nope", 0
 
     def add_points(self: Self, user_id: int, amount: int):
         """
-        Adds points to the row.
+        Add points to the row.
+
         Returns the previous and new point contributions of the contributing PJ.
         """
         old = 0
         new = amount
         str_id = str(user_id)
         self.Points += amount
-        if str_id in self.Contributions.keys():
+        if str_id in self.Contributions:
             old = self.Contributions[str_id]["points"]
             new = old + amount
             self.Contributions[str_id]["points"] = new
@@ -52,10 +47,8 @@ class VictoryPointsRow(Row):
             self.Contributions[str_id] = {"name": pj.Name, "points": new}
         return old, new
 
-    def change_objective(self, obj_name: str, obj_pts: int):
-        """
-        Adds a mission to the row.
-        """
+    def change_objective(self, obj_name: str, obj_pts: int) -> None:
+        """Add a mission to the row."""
         # Ensure that the objectives field is a dictionary
         if not isinstance(self.Objectives, JsonData):
             self.Objectives = JsonData({})
@@ -67,10 +60,8 @@ class VictoryPointsRow(Row):
             # If the mission_name does not exist, create a new entry
             self.Objectives[obj_name] = obj_pts
 
-    def remove_objective(self, obj_name: str):
-        """
-        Removes a mission from the row.
-        """
+    def remove_objective(self, obj_name: str) -> None:
+        """Remove a mission from the row."""
         # Ensure that the objectives field is a dictionary
         if not isinstance(self.Objectives, JsonData):
             self.Objectives = JsonData({})
@@ -81,11 +72,11 @@ class VictoryPointsRow(Row):
 
 
 class VictoryPointsController(SheetsControllerBase[VictoryPointsRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(MODIFIERS_SHEET_ID, VictoryPointsRow)
 
     def get_mission_row(self, name: str) -> VictoryPointsRow:
-        """Gets the modifiers row for a given user_id."""
+        """Get the modifiers row for a given user_id."""
         try:
             return self.find_rows_with_values({"Mission_name": name})[0]
         except (ValueError, DataNotFoundError, IndexError):

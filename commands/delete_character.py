@@ -49,7 +49,7 @@ class DeleteCharacterCommands(Cog):
         death_level: int = SlashOption(
             "level-alcanzado", "Nivel en que estaba el PJ al morir o retirarse", True
         ),
-    ):
+    ) -> None:
         user_id = not_none(interaction.user).id
         # Eliminar el personaje
         sh_pjs = PJsController()

@@ -68,7 +68,7 @@ class EarnIncomeCommands(Cog):
             "skill",
             "Skill utilizada. Trained Only.",
             True,
-            choices=[sk_name for sk_name in LORELESS_SKILLS],
+            choices=list(LORELESS_SKILLS),
         ),
         downtime_used: int = SlashOption(
             "downtime-used",
@@ -300,7 +300,7 @@ def income_message(
     DC: int,
     dice: int,
     income: float,
-):
+) -> str:
 
     skill_name = skill.Skill_name
     skill_msg = skill.modifiers_description(mods, extra_bonus)

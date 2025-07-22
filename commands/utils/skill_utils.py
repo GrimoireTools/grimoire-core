@@ -8,7 +8,7 @@ from level_bonuses import PROF_BONUSES
 ALTERNATE = True
 
 
-def nat_20_1_message(dice_result: int):
+def nat_20_1_message(dice_result: int) -> str:
     if dice_result == 20:
         return "**Nat 20!** "
     elif dice_result == 1:
@@ -72,7 +72,7 @@ def fb(bonus: int, bold: bool = False) -> str:
     return f"{color}{bonus:+}{RESET}"
 
 
-def format_diceroll(dice: int, total: int):
+def format_diceroll(dice: int, total: int) -> str:
     RED = "\033[1;31m"
     CYAN = "\033[1;36m"
     WHITE = "\033[1;37m"
@@ -94,9 +94,6 @@ def ability_param(ability_name: str):
 def filter_lores(lore_subname: str, user_id: int | None) -> list[str]:
     if len(lore_subname) == 0:
         LoreSubnames().udpate_lore_subnames()
-    if user_id:
-        lores = LoreSubnames().user_lore_subnames(user_id)
-    else:
-        lores = LoreSubnames().all_lore_subnames()
+    lores = LoreSubnames().user_lore_subnames(user_id) if user_id else LoreSubnames().all_lore_subnames()
 
     return [a for a in lores if a.lower().startswith(lore_subname.lower())]

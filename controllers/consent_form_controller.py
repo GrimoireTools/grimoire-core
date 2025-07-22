@@ -105,9 +105,7 @@ class ConsentFormRow(Row):
     Feedback: str  # ¿Te gustaría comentar sobre algun de estos temas o sobre alguno que no se haya abordado aquí? Si es así, ¿cuál/es?
 
     def notable_options(self) -> list[str]:
-        """
-        Devuelve una lista de opciones que son notables (no "Sí").
-        """
+        """Devuelve una lista de opciones que son notables (no "Sí")."""
         notable_options = []
         for col, description in COLUMN_DESCRIPTIONS.items():
             if col in non_consent_options:
@@ -120,13 +118,11 @@ class ConsentFormRow(Row):
 
 
 class ConsentFormController(SheetsControllerBase[ConsentFormRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(CONSENT_FORM_SHEET_ID, ConsentFormRow, CONSENT_FORM_DOC_NAME)
 
     def get_latest_response(self, discord_id: int) -> ConsentFormRow | None:
-        """
-        Devuelve las última respuesta de un usuario, o None si no ha respondido.
-        """
+        """Devuelve las última respuesta de un usuario, o None si no ha respondido."""
         try:
             rows = self.find_rows_with_values(
                 {

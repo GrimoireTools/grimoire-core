@@ -6,7 +6,7 @@ from .utils import DataNotFoundError
 class ProficiencyControllerBase(SheetsControllerBase[RowType]):
     _prof_row_name: str
 
-    def __init__(self, sheet_id: int, cls: type[RowType], prof_row_name: str):
+    def __init__(self, sheet_id: int, cls: type[RowType], prof_row_name: str) -> None:
         super().__init__(sheet_id, cls)
         self._prof_row_name = prof_row_name
 
