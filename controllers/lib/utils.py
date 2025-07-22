@@ -4,7 +4,7 @@ from typing import Any, Self
 from gspread.exceptions import APIError
 from nextcord import SlashOption, Interaction
 from loguru import logger
-from typing import TypeVar, Any
+from typing import TypeVar
 
 from .varenv import getVar
 
@@ -92,7 +92,6 @@ def parse_float_arg(num: str) -> float:
 
 def gp_to_coin_list(num: float) -> CoinsList:
     """Given an amount of gold, returns its representation in coins, minimizing the total amount of coins."""
-
     num = (1 if num >= 0 else -1) * int(round(abs(float(num)) * 100))
 
     pp = num // 1000
@@ -132,7 +131,8 @@ def check_results(DC: int, result: int, dice: int) -> int:
 
 def result_name(result: int) -> str:
     """Given a success value from 0 to 3,
-    returns the string name representation of the success degree."""
+    returns the string name representation of the success degree.
+    """
     return ["fallo crítico", "fallo", "éxito", "éxito crítico"][result]
 
 
@@ -231,10 +231,10 @@ def try_command(func):
             return await func(self, interaction, *args, **kwargs)
         except DataNotFoundError as e:
             await interaction.followup.send(f"DataNotFoundError: {e}")
-        except NoneError as e:
+        except NoneError:
             await interaction.followup.send("None Error: not_none found None value")
         except APIError as e:
-            await interaction.followup.send(f"Google API Error: {str(e)}. Prueba de nuevo en unos minutos.")
+            await interaction.followup.send(f"Google API Error: {e!s}. Prueba de nuevo en unos minutos.")
 
     return try_command_func
 

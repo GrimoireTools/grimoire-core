@@ -1,6 +1,5 @@
 from typing import (
     Generic,
-    Type,
 )
 from .utils import DataNotFoundError, column_to_num
 from gspread.worksheet import Worksheet
@@ -9,10 +8,10 @@ from .singleton import Singleton
 from .row import RowType
 import json
 import gspread
-from varenv import getVar
+from varenv import get_var
 from loguru import logger
 
-credentials = json.loads(getVar("GOOGLE"), strict=False)
+credentials = json.loads(get_var("GOOGLE"), strict=False)
 
 
 gc = gspread.auth.service_account_from_dict(credentials)
@@ -33,7 +32,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
 
     DATA: list[list[Value]]
     sheet: Worksheet
-    row_type: Type[RowType]
+    row_type: type[RowType]
     marker_col: int = 1  # Columna que se revisa para saber si la fila existe
 
     def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Megamarch"):

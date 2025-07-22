@@ -55,13 +55,13 @@ class SalaryCommands(Cog):
         sh_pjs.set_row(pj)
 
         await interaction.followup.send(
-            (
+
                 f"{pj.Name}: Misión nivel {level} completada!"
                 f"\n Se te suma el sueldo de la misión:"
                 f" {sueldo_gp: .2f}gp (ahora tienes {new_money: .2f}gp)"
                 f"\n Se te suman {sueldo_dt} días de dt "
                 f"(ahora tienes {pj.Downtime} dias de dt)"
-            )
+
         )
         await caliban_speaks(interaction, 50, "mission")
 
@@ -86,11 +86,11 @@ class SalaryCommands(Cog):
         sh_pjs.set_row(pj)
 
         return await interaction.followup.send(
-            (
+
                 f"{pj.Name}: Turno nivel {level} no jugado!"
                 f"\n Se te suma el sueldo de existir:"
                 f" {sueldo_gp: .2f}gp (ahora tienes {new_money: .2f}gp)"
                 f"\n Se te suman {sueldo_dt} días de dt "
                 f"(ahora tienes {pj.Downtime} dias de dt)"
-            )
+
         )

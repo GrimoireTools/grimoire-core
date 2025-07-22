@@ -81,5 +81,5 @@ class MoneyCommands(Cog):
         coins = sh.set_money(user_id, pj.calc_money() + amount)
 
         return await interaction.followup.send(
-            (f"{pj.Name} obtiene {amount:.2f}gp. Ahora tiene {coins.pretty_print()}, **Total: {coins.total():.2f}gp**")
+            f"{pj.Name} obtiene {amount:.2f}gp. Ahora tiene {coins.pretty_print()}, **Total: {coins.total():.2f}gp**"
         )

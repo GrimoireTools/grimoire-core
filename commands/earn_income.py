@@ -1,4 +1,3 @@
-from loguru import logger
 from commands.utils.skill_utils import filter_lores
 from controllers.lib.cog import standard_command, Cog
 from typing import Any, Self

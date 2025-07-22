@@ -15,9 +15,9 @@ Pasos:
     - PJ
 """
 
-from typing import Self, Sequence
+from typing import Self
+from collections.abc import Sequence
 
-from loguru import logger
 from controllers.cemetery_controller import CemeteryController, CemeteryRow
 from controllers.lib.cog import standard_command, Cog
 from nextcord import Interaction, SlashOption
@@ -31,15 +31,24 @@ from controllers.skills_controller import SkillsController
 
 
 class DeleteCharacterCommands(Cog):
-
-    @standard_command("Manda un PJ al cementerio y elimina sus datos secundarios (skills, mods, etc)")
+    @standard_command(
+        "Manda un PJ al cementerio y elimina sus datos secundarios (skills, mods, etc)"
+    )
     async def retire(
         self: Self,
         interaction: Interaction,
-        death_turn: int = SlashOption("turno-de-retiro", "Numero de turno en que el PJ fué retirado o murió", True),
-        death_narrator: str = SlashOption("narrador-de-muerte", "Narrador responsable de la muerte del PJ", True),
-        death_cause: str = SlashOption("causa-de-muerte", "Enemigo o situación causante de la muerte del PJ", True),
-        death_level: int = SlashOption("level-alcanzado", "Nivel en que estaba el PJ al morir o retirarse", True),
+        death_turn: int = SlashOption(
+            "turno-de-retiro", "Numero de turno en que el PJ fué retirado o murió", True
+        ),
+        death_narrator: str = SlashOption(
+            "narrador-de-muerte", "Narrador responsable de la muerte del PJ", True
+        ),
+        death_cause: str = SlashOption(
+            "causa-de-muerte", "Enemigo o situación causante de la muerte del PJ", True
+        ),
+        death_level: int = SlashOption(
+            "level-alcanzado", "Nivel en que estaba el PJ al morir o retirarse", True
+        ),
     ):
         user_id = not_none(interaction.user).id
         # Eliminar el personaje
@@ -49,7 +58,9 @@ class DeleteCharacterCommands(Cog):
 
         # Copiar el personaje al cementerio
         sh_cemetery = CemeteryController()
-        cemetery_row = CemeteryRow.from_pj_row(pj, f"T{death_turn}", death_narrator, death_cause, death_level)
+        cemetery_row = CemeteryRow.from_pj_row(
+            pj, f"T{death_turn}", death_narrator, death_cause, death_level
+        )
         sh_cemetery.insert_row(cemetery_row)
         # Eliminar todas las filas de skills
         try:
@@ -77,7 +88,9 @@ class DeleteCharacterCommands(Cog):
         except DataNotFoundError:
             pass
         # Enviar mensaje de confirmación
-        await interaction.followup.send(f"El PJ {pj.Name} ha sido retirado del juego y enviado al cementerio.")
+        await interaction.followup.send(
+            f"El PJ {pj.Name} ha sido retirado del juego y enviado al cementerio."
+        )
 
 
 def group_row_indexes(rows: Sequence[Row]) -> list[list[int]]:

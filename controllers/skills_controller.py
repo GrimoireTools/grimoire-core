@@ -1,7 +1,6 @@
-from typing import Tuple
 from PF2eData import SKILLS, Ability, Prof, Skill
 from controllers.lib.prof_controller import ProficiencyControllerBase
-from controllers.lib.row import Row, r_int
+from controllers.lib.row import Row
 from controllers.lib.singleton import Singleton
 from controllers.lib.utils import not_none
 from controllers.modifiers_controller import ModifiersRow
@@ -53,7 +52,6 @@ def skill_mod_type(skill: Skill | SkillRow | str) -> Ability:
     """
     Devuelve el tipo de modificador
     """
-
     if isinstance(skill, SkillRow):
         skill = skill.Skill_name
     if skill in SKILLS:
@@ -89,7 +87,6 @@ class LoreSubnames(metaclass=Singleton):
 
     def udpate_lore_subnames(self) -> None:
         """Updates the lore subnames in the proficiency sheet."""
-
         user_col = SkillRow.col_index("Discord_id")
         skill_col = SkillRow.col_index("Skill_name")
 

@@ -3,7 +3,7 @@ from loguru import logger
 from nextcord.ext import commands  # type: ignore
 import sys
 from commands import setup_all_commands
-from varenv import getVar
+from varenv import get_var
 from icecream import install, ic
 
 # Logging
@@ -12,7 +12,7 @@ logger.add(sys.stderr, colorize=True)
 install()
 ic.configureOutput(includeContext=True)
 
-BOT_TOKEN = getVar("TOKEN")
+BOT_TOKEN = get_var("TOKEN")
 
 bot = commands.Bot()
 

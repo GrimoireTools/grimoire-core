@@ -1,6 +1,6 @@
 from PF2eData import Ability, Prof, Save
 from controllers.lib.prof_controller import ProficiencyControllerBase
-from controllers.lib.row import Row, r_int
+from controllers.lib.row import Row
 from level_bonuses import PROF_BONUSES
 
 SAVES_SHEET_ID = 1756443107

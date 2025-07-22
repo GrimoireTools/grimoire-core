@@ -1,8 +1,7 @@
 import nextcord
 from PF2eData import PROF, SKILL_ICONS
-from icecream import ic
 from controllers.saves_controller import SaveRow
-from controllers.skills_controller import LoreSubnames, SkillRow, SkillsController
+from controllers.skills_controller import LoreSubnames, SkillRow
 from controllers.lib.utils import not_none
 from level_bonuses import PROF_BONUSES
 
@@ -74,9 +73,9 @@ def fb(bonus: int, bold: bool = False) -> str:
 
 
 def format_diceroll(dice: int, total: int):
-    RED = f"\033[1;31m"
-    CYAN = f"\033[1;36m"
-    WHITE = f"\033[1;37m"
+    RED = "\033[1;31m"
+    CYAN = "\033[1;36m"
+    WHITE = "\033[1;37m"
     RESET = "\033[0m"
     color = RED if dice == 1 else CYAN if dice == 20 else WHITE
     return f"{color}{total}{RESET}"

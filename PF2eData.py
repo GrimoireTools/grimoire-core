@@ -1,6 +1,6 @@
 from collections import defaultdict
 import json
-from typing import Any, Callable, Generic, Literal, Self, Tuple, Type, TypeVar, TypedDict
+from typing import Literal
 
 
 RELIGIONS: list[str] = [
@@ -125,7 +125,7 @@ ANCESTRIES: list[str] = [
 
 
 Ability = Literal["Str", "Dex", "Con", "Int", "Wis", "Cha"]
-Skill = Literal[  # noqa: W503
+Skill = Literal[
     "Perception",
     "Acrobatics",
     "Arcana",
@@ -176,11 +176,11 @@ SKILLS: dict[Skill, Ability] = {
     "Survival": ABILITIES.Wis,
     "Thievery": ABILITIES.Dex,
 }
-LORELESS_SKILLS: list[Skill] = [sk for sk in SKILLS.keys() if sk != "Lore"]
+LORELESS_SKILLS: list[Skill] = [sk for sk in SKILLS if sk != "Lore"]
 
 
 Save = Literal["Fortitude", "Reflex", "Will"]
-SAVES: list[Tuple[Save, Ability]] = [
+SAVES: list[tuple[Save, Ability]] = [
     ("Fortitude", ABILITIES.Con),
     ("Reflex", ABILITIES.Dex),
     ("Will", ABILITIES.Wis),

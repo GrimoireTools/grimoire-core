@@ -1,7 +1,5 @@
 from typing import Any, Self
 from controllers.lib.cog import standard_command, Cog
-from controllers.lib.utils import not_none
-from controllers.pjs_controller import PJsController
 from controllers.victory_pts_controller import VictoryPointsController, VictoryPointsRow
 from nextcord import Interaction, Member, SlashOption
 
@@ -41,7 +39,9 @@ class VictoryPointsCommands(Cog):
         sh = VictoryPointsController()
         mission_row = sh.get_mission_row(mission_name)
         if mission_row is None:
-            return await interaction.followup.send(f"No se ha encontrado la misión *{mission_name}*.")
+            return await interaction.followup.send(
+                f"No se ha encontrado la misión *{mission_name}*."
+            )
         message = f"**Misión:** {mission_row.Mission_name} ({mission_row.Points} pts)\n"
         objectives_sorted = sorted(mission_row.Objectives.items(), key=lambda x: x[1])
         for objective, pts in objectives_sorted:
@@ -55,18 +55,23 @@ class VictoryPointsCommands(Cog):
         interaction: Interaction,
         mission_name: str = SlashOption("nombre-mision", "Nombre de la misión", True),
         objective_name: str = SlashOption(
-            "nombre-objetivo", "Nombre del objetivo de puntos. Se pueden añadir mas con /add_objective", True
+            "nombre-objetivo",
+            "Nombre del objetivo de puntos. Se pueden añadir mas con /add_objective",
+            True,
         ),
-        objective_pts: int = SlashOption("pts-objetivo", "Meta de puntos del objetivo", True),
+        objective_pts: int = SlashOption(
+            "pts-objetivo", "Meta de puntos del objetivo", True
+        ),
     ) -> None:
         global ACTIVE_MISSION_NAMES
         sh = VictoryPointsController()
         missions = sh.get_all_rows()
         mission_names = [r.Mission_name for r in missions]
         if mission_name in mission_names:
-            await interaction.followup.send(f"*{mission_name}* ya está registrado en la lista de misiones.")
+            await interaction.followup.send(
+                f"*{mission_name}* ya está registrado en la lista de misiones."
+            )
         else:
-
             sh.insert_row(
                 VictoryPointsRow(
                     Mission_name=mission_name,
@@ -86,33 +91,45 @@ class VictoryPointsCommands(Cog):
         self: Self,
         interaction: Interaction,
         mission_name: str = SlashOption("nombre-mision", "Nombre de la misión", True),
-        objective_name: str = SlashOption("nombre-objetivo", "Nombre del objetivo de puntos", True),
-        objective_pts: int = SlashOption("pts-objetivo", "Meta de puntos del objetivo", True),
+        objective_name: str = SlashOption(
+            "nombre-objetivo", "Nombre del objetivo de puntos", True
+        ),
+        objective_pts: int = SlashOption(
+            "pts-objetivo", "Meta de puntos del objetivo", True
+        ),
     ) -> None:
         sh = VictoryPointsController()
         mission_row = sh.get_mission_row(mission_name)
         mission_row.change_objective(objective_name, objective_pts)
         sh.set_row(mission_row)
-        await interaction.followup.send(f"Se ha añadido el objetivo {objective_name} a la misión *{mission_name}*.")
+        await interaction.followup.send(
+            f"Se ha añadido el objetivo {objective_name} a la misión *{mission_name}*."
+        )
 
     @standard_command("Elimina un objetivo de una misión de pts de victoria.")
     async def remove_objective(
         self: Self,
         interaction: Interaction,
         mission_name: str = SlashOption("nombre-mision", "Nombre de la misión", True),
-        objective_name: str = SlashOption("nombre-objetivo", "Nombre del objetivo de puntos", True),
+        objective_name: str = SlashOption(
+            "nombre-objetivo", "Nombre del objetivo de puntos", True
+        ),
     ) -> None:
         sh = VictoryPointsController()
         mission_row = sh.get_mission_row(mission_name)
         mission_row.remove_objective(objective_name)
         sh.set_row(mission_row)
-        await interaction.followup.send(f"Se ha eliminado el objetivo {objective_name} de la misión *{mission_name}*.")
+        await interaction.followup.send(
+            f"Se ha eliminado el objetivo {objective_name} de la misión *{mission_name}*."
+        )
 
     @standard_command("Añade puntos de victoria a una misión.")
     async def victory_points(
         self: Self,
         interaction: Interaction,
-        points: int = SlashOption("pts", "Puntos de victoria a añadir (o quitar, si es negativo)", True),
+        points: int = SlashOption(
+            "pts", "Puntos de victoria a añadir (o quitar, si es negativo)", True
+        ),
         mission_name: str = SlashOption("nombre-mision", "Nombre de la misión", True),
         target: Member = SlashOption(
             "usuario-target",
@@ -144,7 +161,7 @@ class VictoryPointsCommands(Cog):
             plural = len(completed_objectives) > 1
             completion_msg += "".join(
                 [
-                    f"¡Se ha{"n" if plural else ""} completado {"los" if plural else "el"} objetivo{'s' if plural else ''} ",
+                    f"¡Se ha{'n' if plural else ''} completado {'los' if plural else 'el'} objetivo{'s' if plural else ''} ",
                     ", ".join(completed_objectives),
                     "!\n",
                 ]
@@ -153,7 +170,7 @@ class VictoryPointsCommands(Cog):
             plural = len(uncompleted_objectives) > 1
             completion_msg += "".join(
                 [
-                    f"¡Se ha{"n" if plural else ""} fallado {"los" if plural else "el"} objetivo{'s' if plural else ''} ",
+                    f"¡Se ha{'n' if plural else ''} fallado {'los' if plural else 'el'} objetivo{'s' if plural else ''} ",
                     ", ".join(uncompleted_objectives),
                     "!\n",
                 ]
@@ -162,11 +179,11 @@ class VictoryPointsCommands(Cog):
         name, contr = mission.user_contribution(user_id)
 
         return await interaction.followup.send(
-            (
-                f"{name} {"añade" if points >= 0 else "quita"} {abs(points)} puntos de victoria a la misión *{mission_name}*.\n"
+
+                f"{name} {'añade' if points >= 0 else 'quita'} {abs(points)} puntos de victoria a la misión *{mission_name}*.\n"
                 f"Total de puntos de victoria: {old_total} -> {mission.Points}\n"
                 f"Contribución de {name}: {old_contr} -> {new_contr}\n{completion_msg}"
-            )
+
         )
 
     @standard_command("Muestra los contribudores a una misión de pts de victoria.")
@@ -179,7 +196,11 @@ class VictoryPointsCommands(Cog):
         mission_row = sh.get_mission_row(mission_name)
         message = f"**Contribuyentes a la misión:** {mission_row.Mission_name} ({mission_row.Points} pts)\n"
         contributors_sorted = sorted(
-            [(v["name"], v["points"]) for _, v in mission_row.Contributions.items() if v["points"] != 0],
+            [
+                (v["name"], v["points"])
+                for _, v in mission_row.Contributions.items()
+                if v["points"] != 0
+            ],
             key=lambda x: x[1],
             reverse=True,
         )
@@ -192,8 +213,12 @@ class VictoryPointsCommands(Cog):
     @remove_objective.on_autocomplete("mission_name")
     @victory_points.on_autocomplete("mission_name")
     @mission_contributors.on_autocomplete("mission_name")
-    async def active_mission_names_options(self, interaction: Interaction, input: str) -> Any:
+    async def active_mission_names_options(
+        self, interaction: Interaction, input: str
+    ) -> Any:
         names = ACTIVE_MISSION_NAMES
         if input:
-            names = [name for name in ACTIVE_MISSION_NAMES if input.lower() in name.lower()]
+            names = [
+                name for name in ACTIVE_MISSION_NAMES if input.lower() in name.lower()
+            ]
         await interaction.response.send_autocomplete(names)

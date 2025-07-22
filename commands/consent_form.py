@@ -1,3 +1,10 @@
+"""Commands for managing player consent forms.
+
+This module provides Discord slash commands for checking consent form responses
+and notifying players who haven't completed the required forms. It handles
+player mentions and displays consent-related triggers privately to moderators.
+"""
+
 from typing import Any, Self
 
 from nextcord import Interaction, Member, SlashOption
@@ -6,24 +13,31 @@ from controllers.lib.cog import Cog, standard_command
 
 
 def player(x: int) -> SlashOption:
-    """
-    Returns a SlashOption for a player.
-    """
+    """Make a default SlashOption for a player."""
     return SlashOption(f"jugador_{x}", required=False, default=None)
 
 
+PLAYER_1 = player(1)
+PLAYER_2 = player(2)
+PLAYER_3 = player(3)
+PLAYER_4 = player(4)
+PLAYER_5 = player(5)
+
+
 class ConsentFormCommands(Cog):
+    """Commands related to the consent form for players."""
 
     @standard_command("Muestra las respuestas del formulario de consentimiento y avisa a quienes no la han rellenado")
     async def consent_form(
         self: Self,
         interaction: Interaction,
-        player_1: Member = player(1),
-        player_2: Member = player(2),
-        player_3: Member = player(3),
-        player_4: Member = player(4),
-        player_5: Member = player(5),
+        player_1: Member = PLAYER_1,
+        player_2: Member = PLAYER_2,
+        player_3: Member = PLAYER_3,
+        player_4: Member = PLAYER_4,
+        player_5: Member = PLAYER_5,
     ) -> Any:
+        """Check consent form responses for specified players and notify those who haven't completed it."""
         r = interaction.followup.send(
             "Buscando respuestas del formulario de consentimiento. Esto puede tardar unos segundos..."
         )
@@ -45,7 +59,7 @@ class ConsentFormCommands(Cog):
             else:
                 notable_options = response.notable_options()
                 if len(notable_options) > 0:
-                    triggers.append(f"Los triggers de {player.nick} son:\n- {"\n- ".join(notable_options)}")
+                    triggers.append(f"Los triggers de {player.nick} son:\n- {'\n- '.join(notable_options)}")
                 else:
                     triggers.append(f"{player.nick} no tiene triggers en el formulario de consentimiento.")
 

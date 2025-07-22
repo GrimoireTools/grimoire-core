@@ -2,7 +2,7 @@ from typing import Any, Self
 from nextcord import Interaction, SlashOption
 
 import dndice
-from PF2eData import LORELESS_SKILLS, PROF, SKILLS, Prof, Skill
+from PF2eData import LORELESS_SKILLS, PROF, Prof, Skill
 from commands.utils.skill_utils import *
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none

@@ -4,9 +4,9 @@ from abc import ABC
 from collections import OrderedDict
 from dataclasses import dataclass, field
 import types
-from typing import Any, Dict, Generic, Literal, Type, TypeVar, Union, get_args, get_origin, get_type_hints
+from typing import Any, Generic, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
 import json
-from .utils import num_to_column, column_to_num
+from .utils import num_to_column
 
 Col = int | str
 Value = str | int | float
@@ -42,12 +42,12 @@ class Row(ABC):
     __index = -1
 
     @classmethod
-    def from_dict(cls: Type[T], row: dict[str, Value | None]) -> T:
+    def from_dict(cls: type[T], row: dict[str, Value | None]) -> T:
         """Creates a new instance of the class from a dictionary."""
         return cls(**row)
 
     @classmethod
-    def from_list(cls: Type[T], row: list[Value]) -> T:
+    def from_list(cls: type[T], row: list[Value]) -> T:
         """Creates a new instance of the class from a list"""
         hints = get_type_hints(cls)
         keys = list(hints.keys())
@@ -96,7 +96,8 @@ class Row(ABC):
 
     def get_index(self) -> int:
         """Returns the 0-based index of the row in the sheet
-        or -1 if the row has not been added to the sheet yet"""
+        or -1 if the row has not been added to the sheet yet
+        """
         return self.__index
 
     def _cast_value(self, name: str, value: Value) -> Value:
@@ -202,7 +203,7 @@ class Row(ABC):
                     curr_range.append(val)
         app_range(col_start, col_end, curr_range)
 
-        return [{"range": range, "values": [values]} for range, values in zip(coord_ranges, val_ranges)]
+        return [{"range": range, "values": [values]} for range, values in zip(coord_ranges, val_ranges, strict=False)]
 
 
 def rfield(default: T | None = None) -> T:
@@ -221,7 +222,7 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
-class JsonData(Dict[K, V], Generic[K, V]):
+class JsonData(dict[K, V], Generic[K, V]):
     """A dictionary that can be serialized to JSON."""
 
     def __init__(self, data=None):

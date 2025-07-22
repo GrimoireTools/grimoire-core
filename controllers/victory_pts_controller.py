@@ -1,8 +1,8 @@
-from typing import Any, Self, Tuple, TypedDict
+from typing import Self, TypedDict
 from controllers.pjs_controller import PJsController
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import JsonData, Row
-from controllers.lib.utils import DataNotFoundError, not_none
+from controllers.lib.utils import DataNotFoundError
 
 MODIFIERS_SHEET_ID = 1986112206
 
@@ -14,18 +14,23 @@ class Contribution(TypedDict):
 
 class VictoryPointsRow(Row):
     Mission_name: str
+    Description: str
     Points: int
     Objectives: JsonData[str, int]  # {<obj_name>: points}
-    Contributions: JsonData[str, Contribution]  # {user_id (str): {name: ..., points: ...}}
+    Contributions: JsonData[
+        str, Contribution
+    ]  # {user_id (str): {name: ..., points: ...}}
     Active: int
 
-    def user_contribution(self: Self, user_id: int) -> Tuple[str, int]:
+    def user_contribution(self: Self, user_id: int) -> tuple[str, int]:
         """
         Returns the contribution of a user: the name of their PJ and the amount contributed.
         """
         str_id = str(user_id)
         if str_id in self.Contributions.keys():
-            return self.Contributions[str_id]["name"], self.Contributions[str_id]["points"]
+            return self.Contributions[str_id]["name"], self.Contributions[str_id][
+                "points"
+            ]
         else:
             return "Nope", 0
 
@@ -85,5 +90,5 @@ class VictoryPointsController(SheetsControllerBase[VictoryPointsRow]):
             return self.find_rows_with_values({"Mission_name": name})[0]
         except (ValueError, DataNotFoundError, IndexError):
             raise DataNotFoundError(
-                f"Esta misión no existe. Usa /add_mission para añadirla a la lista de misiones."
+                "Esta misión no existe. Usa /add_mission para añadirla a la lista de misiones."
             ) from None

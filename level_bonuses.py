@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 from PF2eData import PROF, Prof
 from controllers.pjs_controller import get_cached_level
 

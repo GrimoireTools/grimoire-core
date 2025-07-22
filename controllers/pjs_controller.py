@@ -1,11 +1,15 @@
-from typing import Any, Literal, Self, Type, TypeVar, TypedDict
+from typing import Self, TypeVar, TypedDict
 
 from loguru import logger
 
 from controllers.lib.utils import gp_to_coin_list, CoinsList, DataNotFoundError
 from controllers.lib.base_controller import SheetsControllerBase, Value
 from controllers.lib.row import Row
-from controllers.lvl_groups_controller import LEVEL_GROUPS, LevelGroup, get_cached_lvl_group
+from controllers.lvl_groups_controller import (
+    LEVEL_GROUPS,
+    LevelGroup,
+    get_cached_lvl_group,
+)
 
 PJ_SHEET_ID = 0
 
@@ -31,7 +35,7 @@ class PJRow(Row):
     Level_group: LevelGroup
 
     @classmethod
-    def from_coin_list(cls: Type[Self], coin_list: list[int] | CoinsList) -> Self:
+    def from_coin_list(cls: type[Self], coin_list: list[int] | CoinsList) -> Self:
         """
         Convierte una lista de monedas a una fila
         """
@@ -86,7 +90,10 @@ class PJRow(Row):
             self.Languages += f", {language}"
 
     def _ranges(
-        self, row: int, force_set: dict[str, bool] | None = None, force_skip: dict[str, bool] | None = None
+        self,
+        row: int,
+        force_set: dict[str, bool] | None = None,
+        force_skip: dict[str, bool] | None = None,
     ) -> list[dict[str, str | list[Value]]]:
         """
         Convierte la fila a un rango de Google Sheets
@@ -102,6 +109,7 @@ class PjCache(TypedDict):
     Caliban: bool
     Name: str
     Level_group: LevelGroup
+    Class: str
 
 
 PJ_CACHE: dict[str, PjCache] = {}
@@ -123,6 +131,7 @@ def cache_pjs(pj_rows: list[PJRow]):
             "Caliban": pj.Caliban_met == 1,
             "Name": pj.Name,
             "Level_group": pj.Level_group,
+            "Class": pj.Class,
         }
         for pj in pj_rows
     }
@@ -164,6 +173,11 @@ def get_cached_group(user_id: str | int) -> LevelGroup:
     return _get_cache(user_id, "Level_group", LEVEL_GROUPS[0])
 
 
+def get_cached_class(user_id: str | int) -> str:
+    """Returns the user's character's class."""
+    return _get_cache(user_id, "Class", "Desconocido")
+
+
 class PJsController(SheetsControllerBase[PJRow]):
     def __init__(self):
         super().__init__(PJ_SHEET_ID, PJRow)
@@ -184,8 +198,10 @@ class PJsController(SheetsControllerBase[PJRow]):
     def get_pj_row(self, user_id: int) -> PJRow:
         try:
             return self.get_row(self.find_pj_row_index(user_id))
-        except ValueError as e:
-            raise DataNotFoundError(f"Character with user_id {user_id} not found") from None
+        except ValueError:
+            raise DataNotFoundError(
+                f"Character with user_id {user_id} not found"
+            ) from None
 
     def character_exists(self, user_id: int) -> bool:
         try:

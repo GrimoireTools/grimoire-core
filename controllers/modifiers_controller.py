@@ -1,6 +1,6 @@
 from PF2eData import Ability
 from controllers.lib.base_controller import SheetsControllerBase
-from controllers.lib.row import Row, r_int
+from controllers.lib.row import Row
 from controllers.lib.utils import DataNotFoundError, not_none
 
 MODIFIERS_SHEET_ID = 41455486
@@ -33,7 +33,7 @@ class ModifiersController(SheetsControllerBase[ModifiersRow]):
             return self.get_row(self.find_pj_row_index(user_id))
         except (ValueError, DataNotFoundError):
             raise DataNotFoundError(
-                f"Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
+                "Tu personaje no tiene modificadores de habilidad definidos. Definelos con /set_modifiers."
             ) from None
 
     def mods_row_exists(self, user_id: int) -> bool:

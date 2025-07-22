@@ -1,6 +1,5 @@
-from typing import Optional
 from controllers.lib.base_controller import SheetsControllerBase
-from controllers.lib.row import Row, r_int
+from controllers.lib.row import Row
 
 SALARY_SHEET_ID = 1681819644
 

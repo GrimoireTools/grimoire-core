@@ -8,7 +8,7 @@ from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import not_none
 from controllers.pjs_controller import PJsController
 from controllers.saves_controller import SavesController, save_mod_type
-from controllers.modifiers_controller import ModifiersController, ModifiersRow
+from controllers.modifiers_controller import ModifiersController
 
 CODEBLOCK_LANG = "ansi"
 

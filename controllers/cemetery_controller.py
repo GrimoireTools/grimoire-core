@@ -1,4 +1,4 @@
-from typing import Self, Type
+from typing import Self
 
 from controllers.lib.utils import CoinsList
 from controllers.lib.base_controller import SheetsControllerBase
@@ -40,7 +40,7 @@ class CemeteryRow(Row):
 
     @classmethod
     def from_pj_row(
-        cls: Type[Self],
+        cls: type[Self],
         pj_row: PJRow,
         death_turn: str,
         death_narrator: str,

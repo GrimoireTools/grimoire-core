@@ -1,5 +1,5 @@
 from controllers.lib.base_controller import SheetsControllerBase
-from controllers.lib.row import Row, r_int
+from controllers.lib.row import Row
 
 CONSENT_FORM_SHEET_ID = 1780466578
 CONSENT_FORM_DOC_NAME = "CRO Consent Form"
