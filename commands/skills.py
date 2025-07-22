@@ -1,9 +1,11 @@
+"""Commands for managing character skills in a Pathfinder 2e game."""
+
 from typing import Any, Self
 from nextcord import Interaction, SlashOption
 
 import dndice
 from PF2eData import LORELESS_SKILLS, PROF, Prof, Skill
-from commands.utils.skill_utils import *
+from commands.utils.skill_utils import ability_param, skill_description, format_diceroll, filter_lores
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import DataNotFoundError, not_none
 from controllers.lvl_groups_controller import LEVEL_GROUPS, LevelGroup
@@ -15,9 +17,11 @@ CODEBLOCK_LANG = "ansi"
 
 
 class SkillCommands(Cog):
+    """Commands for managing character skills."""
 
     @standard_command("Muestra la información de todas las skills de tu personaje")
     async def all_skills(self: Self, interaction: Interaction, extra_info: bool = False) -> Any:
+        """Display all skills of the character."""
         user_id = not_none(interaction.user).id
         mods_row = ModifiersController().get_mods_row(user_id)
         all_skill_rows = SkillsController().get_all_prof_rows(user_id)
@@ -34,6 +38,7 @@ class SkillCommands(Cog):
 
     @standard_command("Muestra la información de todas las lore skills de tu personaje")
     async def all_lores(self: Self, interaction: Interaction, extra_info: bool = False) -> Any:
+        """Display all lore skills of the character."""
         user_id = not_none(interaction.user).id
         mods_row = ModifiersController().get_mods_row(user_id)
         all_skill_rows = SkillsController().get_all_prof_rows(user_id)
@@ -60,20 +65,16 @@ class SkillCommands(Cog):
         ),
         extra_info: bool = False,
     ) -> Any:
+        """Display information about a specific skill of the character."""
         user_id = not_none(interaction.user).id
         mod_type = skill_mod_type(skill_name)
         mods_row = ModifiersController().get_mods_row(user_id)
         skill_row = SkillsController().get_prof_row(user_id, skill_name)
 
         message: str = f"## {skill_name} de {mods_row.PJ_name}:\n"
-        message += f"```{CODEBLOCK_LANG}\n{skill_description(
-            mods_row[mod_type],
-            mod_type,
-            skill_name,
-            skill_row,
-            extra_info,
-            user_id
-        )}```"
+        message += f"```{CODEBLOCK_LANG}\n{
+            skill_description(mods_row[mod_type], mod_type, skill_name, skill_row, extra_info, user_id)
+        }```"
 
         return await interaction.followup.send(message)
 
@@ -88,6 +89,7 @@ class SkillCommands(Cog):
         ),
         extra_info: bool = False,
     ) -> Any:
+        """Display information about a specific lore skill of the character."""
         skill_name = f"Lore ({lore_subname})"
 
         user_id = not_none(interaction.user).id
@@ -96,14 +98,9 @@ class SkillCommands(Cog):
         skill_row = SkillsController().get_prof_row(user_id, skill_name)
 
         message: str = f"## {skill_name} de {mods_row.PJ_name}:\n"
-        message += f"```{CODEBLOCK_LANG}\n{skill_description(
-            mods_row[mod_type],
-            mod_type,
-            skill_name,
-            skill_row,
-            extra_info,
-            user_id
-        )}```"
+        message += f"```{CODEBLOCK_LANG}\n{
+            skill_description(mods_row[mod_type], mod_type, skill_name, skill_row, extra_info, user_id)
+        }```"
 
         return await interaction.followup.send(message)
 
@@ -136,6 +133,7 @@ class SkillCommands(Cog):
             default="",
         ),
     ) -> Any:
+        """Define the proficiency of a specific skill for the character."""
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
         sh_skills = SkillsController()
@@ -181,6 +179,7 @@ class SkillCommands(Cog):
         survival: Prof = ability_param("survival"),
         thievery: Prof = ability_param("thievery"),
     ) -> Any:
+        """Define the proficiencies of all skills for the character."""
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
         sh_skills = SkillsController()
@@ -258,6 +257,7 @@ class SkillCommands(Cog):
             default="",
         ),
     ) -> Any:
+        """Define the proficiency of a specific lore skill for the character."""
         user_id = not_none(interaction.user).id
         skill = f"Lore ({lore_subname})"
 
@@ -294,6 +294,7 @@ class SkillCommands(Cog):
         wisdom: int,
         charisma: int,
     ) -> Any:
+        """Define the ability modifiers for the character."""
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
         sh_mods = ModifiersController()
@@ -332,6 +333,7 @@ class SkillCommands(Cog):
         ),
         extra_info: bool = False,
     ) -> Any:
+        """Roll a skill check with the selected skill."""
         user_id = not_none(interaction.user).id
 
         message = skill_roll_message(
@@ -360,6 +362,7 @@ class SkillCommands(Cog):
         ),
         extra_info: bool = False,
     ) -> Any:
+        """Roll a lore skill check with the selected lore skill."""
         skill = f"Lore ({lore_subname})"
         user_id = not_none(interaction.user).id
 
@@ -397,6 +400,7 @@ class SkillCommands(Cog):
             choices=LEVEL_GROUPS,
         ),
     ) -> Any:
+        """Display the top n characters with the best selected skill."""
         sh_skills = SkillsController()
         sh_mods = ModifiersController()
         if group is None:
@@ -448,6 +452,7 @@ class SkillCommands(Cog):
             choices=LEVEL_GROUPS,
         ),
     ) -> Any:
+        """Display the top n characters with the best lore skill."""
         skill = f"Lore ({lore_subname})"
         sh_skills = SkillsController()
         sh_mods = ModifiersController()
@@ -479,12 +484,14 @@ class SkillCommands(Cog):
     @set_lore.on_autocomplete("lore_subname")
     @lore_ranking.on_autocomplete("lore_subname")
     async def autocomplete_set_lore_subname(self: Self, interaction: Interaction, lore_subname: str) -> Any:
+        """Autocomplete for lore subname in set_lore command."""
         filtered_lores: list[str] = filter_lores(lore_subname, None)[:25]
         await interaction.response.send_autocomplete(filtered_lores)
 
     @lore.on_autocomplete("lore_subname")
     @roll_lore.on_autocomplete("lore_subname")
     async def autocomplete_lore_subname(self: Self, interaction: Interaction, lore_subname: str) -> Any:
+        """Autocomplete for lore subname in lore command."""
         if interaction.user is None:
             raise ValueError("Null user")
         user_id: int = interaction.user.id
@@ -494,6 +501,7 @@ class SkillCommands(Cog):
 
 
 def skill_roll_message(user_id: int, skill_name: Skill | str, extra_mod: int = 0, extra_info: bool = False) -> str:
+    """Generate a message for a skill roll."""
     mods_row = ModifiersController().get_mods_row(user_id)
     skill_row = SkillsController().get_prof_row(user_id, skill_name)
 
@@ -514,4 +522,10 @@ def skill_roll_message(user_id: int, skill_name: Skill | str, extra_mod: int = 0
     total_mod = ability_bonus + prof_bonus + other_bonus + extra_mod
     result = dice + total_mod
     skill_msg = skill_description(ability_bonus, mod_type, skill_name, skill_row, extra_info, user_id, extra_mod)
-    return f"# {mods_row.PJ_name} {skill_name} roll: \n```{CODEBLOCK_LANG}\n{skill_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"
+    return (
+        f"# {mods_row.PJ_name} {skill_name} roll: \n"
+        f"```{CODEBLOCK_LANG}\n"
+        f"{skill_msg}\n"
+        f"# Resultado: {format_diceroll(dice, result)}\n"
+        f"Details:[d20{total_mod:+} ({dice})]```"
+    )

@@ -1,3 +1,5 @@
+"""Consent Form Controller Module."""
+
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import Row
 
@@ -59,6 +61,8 @@ non_consent_options = [
 
 
 class ConsentFormRow(Row):
+    """Row for a consent form response."""
+
     # - Sección 0
     Timestamp: str  # Marca temporal
     Discord_id: str  # ID de discord
@@ -102,7 +106,9 @@ class ConsentFormRow(Row):
     Death_scenes: str  # Escenas explícitas de daños o muerte
     Sec4_other: str  # ¿Algún otro tema que incluirías aquí?
     # - Sección 5: Feedback
-    Feedback: str  # ¿Te gustaría comentar sobre algun de estos temas o sobre alguno que no se haya abordado aquí? Si es así, ¿cuál/es?
+    # ¿Te gustaría comentar sobre algun de estos temas o sobre alguno que no se haya abordado aquí?
+    # Si es así, ¿cuál/es?
+    Feedback: str
 
     def notable_options(self) -> list[str]:
         """Devuelve una lista de opciones que son notables (no "Sí")."""
@@ -118,6 +124,8 @@ class ConsentFormRow(Row):
 
 
 class ConsentFormController(SheetsControllerBase[ConsentFormRow]):
+    """Controller for managing consent form responses."""
+
     def __init__(self) -> None:
         super().__init__(CONSENT_FORM_SHEET_ID, ConsentFormRow, CONSENT_FORM_DOC_NAME)
 

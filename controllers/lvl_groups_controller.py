@@ -1,3 +1,5 @@
+"""Lvl Groups Controller Module."""
+
 from typing import Literal
 from loguru import logger
 from controllers.lib.base_controller import SheetsControllerBase
@@ -9,6 +11,8 @@ LEVEL_GROUPS: list[LevelGroup] = ["Lvl Alto", "Lvl Bajo"]
 
 
 class LvlGroupRow(Row):
+    """Row for a level group."""
+
     Group: LevelGroup
     Level: int
 
@@ -17,7 +21,7 @@ LEVEL_GROUPS_CACHE: dict[str, int] = {}
 
 
 def cache_lvl_groups(lvl_group_rows: list[LvlGroupRow], force: LvlGroupRow | None = None) -> None:
-    """Caches the names of each character."""
+    """Cache the names of each character."""
     global LEVEL_GROUPS_CACHE
     LEVEL_GROUPS_CACHE = {gr.Group: gr.Level for gr in lvl_group_rows}
     if force:
@@ -26,7 +30,7 @@ def cache_lvl_groups(lvl_group_rows: list[LvlGroupRow], force: LvlGroupRow | Non
 
 
 def get_cached_lvl_group(group: LevelGroup) -> int:
-    """Returns the group's level."""
+    """Return the group's level."""
     global LEVEL_GROUPS_CACHE
     if group not in LEVEL_GROUPS_CACHE:
         LvlGroupController()
@@ -34,6 +38,8 @@ def get_cached_lvl_group(group: LevelGroup) -> int:
 
 
 class LvlGroupController(SheetsControllerBase[LvlGroupRow]):
+    """Controller for managing level groups."""
+
     def __init__(self) -> None:
         super().__init__(LEVEL_GROUPS_SHEET_ID, LvlGroupRow)
 
@@ -43,14 +49,14 @@ class LvlGroupController(SheetsControllerBase[LvlGroupRow]):
         cache_lvl_groups(rows)
 
     def get_level_row(self, group: str) -> LvlGroupRow:
-        """Returns the level of a given group."""
+        """Return the level of a given group."""
         rows = self.find_rows_with_values({"Group": group})
         if rows:
             return rows[0]
         raise ValueError(f"Group '{group}' not found in level groups.")
 
     def set_level(self, group: str, level: int) -> None:
-        """Sets the level of a given group."""
+        """Set the level of a given group."""
         row = self.get_level_row(group)
         if not row:
             raise ValueError(f"Group '{group}' not found in level groups.")

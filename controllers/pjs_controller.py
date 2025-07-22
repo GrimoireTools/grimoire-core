@@ -1,3 +1,5 @@
+"""PJs Controller Module."""
+
 from typing import Self, TypeVar, TypedDict
 
 from loguru import logger
@@ -15,6 +17,8 @@ PJ_SHEET_ID = 0
 
 
 class PJRow(Row):
+    """Row for a Player Character (PJ) entry."""
+
     Name: str
     Discord_id: str
     Player: str
@@ -91,6 +95,8 @@ class PJRow(Row):
 
 
 class PjCache(TypedDict):
+    """Cache for a Player Character (PJ)."""
+
     Level: int
     Caliban: bool
     Name: str
@@ -102,14 +108,14 @@ PJ_CACHE: dict[str, PjCache] = {}
 
 
 def clear_pj_cache() -> None:
-    """Clears the cached PJs."""
+    """Clear the cached PJs."""
     global PJ_CACHE
     PJ_CACHE = {}
     logger.debug("Cleared PJ cache.")
 
 
 def cache_pjs(pj_rows: list[PJRow]) -> None:
-    """Caches the list of characters that have met Caliban."""
+    """Cache the list of characters that have met Caliban."""
     global PJ_CACHE
     PJ_CACHE = {
         pj.Discord_id: {
@@ -128,7 +134,7 @@ K = TypeVar("K")
 
 
 def _get_cache[K](user_id: str | int, key: str, default: K) -> K:
-    """Helper function to get a value from the cache."""
+    """Get a value from the cache."""
     global PJ_CACHE
     user_id = str(user_id)
     if user_id not in PJ_CACHE:
@@ -140,31 +146,33 @@ def _get_cache[K](user_id: str | int, key: str, default: K) -> K:
 
 
 def get_caliban_met(user_id: str | int) -> bool:
-    """Returns True if the character has met Caliban."""
+    """Return True if the character has met Caliban."""
     return _get_cache(user_id, "Caliban", False)
 
 
 def get_cached_level(user_id: str | int) -> int:
-    """Returns the user's character's level."""
+    """Return the user's character's level."""
     return _get_cache(user_id, "Level", 1)
 
 
 def get_cached_name(user_id: str | int) -> str:
-    """Returns the user's character's name."""
+    """Return the user's character's name."""
     return _get_cache(user_id, "Name", "Desconocido")
 
 
 def get_cached_group(user_id: str | int) -> LevelGroup:
-    """Returns the user's character's group."""
+    """Return the user's character's group."""
     return _get_cache(user_id, "Level_group", LEVEL_GROUPS[0])
 
 
 def get_cached_class(user_id: str | int) -> str:
-    """Returns the user's character's class."""
+    """Return the user's character's class."""
     return _get_cache(user_id, "Class", "Desconocido")
 
 
 class PJsController(SheetsControllerBase[PJRow]):
+    """Controller for managing Player Characters (PJs)."""
+
     def __init__(self) -> None:
         super().__init__(PJ_SHEET_ID, PJRow)
 
@@ -173,21 +181,22 @@ class PJsController(SheetsControllerBase[PJRow]):
         rows = self.get_all_rows()
         cache_pjs(rows)
 
-    def set_money(self, user_id: int, total_money: float):
+    def set_money(self, user_id: int, total_money: float) -> CoinsList:
+        """Set the money for a character, updating the row."""
         row = self.find_pj_row_index(user_id)
         coin_list = gp_to_coin_list(total_money)
         self.set_row(PJRow.from_coin_list(coin_list), row)
         return coin_list
 
     def get_pj_row(self, user_id: int) -> PJRow:
+        """Get the PJ row for a given user_id."""
         try:
             return self.get_row(self.find_pj_row_index(user_id))
         except ValueError:
-            raise DataNotFoundError(
-                f"Character with user_id {user_id} not found"
-            ) from None
+            raise DataNotFoundError(f"Character with user_id {user_id} not found") from None
 
     def character_exists(self, user_id: int) -> bool:
+        """Check if a character exists for a given user_id."""
         try:
             return self.get_pj_row(user_id) is not None
         except DataNotFoundError:

@@ -13,7 +13,7 @@ from typing import Any, Self
 from collections.abc import Callable, Awaitable
 
 import nextcord
-from nextcord import ForumChannel, SlashOption
+from nextcord import ForumChannel, ForumTag, SlashOption
 from controllers.lib.utils import not_none
 from controllers.lib.cog import Cog, standard_command
 
@@ -24,6 +24,20 @@ import asyncio
 MISSION_CHANNEL_ID = 1203377771812888656
 MISSION_FORUM_ID = 1268419186149818399
 MASTERS_ROLE_ID = 1163525259962626219
+
+GM_TAGS: dict[int, str] = {
+    393913641834905601: "Argi",
+    137000318440439808: "Edo",
+    380098969709314054: "Luciano",
+    137054851791060992: "Cris",
+    779413237565227051: "Tommy",
+    190073840607559680: "Fran",
+    334582584967430144: "Taco",
+    329424775678001152: "Jua",
+    360212346137739265: "Tommy",
+    952634365484077116: "Nilo",
+    302902786494824449: "Axl",
+}
 
 
 class AnnouncementsCommands(Cog):
@@ -76,6 +90,13 @@ class AnnouncementsCommands(Cog):
             return None
         return guild, user, channel
 
+    def _find_tag(self, tags: list[ForumTag], name: str) -> ForumTag | None:
+        """Find a tag by name in the list of tags."""
+        for tag in tags:
+            if tag.name.lower() == name.lower():
+                return tag
+        return None
+
     @standard_command("Genera un aviso de misión.")
     async def mission_notice(
         self: Self,
@@ -88,7 +109,6 @@ class AnnouncementsCommands(Cog):
         tags: str = SlashOption(
             "tags",
             "tags de la misión, separados por comas (ej. 'exploración, combate')",
-            default="",
         ),
         duration: str = SlashOption("duración", "Duración de la mesa", default="4-5 horas"),
         players: str = "4-5",
@@ -119,10 +139,13 @@ class AnnouncementsCommands(Cog):
             )
             return
         tag_list = [tag.strip() for tag in tags.split(",")] if tags else []
+
+        # Ensure description is wrapped in a code block if not already
+        desc = description.strip()
+        desc = f"```ansi\n{desc}\n```" if not (desc.startswith("```") and desc.endswith("```")) else desc
+
         announcement = f"""# __T{turn} Lvl {tier}: *{mission_name}*__
-```ansi
-{description}
-```
+{desc}
 Narrador: {narrator.mention}
 Tamaño de party: {players}
 Duración: {duration}
@@ -133,10 +156,24 @@ Tags: {", ".join(tag_list) if tag_list else "Ninguno"}
         # Create forum thread
         forum_tags = mission_forum.available_tags
 
+        gm_tag = self._find_tag(forum_tags, GM_TAGS.get(narrator.id, "GM"))
+        if not gm_tag:
+            await interaction.followup.send(
+                "Error: Could not find a valid GM tag for the narrator.",
+                ephemeral=True,
+            )
+            return
+        tier_tag = self._find_tag(forum_tags, f"tier {tier.lower()}")
+        if not tier_tag:
+            await interaction.followup.send(
+                f"Error: Could not find a valid tier tag for '{tier}'.",
+                ephemeral=True,
+            )
+            return
         thread = await mission_forum.create_thread(
             name=f"T{turn} {tier.title()}: {mission_name}",
             content=announcement,
-            applied_tags=forum_tags[0:2],  # Use first two tags as an example
+            applied_tags=[gm_tag, tier_tag],  # Use first two tags as an example
         )
         await thread.add_user(narrator)
         announcement += f"Foro: {thread.mention}\n\n**Participantes:**"

@@ -1,3 +1,5 @@
+"""Commands for managing in-game salary and downtime."""
+
 from typing import Any, Self
 from controllers.lib.cog import standard_command, Cog
 from controllers.lib.utils import default_user_option, not_none
@@ -32,6 +34,7 @@ AFK_GOLD = [
 
 
 class SalaryCommands(Cog):
+    """Commands for managing in-game salary and downtime."""
 
     @standard_command("Gana el downtime y dinero esperado de terminar una misión")
     async def salary(
@@ -41,6 +44,7 @@ class SalaryCommands(Cog):
         turno: int = SlashOption("turno", description="Turno en el que se completó la misión", required=True),
         target: Member = default_user_option,
     ) -> Any:
+        """Receive the expected salary and downtime for completing a mission."""
         user_id = not_none(interaction.user).id if target is None else target.id
         sh_pjs = PJsController()
         pj = sh_pjs.get_pj_row(user_id)
@@ -55,13 +59,11 @@ class SalaryCommands(Cog):
         sh_pjs.set_row(pj)
 
         await interaction.followup.send(
-
-                f"{pj.Name}: Misión nivel {level} completada!"
-                f"\n Se te suma el sueldo de la misión:"
-                f" {sueldo_gp: .2f}gp (ahora tienes {new_money: .2f}gp)"
-                f"\n Se te suman {sueldo_dt} días de dt "
-                f"(ahora tienes {pj.Downtime} dias de dt)"
-
+            f"{pj.Name}: Misión nivel {level} completada!"
+            f"\n Se te suma el sueldo de la misión:"
+            f" {sueldo_gp: .2f}gp (ahora tienes {new_money: .2f}gp)"
+            f"\n Se te suman {sueldo_dt} días de dt "
+            f"(ahora tienes {pj.Downtime} dias de dt)"
         )
         await caliban_speaks(interaction, 50, "mission")
 
@@ -74,6 +76,7 @@ class SalaryCommands(Cog):
         ),
         target: Member = default_user_option,
     ) -> Any:
+        """Receive the expected salary and downtime for a turn not played."""
         user_id = not_none(interaction.user).id if target is None else target.id
         sh_pjs = PJsController()
         pj = sh_pjs.get_pj_row(user_id)
@@ -86,11 +89,9 @@ class SalaryCommands(Cog):
         sh_pjs.set_row(pj)
 
         return await interaction.followup.send(
-
-                f"{pj.Name}: Turno nivel {level} no jugado!"
-                f"\n Se te suma el sueldo de existir:"
-                f" {sueldo_gp: .2f}gp (ahora tienes {new_money: .2f}gp)"
-                f"\n Se te suman {sueldo_dt} días de dt "
-                f"(ahora tienes {pj.Downtime} dias de dt)"
-
+            f"{pj.Name}: Turno nivel {level} no jugado!"
+            f"\n Se te suma el sueldo de existir:"
+            f" {sueldo_gp: .2f}gp (ahora tienes {new_money: .2f}gp)"
+            f"\n Se te suman {sueldo_dt} días de dt "
+            f"(ahora tienes {pj.Downtime} dias de dt)"
         )

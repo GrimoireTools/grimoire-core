@@ -1,3 +1,14 @@
+"""
+Provides slash commands for managing and displaying character languages.
+
+This module defines commands to list and add languages for Pathfinder 2e characters
+using Discord interactions. It includes the LanguagesCommands cog with commands
+to show a user's known languages and to add new languages to their character.
+
+Important classes/functions:
+    - LanguagesCommands: Cog containing language management commands.
+"""
+
 from typing import Any, Self
 from nextcord import Interaction, SlashOption, Member
 
@@ -8,6 +19,7 @@ from controllers.lib.utils import default_user_option
 
 
 class LanguagesCommands(Cog):
+    """Commands for managing character languages in Pathfinder 2e."""
 
     @standard_command("Muestra la lista de tus lenguajes")
     async def languages(
@@ -15,6 +27,7 @@ class LanguagesCommands(Cog):
         interaction: Interaction,
         target: Member = default_user_option,
     ) -> Any:
+        """Display the languages known by the specified player or the command issuer."""
         user_id: int = target.id if target is not None else interaction.user.id
         sh = PJsController()
         pj = sh.get_pj_row(user_id)
@@ -33,6 +46,7 @@ class LanguagesCommands(Cog):
         addedlanguage: str = SlashOption("lenguaje", "Lenguaje que quieres añadir a tu PJ", True, choices=LANGUAGES),
         target: Member = default_user_option,
     ) -> Any:
+        """Add a new language to the character's known languages."""
         user_id: int = target.id if target is not None else interaction.user.id
         sh = PJsController()
         pj = sh.get_pj_row(user_id)

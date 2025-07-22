@@ -1,3 +1,5 @@
+"""Modifiers Controller Module."""
+
 from PF2eData import Ability
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import Row
@@ -7,6 +9,8 @@ MODIFIERS_SHEET_ID = 41455486
 
 
 class ModifiersRow(Row):
+    """Row for a modifiers entry."""
+
     PJ_name: str
     Discord_id: str
     STR: int
@@ -17,6 +21,7 @@ class ModifiersRow(Row):
     CHA: int
 
     def __getitem__(self, ability: Ability) -> int:
+        """Get the modifier for a given ability."""
         key = ability.upper()
         if key in self.__dict__:
             return not_none(getattr(self, key))
@@ -24,11 +29,13 @@ class ModifiersRow(Row):
 
 
 class ModifiersController(SheetsControllerBase[ModifiersRow]):
+    """Controller for managing modifiers."""
+
     def __init__(self) -> None:
         super().__init__(MODIFIERS_SHEET_ID, ModifiersRow)
 
     def get_mods_row(self, user_id: int) -> ModifiersRow:
-        """Gets the modifiers row for a given user_id."""
+        """Get the modifiers row for a given user_id."""
         try:
             return self.get_row(self.find_pj_row_index(user_id))
         except (ValueError, DataNotFoundError):
@@ -37,7 +44,7 @@ class ModifiersController(SheetsControllerBase[ModifiersRow]):
             ) from None
 
     def mods_row_exists(self, user_id: int) -> bool:
-        """Checks if the modifiers row exists for a given user_id."""
+        """Check if the modifiers row exists for a given user_id."""
         try:
             r = self.get_mods_row(user_id)
             return r is not None and True

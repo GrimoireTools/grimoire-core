@@ -1,3 +1,5 @@
+"""Controller for managing saves in a Google Sheets document."""
+
 from PF2eData import Ability, Prof, Save
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row
@@ -7,6 +9,8 @@ SAVES_SHEET_ID = 1756443107
 
 
 class SaveRow(Row):
+    """Row for a save entry."""
+
     PJ_name: str
     Discord_id: str
     Save_name: Save
@@ -15,6 +19,7 @@ class SaveRow(Row):
     Bonus_description: str
 
     def mod_type(self) -> Ability:
+        """Get the modifier type for the save."""
         return save_mod_type(self.Save_name)
 
     def prof_bonus(self) -> int:
@@ -26,6 +31,8 @@ class SaveRow(Row):
 
 
 class SavesController(ProficiencyControllerBase[SaveRow]):
+    """Controller for managing saves."""
+
     def __init__(self) -> None:
         super().__init__(SAVES_SHEET_ID, SaveRow, "Save_name")
 

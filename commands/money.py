@@ -1,13 +1,16 @@
+"""Commands for managing in-game money transactions."""
+
 from typing import Any, Self
 from nextcord import SlashOption, Member, Interaction
 
 from controllers.pjs_controller import PJRow, PJsController
 from controllers.lib.utils import not_none, parse_float_arg
 from controllers.lib.cog import Cog, standard_command
-from commands.utils.caliban_utils import *
+from commands.utils.caliban_utils import caliban_speaks, caliban_force_speaks
 
 
 class MoneyCommands(Cog):
+    """Commands for managing in-game money transactions."""
 
     @standard_command("Resta dinero de tu cuenta. Puedes transferir a otra persona.")
     async def pay(
@@ -21,6 +24,7 @@ class MoneyCommands(Cog):
             default=None,
         ),
     ) -> Any:
+        """Pay a specified amount of money or transfer it to another player."""
         amount = parse_float_arg(amount_str)
         if amount < 0:
             return await interaction.send("Debes pagar una cantidad positiva de dinero")
@@ -49,7 +53,8 @@ class MoneyCommands(Cog):
             msg = (
                 f"{pj.Name} le paga {amount:.2f}gp a {target_pj.Name}.\n"
                 f"Dinero restante de {pj.Name}: {pj_coins.pretty_print()}, **Total: {pj_coins.total():.2f}gp**\n"
-                f"Dinero restante de {target_pj.Name}: {target_pj_coins.pretty_print()}, **Total: {target_pj_coins.total():.2f}gp**"
+                f"Dinero restante de {target_pj.Name}: {target_pj_coins.pretty_print()}, "
+                f"**Total: {target_pj_coins.total():.2f}gp**"
             )
         else:
             msg = (
@@ -71,6 +76,7 @@ class MoneyCommands(Cog):
             default=None,
         ),
     ) -> Any:
+        """Add money to the player's account or transfer to another player."""
         amount = parse_float_arg(amount_str)
         if amount < 0:
             return await interaction.send("Debes añadir una cantidad positiva de dinero")

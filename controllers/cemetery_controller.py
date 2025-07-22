@@ -1,3 +1,5 @@
+"""Cemetery Controller Module."""
+
 from typing import Self
 
 from controllers.lib.utils import CoinsList
@@ -9,6 +11,8 @@ CEMETERY_SHEET_ID = 100792464
 
 
 class CemeteryRow(Row):
+    """Row for a cemetery entry."""
+
     Name: str
     Discord_id: str
     Player: str
@@ -30,12 +34,14 @@ class CemeteryRow(Row):
     Lvl_at_death: int
 
     def to_coin_list(self) -> CoinsList:
+        """Convert the money fields to a CoinsList."""
         coin_list = [self.Money_pp, self.Money_gp, self.Money_sp, self.Money_cp]
         if None in coin_list:
             raise ValueError("Coin list incomplete")
         return CoinsList(*coin_list)  # type: ignore
 
     def calc_money(self) -> float:
+        """Calculate the total money from the coin list."""
         return self.to_coin_list().total()
 
     @classmethod
@@ -47,7 +53,7 @@ class CemeteryRow(Row):
         death_cause: str,
         lvl_at_death: int,
     ) -> Self:
-        """Convierte una fila de PJ a una fila de cementerio."""
+        """Convert a PJ row to a cemetery row."""
         return cls.from_dict(
             {
                 "Name": pj_row.Name,
@@ -74,5 +80,7 @@ class CemeteryRow(Row):
 
 
 class CemeteryController(SheetsControllerBase[CemeteryRow]):
+    """Controller for managing cemetery entries."""
+
     def __init__(self) -> None:
         super().__init__(CEMETERY_SHEET_ID, CemeteryRow)

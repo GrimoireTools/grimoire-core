@@ -1,3 +1,5 @@
+"""Controller for managing salary data in a Google Sheets document."""
+
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import Row
 
@@ -5,6 +7,8 @@ SALARY_SHEET_ID = 1681819644
 
 
 class SalaryRow(Row):
+    """Row for a salary entry."""
+
     Level: int
     Base_salary: float
     Salary: float
@@ -12,6 +16,8 @@ class SalaryRow(Row):
 
 
 class SalaryController(SheetsControllerBase[SalaryRow]):
+    """Controller for managing salary entries."""
+
     def __init__(self) -> None:
         super().__init__(SALARY_SHEET_ID, SalaryRow)
 

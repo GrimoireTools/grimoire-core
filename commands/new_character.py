@@ -1,8 +1,10 @@
+"""Commands for managing new characters in the Megamarch campaign."""
+
 from typing import Any, Self, TypedDict
 
 from loguru import logger
 import nextcord
-from nextcord import SelectOption, Interaction, SlashOption
+from nextcord import Member, SelectOption, Interaction, SlashOption
 
 
 from PF2eData import ANCESTRIES, CLASSES, HERITAGES, RELIGIONS, ARCHETYPES
@@ -14,6 +16,8 @@ from controllers.lib.utils import not_none
 
 
 class PartialCharacter(TypedDict):
+    """Partial character data for registration."""
+
     Name: str
     Discord_id: str
     Player: str
@@ -24,6 +28,8 @@ class PartialCharacter(TypedDict):
 
 
 class HeritageDropdown(nextcord.ui.Select):
+    """Dropdown for selecting a heritage for a new character."""
+
     partial_pj: PartialCharacter
 
     def __init__(self: Self, partial_pj: PartialCharacter) -> None:
@@ -40,6 +46,7 @@ class HeritageDropdown(nextcord.ui.Select):
         )
 
     async def callback(self: Self, interaction: Interaction) -> None:
+        """Handle the selection of a heritage."""
         selected_heritage: str = self.values[0]
         try:
             assert self.view is not None
@@ -69,12 +76,15 @@ class HeritageDropdown(nextcord.ui.Select):
 
 
 class RegisterDropdownView(nextcord.ui.View):
+    """View for the heritage selection dropdown."""
+
     def __init__(self: Self, heritage_dropdown: HeritageDropdown) -> None:
         super().__init__()
         self.add_item(heritage_dropdown)
 
 
 class NewCharacterCommands(Cog):
+    """Commands for registering new characters in the Megamarch campaign."""
 
     @standard_command("Registra un nuevo personaje de Megamarch.")
     async def register(
@@ -105,8 +115,15 @@ class NewCharacterCommands(Cog):
             required=True,
             choices=LEVEL_GROUPS,
         ),
+        target_user: Member | None = SlashOption(
+            "target_user",
+            "Jugador cuyo PJ se va a registrar. Si no se especifica, se usa el que ejecuta el comando.",
+            required=False,
+            default=None,
+        ),
     ) -> Any:
-        user_id = not_none(interaction.user).id
+        """Register a new character for the player."""
+        user_id = target_user.id if target_user else not_none(interaction.user).id
         sh = PJsController()
 
         if sh.character_exists(user_id):
@@ -143,6 +160,7 @@ class NewCharacterCommands(Cog):
             required=True,
         ),
     ) -> Any:
+        """Register a new archetype for the player's character or remove an existing one."""
         user_id = not_none(interaction.user).id
         sh = PJsController()
         pj: PJRow = sh.get_pj_row(user_id)
@@ -162,6 +180,7 @@ class NewCharacterCommands(Cog):
 
     @register.on_autocomplete("ascendencia")
     async def autocomplete_ancestry(self, interaction: Interaction, ancestry: str) -> Any:
+        """Autocomplete for ancestries."""
         filtered_ancestries = []
         if ancestry:
             filtered_ancestries = [a for a in ANCESTRIES if a.lower().startswith(ancestry.lower())]
@@ -169,6 +188,7 @@ class NewCharacterCommands(Cog):
 
     @register_archetype.on_autocomplete("archetype")
     async def autocomplete_archetype(self, interaction: Interaction, archetype: str) -> Any:
+        """Autocomplete for archetypes."""
         filtered_archetypes = []
         if archetype:
             filtered_archetypes = [a for a in ARCHETYPES if a.lower().startswith(archetype.lower())]

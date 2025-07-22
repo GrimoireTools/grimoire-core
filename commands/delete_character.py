@@ -20,7 +20,7 @@ from collections.abc import Sequence
 
 from controllers.cemetery_controller import CemeteryController, CemeteryRow
 from controllers.lib.cog import standard_command, Cog
-from nextcord import Interaction, SlashOption
+from nextcord import Interaction, Member, SlashOption
 
 from controllers.lib.row import Row
 from controllers.lib.utils import DataNotFoundError, not_none
@@ -45,6 +45,12 @@ class DeleteCharacterCommands(Cog):
         death_narrator: str = SlashOption("narrador-de-muerte", "Narrador responsable de la muerte del PJ", True),
         death_cause: str = SlashOption("causa-de-muerte", "Enemigo o situación causante de la muerte del PJ", True),
         death_level: int = SlashOption("level-alcanzado", "Nivel en que estaba el PJ al morir o retirarse", True),
+        target_player: Member | None = SlashOption(
+            "target_player",
+            "Jugador cuyo PJ se va a retirar. Si no se especifica, se usa el que ejecuta el comando.",
+            required=False,
+            default=None,
+        ),
     ) -> None:
         """Retire a character to the cemetery and clean up associated data.
 
@@ -61,7 +67,7 @@ class DeleteCharacterCommands(Cog):
         Raises:
             DataNotFoundError: When character data is not found in sheets.
         """
-        user_id = not_none(interaction.user).id
+        user_id = target_player.id if target_player else not_none(interaction.user).id
         # Eliminar el personaje
         sh_pjs = PJsController()
         pj = sh_pjs.get_pj_row(user_id)

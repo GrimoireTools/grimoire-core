@@ -1,22 +1,26 @@
+"""Commands for managing character saves."""
+
 from typing import Any, Self
 from nextcord import Interaction, SlashOption
 
 import dndice
 from PF2eData import PROF, SAVES, Prof, Save
-from commands.utils.skill_utils import *
+from commands.utils.skill_utils import ability_param, skill_description, format_diceroll
 from controllers.lib.cog import Cog, standard_command
 from controllers.lib.utils import not_none
 from controllers.pjs_controller import PJsController
-from controllers.saves_controller import SavesController, save_mod_type
+from controllers.saves_controller import SaveRow, SavesController, save_mod_type
 from controllers.modifiers_controller import ModifiersController
 
 CODEBLOCK_LANG = "ansi"
 
 
 class SaveCommands(Cog):
+    """Commands for managing character saves."""
 
     @standard_command("Muestra la información de todas las saves de tu personaje")
     async def all_saves(self: Self, interaction: Interaction, extra_info: bool = False) -> Any:
+        """Display all saves of the character."""
         user_id = not_none(interaction.user).id
         mods_row = ModifiersController().get_mods_row(user_id)
         all_save_rows = SavesController().get_all_prof_rows(user_id)
@@ -48,20 +52,16 @@ class SaveCommands(Cog):
         ),
         extra_info: bool = False,
     ) -> Any:
+        """Display information about a specific save of the character."""
         user_id = not_none(interaction.user).id
         mod_type = save_mod_type(save_name)
         mods_row = ModifiersController().get_mods_row(user_id)
         save_row = SavesController().get_prof_row(user_id, save_name)
 
         message: str = f"## {save_name} de {mods_row.PJ_name}:\n"
-        message += f"```{CODEBLOCK_LANG}\n{skill_description(
-            mods_row[mod_type],
-            mod_type,
-            save_name,
-            save_row,
-            extra_info,
-            user_id
-        )}```"
+        message += f"```{CODEBLOCK_LANG}\n{
+            skill_description(mods_row[mod_type], mod_type, save_name, save_row, extra_info, user_id)
+        }```"
 
         return await interaction.followup.send(message)
 
@@ -94,6 +94,7 @@ class SaveCommands(Cog):
             default="",
         ),
     ) -> Any:
+        """Define the proficiency of a specific save for the character."""
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
         sh_saves = SavesController()
@@ -132,6 +133,7 @@ class SaveCommands(Cog):
             default="No",
         ),
     ) -> Any:
+        """Define the proficiencies of all saves for the character."""
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
         sh_saves = SavesController()
@@ -196,6 +198,7 @@ class SaveCommands(Cog):
         ),
         extra_info: bool = False,
     ) -> Any:
+        """Roll a save check with the selected save."""
         user_id = not_none(interaction.user).id
 
         message = save_roll_message(
@@ -209,6 +212,7 @@ class SaveCommands(Cog):
 
 
 def save_roll_message(user_id: int, save_name: Save, extra_mod: int = 0, extra_info: bool = False) -> str:
+    """Generate a message for a save roll."""
     mods_row = ModifiersController().get_mods_row(user_id)
     save_row = SavesController().get_prof_row(user_id, save_name)
 
@@ -229,4 +233,10 @@ def save_roll_message(user_id: int, save_name: Save, extra_mod: int = 0, extra_i
     total_mod = ability_bonus + prof_bonus + other_bonus + extra_mod
     result = dice + total_mod
     save_msg = skill_description(ability_bonus, mod_type, save_name, save_row, extra_info, user_id, extra_mod)
-    return f"# {mods_row.PJ_name} {save_name} roll: \n```{CODEBLOCK_LANG}\n{save_msg}\n# Resultado: {format_diceroll(dice, result)}\nDetails:[d20{total_mod:+} ({dice})]```"
+    return (
+        f"# {mods_row.PJ_name} {save_name} roll: \n"
+        f"```{CODEBLOCK_LANG}\n"
+        f"{save_msg}\n"
+        f"# Resultado: {format_diceroll(dice, result)}\n"
+        f"Details:[d20{total_mod:+} ({dice})]```"
+    )

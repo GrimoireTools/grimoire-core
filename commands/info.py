@@ -51,7 +51,7 @@ class InfoCommands(Cog):
     async def update_group_level(
         self: Self,
         interaction: Interaction,
-        group: LevelGroup = SlashOption("level_group", required=True, choices=LEVEL_GROUPS),  # noqa: B008
+        group: LevelGroup = SlashOption("level_group", required=True, choices=LEVEL_GROUPS),
         level: int | None = None,
     ) -> Any:
         """Update the level of all characters in a specified group."""

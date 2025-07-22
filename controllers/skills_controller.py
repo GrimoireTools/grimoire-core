@@ -1,3 +1,5 @@
+"""Controller for managing skills in a Google Sheets document."""
+
 from PF2eData import SKILLS, Ability, Prof, Skill
 from controllers.lib.prof_controller import ProficiencyControllerBase
 from controllers.lib.row import Row
@@ -10,6 +12,8 @@ SAVES_SHEET_ID = 738258837
 
 
 class SkillRow(Row):
+    """Row for a skill entry."""
+
     PJ_name: str
     Discord_id: str
     Skill_name: str | Skill
@@ -18,9 +22,11 @@ class SkillRow(Row):
     Bonus_description: str
 
     def mod_type(self) -> Ability:
+        """Get the modifier type for the skill."""
         return skill_mod_type(self.Skill_name)
 
     def is_lore(self) -> bool:
+        """Check if the skill is a lore skill."""
         return self.Skill_name.lower().startswith("lore")
 
     def prof_bonus(self) -> int:
@@ -55,6 +61,8 @@ def skill_mod_type(skill: Skill | SkillRow | str) -> Ability:
 
 
 class SkillsController(ProficiencyControllerBase[SkillRow]):
+    """Controller for managing skills."""
+
     def __init__(self) -> None:
         super().__init__(SAVES_SHEET_ID, SkillRow, "Skill_name")
 
@@ -75,6 +83,8 @@ class SkillsController(ProficiencyControllerBase[SkillRow]):
 
 
 class LoreSubnames(metaclass=Singleton):
+    """Singleton class to manage lore subnames for skills."""
+
     _LORE_SUBNAMES: dict[str, list[str]]  # user_id, Lore subnames
 
     def udpate_lore_subnames(self) -> None:

@@ -1,0 +1,611 @@
+{
+    "object": "database",
+    "id": "c74240fe-0896-4455-9208-60cbbc2caa98",
+    "cover": {
+        "type": "external",
+        "external": {
+            "url": "https://www.notion.so/images/page-cover/met_emanuel_leutze.jpg"
+        }
+    },
+    "icon": {
+        "type": "emoji",
+        "emoji": "👸"
+    },
+    "created_time": "2024-02-08T02:09:00.000Z",
+    "created_by": {
+        "object": "user",
+        "id": "e98f1c74-1134-4238-b765-948eae25b6e0"
+    },
+    "last_edited_by": {
+        "object": "user",
+        "id": "168d872b-594c-818b-9ac5-0002082f9c1d"
+    },
+    "last_edited_time": "2025-07-20T15:46:00.000Z",
+    "title": [
+        {
+            "type": "text",
+            "text": {
+                "content": "PJs",
+                "link": null
+            },
+            "annotations": {
+                "bold": false,
+                "italic": false,
+                "strikethrough": false,
+                "underline": false,
+                "code": false,
+                "color": "default"
+            },
+            "plain_text": "PJs",
+            "href": null
+        }
+    ],
+    "description": [],
+    "is_inline": false,
+    "properties": {
+        "⛳ Misiones": {
+            "id": "BRH%3F",
+            "name": "⛳ Misiones",
+            "type": "relation",
+            "relation": {
+                "database_id": "c73bb2e8-86bd-4aed-9e92-24934fdef6ce",
+                "type": "dual_property",
+                "dual_property": {
+                    "synced_property_name": "PJs",
+                    "synced_property_id": "%5DSNJ"
+                }
+            }
+        },
+        "Ancestry": {
+            "id": "IcuK",
+            "name": "Ancestry",
+            "type": "multi_select",
+            "multi_select": {
+                "options": [
+                    {
+                        "id": "83feff37-8e4f-46c8-9238-4fa28a256842",
+                        "name": "Human",
+                        "color": "gray",
+                        "description": null
+                    },
+                    {
+                        "id": "4f15cfc6-e98d-4582-843a-b8218ebc07a1",
+                        "name": "Fetchling",
+                        "color": "orange",
+                        "description": null
+                    },
+                    {
+                        "id": "c8873e2a-e72c-481f-9742-f8ea7820dc25",
+                        "name": "Vanara",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "95d66e2d-2878-4b97-b058-a3371bd71d2f",
+                        "name": "Dwarf",
+                        "color": "default",
+                        "description": null
+                    },
+                    {
+                        "id": "875a4458-d8c6-490f-b42d-e66ee6391548",
+                        "name": "Kitsune",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "a62bb77a-eaa3-4244-b14b-7946162ff152",
+                        "name": "Azarketi",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "6abbd629-db34-4982-b287-1dec3a14b308",
+                        "name": "Elf",
+                        "color": "yellow",
+                        "description": null
+                    },
+                    {
+                        "id": "edc41f8e-8280-40af-819b-5256ccbb926e",
+                        "name": "Halfling",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "38fd20fd-899e-4577-9942-545d717e943a",
+                        "name": "Vishkanya",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "437fbe78-6dec-441f-ba8f-6762dc94a1d1",
+                        "name": "Kobold",
+                        "color": "brown",
+                        "description": null
+                    },
+                    {
+                        "id": "4d6066b9-3406-4362-a243-04f5ac4d5d92",
+                        "name": "Goblin",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "65de4071-310b-4c87-be0d-045054f08d9b",
+                        "name": "Catfolk",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "6b3df607-45f4-4c46-bcef-fb4d36cb5942",
+                        "name": "Orc",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "53cb30bd-bf87-468a-9b4d-59915014e39e",
+                        "name": "Poppet",
+                        "color": "orange",
+                        "description": null
+                    },
+                    {
+                        "id": "929663a4-0cf6-456b-83a8-2376dcfa3760",
+                        "name": "Leshy",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "b16eebe6-f017-46e6-92cb-381f0a480c89",
+                        "name": "Lizardfolk",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "c031c060-680d-45c0-a14f-b2e07b837ee4",
+                        "name": "Anadi",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "c80a882d-67df-44ae-9613-c5ab2ba5c677",
+                        "name": "Ratfolk",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "d1e3769d-85ac-4067-bb09-50e1128fbae0",
+                        "name": "Gnome",
+                        "color": "orange",
+                        "description": null
+                    },
+                    {
+                        "id": "a89a5e1b-1f47-4e1c-8fca-91da09e95037",
+                        "name": "Tengu",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "c1142932-eee5-4c8c-ae1b-ea130b0d4727",
+                        "name": "Awakened Animal",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "a9a548dd-abe4-463c-a2a0-c4ae00251050",
+                        "name": "Yaoguai",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "b1d1e149-0d18-41d8-a68c-ae3f624b4667",
+                        "name": "Automaton",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "c3511168-b38d-4416-bfca-5c7a3a9deb71",
+                        "name": "Conrasu",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "c261cd2a-be2f-43c4-9010-ab37984cf51b",
+                        "name": "Kholo",
+                        "color": "brown",
+                        "description": null
+                    },
+                    {
+                        "id": "dc4844a8-e257-4e3a-857e-ddfa0aa28d08",
+                        "name": "Minotaur",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "a06cf220-a8a8-44b4-85e3-37100d762005",
+                        "name": "Skeleton",
+                        "color": "brown",
+                        "description": null
+                    }
+                ]
+            }
+        },
+        "Heritage": {
+            "id": "LRxo",
+            "name": "Heritage",
+            "type": "rich_text",
+            "rich_text": {}
+        },
+        "Ciudad de Origen": {
+            "id": "MqsE",
+            "name": "Ciudad de Origen",
+            "type": "select",
+            "select": {
+                "options": [
+                    {
+                        "id": "db59b7b0-f596-46bb-b6d7-1966b55a65c2",
+                        "name": "Svalka",
+                        "color": "default",
+                        "description": null
+                    },
+                    {
+                        "id": "3d2071c8-9c5f-45ab-b667-6ba5ab5a7167",
+                        "name": "Nemeria",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "4e8e2b0f-b827-4a5b-bf29-2eacc719d347",
+                        "name": "Santa Aurora",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "df2928dc-0006-4234-be7d-e1db0efcf7e9",
+                        "name": "Asthenos",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "3f2718e7-7318-40ae-8bff-95277b3bde3d",
+                        "name": "Dera Stein",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "985e28c8-c18b-46ef-8f5f-e89d2ad060df",
+                        "name": "Todas",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "e8597a8d-c0a7-4721-9b8e-1590d7041bfd",
+                        "name": "Afuera",
+                        "color": "orange",
+                        "description": null
+                    }
+                ]
+            }
+        },
+        "Genero": {
+            "id": "SujF",
+            "name": "Genero",
+            "type": "select",
+            "select": {
+                "options": [
+                    {
+                        "id": "9632b9ea-7593-4d2e-bbc0-2c59fca4531a",
+                        "name": "Masculino",
+                        "color": "yellow",
+                        "description": null
+                    },
+                    {
+                        "id": "ef60871b-86c9-4393-b8bb-7cc5ffea0bdd",
+                        "name": "Femenino",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "e99c6e43-5973-4f7d-9569-78758c25b24e",
+                        "name": "No-Binario",
+                        "color": "orange",
+                        "description": null
+                    },
+                    {
+                        "id": "94929486-daf8-431c-888b-b9a1e1df97f1",
+                        "name": "Identifies As Male",
+                        "color": "purple",
+                        "description": null
+                    }
+                ]
+            }
+        },
+        "Edad": {
+            "id": "_moj",
+            "name": "Edad",
+            "type": "number",
+            "number": {
+                "format": "number"
+            }
+        },
+        "Religión": {
+            "id": "f%40hS",
+            "name": "Religión",
+            "type": "multi_select",
+            "multi_select": {
+                "options": [
+                    {
+                        "id": "4b90b9ec-626e-44c2-b27f-27d6d3d82764",
+                        "name": "La Labor",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "bad47c6f-4fbb-40ed-bc28-1b4c2afecf71",
+                        "name": "El Continuo",
+                        "color": "default",
+                        "description": null
+                    },
+                    {
+                        "id": "3fd1e7bf-822b-42dc-9a88-7e31dafba692",
+                        "name": "El Potencial",
+                        "color": "yellow",
+                        "description": null
+                    },
+                    {
+                        "id": "11c32d69-5ccc-4f88-a70d-a41b67893c4c",
+                        "name": "Ninguna",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "5932eb01-a18f-442b-bccc-51e47dd5831e",
+                        "name": "La Prisión",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "ecc68059-7dda-42ea-b7c1-f992bfeae1d5",
+                        "name": "El Arquitecto",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "6092f555-d176-40b4-a416-d2009d46ed98",
+                        "name": "El Camino",
+                        "color": "orange",
+                        "description": null
+                    }
+                ]
+            }
+        },
+        "Clase": {
+            "id": "pZhH",
+            "name": "Clase",
+            "type": "select",
+            "select": {
+                "options": [
+                    {
+                        "id": "c6a00463-eb99-4473-bb44-83f803f2a470",
+                        "name": "Druid",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "5e26ce4c-cc7a-4c44-8948-e3d2587e2d1e",
+                        "name": "Bard",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "18e3ceee-942a-41b9-91b2-aed1c8be7873",
+                        "name": "Psychic",
+                        "color": "orange",
+                        "description": null
+                    },
+                    {
+                        "id": "a2400563-41b7-4339-935f-6541dbe74090",
+                        "name": "Barbarian",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "c6c48547-5ef6-4bb8-a833-c0f923d67da6",
+                        "name": "Cleric",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "a13526d0-098c-4471-bf58-70dc226f9ade",
+                        "name": "Kineticist",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "32d0d7b8-3651-49b9-a75d-d7ccb79cc7ce",
+                        "name": "Witch",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "11a10bfe-6e74-465d-a0ce-e1f19e5a39d8",
+                        "name": "Magus",
+                        "color": "yellow",
+                        "description": null
+                    },
+                    {
+                        "id": "c9376260-1e68-46c4-8ab3-dfb6198e8480",
+                        "name": "Wizard",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "f3ead6ca-5f1d-4771-8695-9c2e898de103",
+                        "name": "Ranger",
+                        "color": "gray",
+                        "description": null
+                    },
+                    {
+                        "id": "b06690dd-b7af-4cfc-a389-11441c9b2bea",
+                        "name": "Sorcerer",
+                        "color": "brown",
+                        "description": null
+                    },
+                    {
+                        "id": "12411920-0f4a-42ed-95f9-937a8fcb5fa3",
+                        "name": "Inventor",
+                        "color": "brown",
+                        "description": null
+                    },
+                    {
+                        "id": "3587a2a8-ce89-4c12-a458-3c05d923e5e8",
+                        "name": "Fighter",
+                        "color": "gray",
+                        "description": null
+                    },
+                    {
+                        "id": "d2e5020f-4f56-4360-98da-3b92a1d71173",
+                        "name": "Monk",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "a7b9aed4-94c0-4284-8435-261e42440165",
+                        "name": "Alchemist",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "23cceab5-46eb-4fc1-a329-51a2ee2a57c1",
+                        "name": "Rogue",
+                        "color": "yellow",
+                        "description": null
+                    },
+                    {
+                        "id": "55a35460-7070-4e98-9734-fbb319aa9c93",
+                        "name": "Gunslinger",
+                        "color": "gray",
+                        "description": null
+                    },
+                    {
+                        "id": "896816a7-c0a9-4db5-bcac-eeee9974a27f",
+                        "name": "Investigator",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "d1e0b05b-4bc5-4c6f-915d-dee1cf91eaa6",
+                        "name": "Oracle",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "fbfd4265-bd09-4bc6-add0-3bbd2c74fa29",
+                        "name": "Swashbuckler",
+                        "color": "green",
+                        "description": null
+                    },
+                    {
+                        "id": "c9a744cb-aef1-48cf-987d-65e7d70eadad",
+                        "name": "Summoner",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "024aa139-1c6f-44f5-8db8-6b40aae8086f",
+                        "name": "Champion",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "ee5bd71c-aad3-40b8-8e8b-dfbc80a38a43",
+                        "name": "Thaumaturge",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "954044c2-b2b5-472e-8e13-a27ba5ae3ce2",
+                        "name": "Exemplar",
+                        "color": "purple",
+                        "description": null
+                    },
+                    {
+                        "id": "c8243279-8193-4917-b193-ae0d2434b44d",
+                        "name": "Animist",
+                        "color": "default",
+                        "description": null
+                    }
+                ]
+            }
+        },
+        "Estado": {
+            "id": "r%3DFK",
+            "name": "Estado",
+            "type": "multi_select",
+            "multi_select": {
+                "options": [
+                    {
+                        "id": "3fb63d39-40e4-4821-bf62-d4ff248549c0",
+                        "name": "Vivo",
+                        "color": "yellow",
+                        "description": null
+                    },
+                    {
+                        "id": "e96409be-c911-4bd7-9e3a-fc48e61784a0",
+                        "name": "Inactivo",
+                        "color": "blue",
+                        "description": null
+                    },
+                    {
+                        "id": "52e945b0-467a-4780-b310-472e9d21c3c9",
+                        "name": "Fallecido",
+                        "color": "pink",
+                        "description": null
+                    },
+                    {
+                        "id": "d0f5e375-8d03-48b9-93b2-ff6c17d4a266",
+                        "name": "NPC",
+                        "color": "orange",
+                        "description": null
+                    },
+                    {
+                        "id": "0326db2e-8a01-4a1d-979a-17be05c771da",
+                        "name": "Muerto",
+                        "color": "brown",
+                        "description": null
+                    },
+                    {
+                        "id": "62c202c0-9994-4c89-a15f-cc92e49bf92a",
+                        "name": "Retirado",
+                        "color": "red",
+                        "description": null
+                    },
+                    {
+                        "id": "622de0ec-d296-4fd1-8de1-ae5385036aa2",
+                        "name": "No-muerto",
+                        "color": "gray",
+                        "description": null
+                    }
+                ]
+            }
+        },
+        "Player": {
+            "id": "zyN%7B",
+            "name": "Player",
+            "type": "rich_text",
+            "rich_text": {}
+        },
+        "Nombre": {
+            "id": "title",
+            "name": "Nombre",
+            "type": "title",
+            "title": {}
+        }
+    },
+    "parent": {
+        "type": "block_id",
+        "block_id": "7a371bb4-2ce5-4dc2-9f9e-1bc04639a1f5"
+    },
+    "url": "https://www.notion.so/c74240fe08964455920860cbbc2caa98",
+    "public_url": "https://megamarch.notion.site/c74240fe08964455920860cbbc2caa98",
+    "archived": false,
+    "in_trash": false,
+    "request_id": "f683b505-c313-4a3c-bb40-0b94331d2719"
+}
