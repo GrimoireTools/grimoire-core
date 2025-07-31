@@ -10,6 +10,7 @@ Important Classes:
 
 from typing import (
     Generic,
+    Type,
 )
 from .utils import DataNotFoundError, column_to_num
 from gspread.worksheet import Worksheet
@@ -30,7 +31,7 @@ Col = int | str
 Value = str | int | float
 
 
-class SheetsControllerBase(Generic[RowType], metaclass=Singleton):  # noqa: UP046
+class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     """
     Base class for all sheets controllers.
 
@@ -42,10 +43,10 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):  # noqa: UP04
 
     DATA: list[list[Value]]
     sheet: Worksheet
-    row_type: type[RowType]
+    row_type: Type[RowType]
     marker_col: int = 1  # Columna que se revisa para saber si la fila existe
 
-    def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Megamarch") -> None:
+    def __init__(self, sheet_id: int, cls: Type[RowType], doc: str = "Megamarch") -> None:
         """Initialize the class with the given sheet_id and row type."""
         logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls

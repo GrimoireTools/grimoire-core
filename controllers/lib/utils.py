@@ -88,7 +88,7 @@ class NoneError(Exception):
     pass
 
 
-def not_none[T](val: T | None) -> T:
+def not_none(val: T | None) -> T:
     """Return the value if not None, otherwise raises ValueError."""
     if val is None:
         raise NoneError("Value cannot be None")

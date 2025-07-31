@@ -5,7 +5,7 @@ from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 import types
-from typing import Any, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
+from typing import Any, Generic, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
 import json
 from .utils import num_to_column
 
@@ -214,7 +214,7 @@ class Row(ABC):  # noqa: B024
         return [{"range": range, "values": [values]} for range, values in zip(coord_ranges, val_ranges, strict=False)]
 
 
-def rfield[T](default: T | None = None) -> T:
+def rfield(default: T | None = None) -> T:
     """Field definition for a row dataclass."""
     return field(default=default)  # type: ignore
 
@@ -230,7 +230,7 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
-class JsonData[K, V](dict[K, V]):
+class JsonData(dict[K, V], Generic[K, V]):
     """A dictionary that can be serialized to JSON."""
 
     def __init__(self, data: str | dict | list | None = None) -> None:

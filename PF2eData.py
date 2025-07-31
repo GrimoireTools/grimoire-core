@@ -1,6 +1,8 @@
+"""Hardcoded data for the PF2e system."""
+
 from collections import defaultdict
 import json
-from typing import Literal
+from typing import Literal, ClassVar
 
 
 RELIGIONS: list[str] = [
@@ -148,6 +150,8 @@ Skill = Literal[
 
 
 class ABILITIES:
+    """Class to hold ability names and their string representations."""
+
     Str: Ability = "Str"
     Dex: Ability = "Dex"
     Con: Ability = "Con"
@@ -220,6 +224,8 @@ Prof = Literal["Untrained", "Untr Impr", "Trained", "Expert", "Master", "Legenda
 
 
 class PROF:
+    """Class to hold proficiency levels and their string representations."""
+
     Untrained: Prof = "Untrained"
     Improvised: Prof = "Untr Impr"
     Trained: Prof = "Trained"
@@ -227,7 +233,7 @@ class PROF:
     Master: Prof = "Master"
     Legendary: Prof = "Legendary"
 
-    ICONS: dict[Prof, str] = {
+    ICONS: ClassVar[dict[Prof, str]] = {
         Untrained: "🌑",
         Improvised: "🌑",
         Trained: "🌘",
@@ -236,7 +242,7 @@ class PROF:
         Legendary: "🌕",
     }
 
-    profs_list: list[Prof] = [
+    profs_list: ClassVar[list[Prof]] = [
         Untrained,
         Improvised,
         Trained,

@@ -133,7 +133,7 @@ def cache_pjs(pj_rows: list[PJRow]) -> None:
 K = TypeVar("K")
 
 
-def _get_cache[K](user_id: str | int, key: str, default: K) -> K:
+def _get_cache(user_id: str | int, key: str, default: K) -> K:
     """Get a value from the cache."""
     global PJ_CACHE
     user_id = str(user_id)
