@@ -1,8 +1,22 @@
-"""Hardcoded data for the PF2e system."""
+"""Provide constants and type definitions for Pathfinder 2e data.
+
+This module defines lists, dictionaries, and type aliases for use in Pathfinder 2e
+character creation and gameplay. It includes ancestries, classes, skills, proficiencies,
+item categories, archetypes, and related mappings.
+
+
+Important classes/functions:
+    ABILITIES
+    PROF
+    HERITAGES
+    SKILLS
+    SAVES
+"""
 
 from collections import defaultdict
 import json
-from typing import Literal, ClassVar
+from typing import Literal
+from typing import ClassVar
 
 
 RELIGIONS: list[str] = [

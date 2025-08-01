@@ -1,21 +1,22 @@
 """Clase Singleton para crear instancias únicas de clases."""
 
-from typing import Any
+from typing import ClassVar, TypeVar, Any
 
 
-from typing import ClassVar
+T = TypeVar("T")
 
 
 class Singleton(type):
     """Metaclass para crear instancias únicas de clases."""
 
-    _instances: ClassVar[dict] = {}
+    _instances: ClassVar[dict[type, object]] = {}
 
-    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
+    def __call__(cls: type[T], *args: Any, **kwargs: Any) -> T:
         """Return the singleton instance of the class."""
-        if cls not in cls._instances:
-            cls._instances[cls] = super().__call__(*args, **kwargs)
-        instance = cls._instances[cls]
-        if hasattr(instance, "fetch_data"):
-            instance.fetch_data()
-        return instance
+        if cls not in Singleton._instances:
+            Singleton._instances[cls] = super().__call__(*args, **kwargs)
+        instance = Singleton._instances[cls]
+        fetch_data = getattr(instance, "fetch_data", None)
+        if callable(fetch_data):
+            fetch_data()
+        return instance  # type: ignore
