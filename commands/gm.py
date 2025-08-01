@@ -14,8 +14,9 @@ class GMCommands(Cog):
     async def gm_info(self: Self, interaction: Interaction, user: Member = default_user_option) -> Any:
         """Display the GM information for a user."""
         user_id = not_none(interaction.user).id if user is None else user.id
-        gm = GMController().get_gm_row(user_id)
-        if gm.gm_row_exists(user_id):
+        sh = GMController()
+        if sh.gm_row_exists(user_id):
+            gm = sh.get_gm_row(user_id)
             return await interaction.followup.send(
                 f"GM Info de {gm.Emoji} {gm.Name}: {gm.Tag_name}, {gm.Notion_mission_tag}"
             )

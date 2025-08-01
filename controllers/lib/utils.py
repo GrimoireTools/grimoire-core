@@ -4,9 +4,10 @@ import functools
 from math import ceil
 from typing import Any, Self
 from gspread.exceptions import APIError
-from nextcord import SlashOption, Interaction
+from nextcord import SlashOption, Interaction, Member, User
 from loguru import logger
 from typing import TypeVar
+
 
 from .varenv import get_var
 
@@ -21,6 +22,12 @@ default_user_option = SlashOption(
 
 class DataNotFoundError(Exception):
     """Custom exception for data not found in the sheet."""
+
+    pass
+
+
+class StopError(Exception):
+    """Custom exception to stop the execution of a command."""
 
     pass
 
@@ -266,6 +273,8 @@ def try_command(func: Any) -> Any:
             return await func(self, interaction, *args, **kwargs)
         except DataNotFoundError as e:
             await interaction.followup.send(f"DataNotFoundError: {e}")
+        except StopError as e:
+            await interaction.followup.send(f"Error: {e}")
         except NoneError:
             await interaction.followup.send("None Error: not_none found None value")
         except APIError as e:
@@ -292,3 +301,16 @@ def column_to_num(column: str) -> int:
         num += letters.index(letter) + 1
 
     return num - 1
+
+
+MASTERS_ROLE_ID = 1163525259962626219
+
+
+def check_narrator(user: Member | User | None) -> Member:
+    """Check if the interaction user is a narrator."""
+    narrator = not_none(user)
+    if not isinstance(narrator, Member):
+        raise StopError("You must be a member of the server to create mission notices.")
+    if not any(role.id == MASTERS_ROLE_ID for role in narrator.roles):
+        raise StopError("You don't have the narrator role.")
+    return narrator
