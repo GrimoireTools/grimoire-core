@@ -106,7 +106,7 @@ class AnnouncementsCommands(Cog):
         turn: int,
         mission_name: str,
         description: str,
-        tier: str = SlashOption("tier", "tier de la misión", choices=["alto", "bajo"]),
+        tier: str = SlashOption("tier", "tier de la misión", choices=["Alto", "Bajo"]),
         disponibility: str = SlashOption("disponibilidad", "Disponibilidad de la mesa"),
         tags: str = SlashOption(
             "tags",
