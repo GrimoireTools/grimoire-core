@@ -9,6 +9,6 @@ ENV UV_LINK_MODE=copy
 
 WORKDIR /bot
 COPY pyproject.toml uv.lock* /bot/
-RUN uv sync --frozen --no-dev --upgrade
+RUN uv sync --no-dev --upgrade
 COPY . /bot
 CMD uv run main.py
