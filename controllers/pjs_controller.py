@@ -127,7 +127,7 @@ def cache_pjs(pj_rows: list[PJRow]) -> None:
         }
         for pj in pj_rows
     }
-    logger.debug(f"Cached PJ data: {PJ_CACHE}")
+    logger.debug("Cached PJ data")
 
 
 K = TypeVar("K")

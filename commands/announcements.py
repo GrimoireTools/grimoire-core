@@ -13,7 +13,7 @@ from typing import Any, Self
 from collections.abc import Callable, Awaitable
 
 import nextcord
-from nextcord import ForumChannel, ForumTag, Guild, Interaction, Member, SlashOption, TextChannel, Thread
+from nextcord import ForumChannel, ForumTag, Guild, Interaction, Member, Message, SlashOption, TextChannel, Thread
 from controllers.lib.utils import StopError, check_narrator, not_none, default_user_option
 from controllers.lib.cog import Cog, standard_command
 
@@ -40,6 +40,7 @@ MISSION_FORUM_GM_TAGS: dict[int, str] = {
     952634365484077116: "Nilo",
     302902786494824449: "Axl",
 }
+"""ID de cada master narrador y su tag en el foro de misiones."""
 
 
 class AnnouncementsCommands(Cog):
@@ -139,14 +140,17 @@ class AnnouncementsCommands(Cog):
         )
         if thread is None:
             raise StopError("Could not create the forum thread for the mission.")
-        announcement += f"\nForo: {thread.mention}"
+        announcement += f"Coordinación: {thread.mention}"
 
         gm_tag, tier_tag = get_tags(informes_forum, narrator, tier)
         if not gm_tag or not tier_tag:
             raise StopError(f"Could not find a valid {'GM' if not gm_tag else 'tier'} tag.")
-        await post_forum_announcement(
+        thread = await post_forum_announcement(
             interaction, mission_name, announcement, tags=[gm_tag, tier_tag], forum=informes_forum
         )
+        if thread is None:
+            raise StopError("Could not create the forum thread for the mission.")
+        announcement += f"\nInforme: {thread.mention}\n\n**Participantes:**"
 
         # Create the announcement message
         await mission_channel.send(content=announcement)
@@ -175,23 +179,27 @@ class AnnouncementsCommands(Cog):
         async def process_add() -> None:
             message = await channel.fetch_message(payload.message_id)
             print(f"Reaction added by {user.name} ({user.id}) to message {message.id}")
-
+            emoji = f"{payload.emoji}" or "❓"
             if message.author == self.client.user and message.content.startswith("# __T"):
                 content = message.content
+                if user.mention in content:
+                    return  # User already mentioned, no need to add again
 
-                if user.mention not in content:
-                    content = add_participant(content, user, payload.emoji.name or "❓")
-                    await message.edit(content=content)
-                    # Extract thread mention from the content and add user to it
-                    thread = extract_thread(guild, content)
-                    if thread:
-                        await thread.add_user(user)
-                    # Add user to report thread if it exists
-                    name = extract_mission_name(content)
-                    if name:
-                        report_thread = find_report_thread(name, guild)
-                        if report_thread:
-                            await report_thread.add_user(user)
+                content = add_participant(content, user, emoji)
+                await message.edit(content=content)
+                # Extract thread mention from the content and add user to it
+                if thread := extract_thread(guild, content):
+                    await thread.add_user(user)
+                    if first_message := await get_thread_initial_message(thread):
+                        add_participant(first_message.content, user, emoji)
+                        await first_message.edit(content=add_participant(first_message.content, user, emoji))
+
+                # Add user to report thread if it exists
+                name = extract_mission_name(content)
+                if name and (report_thread := find_report_thread(name, guild)):
+                    await report_thread.add_user(user)
+                    if first_message := await get_thread_initial_message(report_thread):
+                        await first_message.edit(content=add_participant(first_message.content, user, emoji))
 
         await self._process_message_safely(payload.message_id, process_add)
 
@@ -209,20 +217,42 @@ class AnnouncementsCommands(Cog):
             if message.author == self.client.user and message.content.startswith("# __T"):
                 content = message.content
                 if user.mention in content:
-                    lines = content.split("\n")
-                    lines = [line for line in lines if user.mention not in line or line.strip().startswith("Narrador:")]
-                    content = "\n".join(lines)
+                    content = remove_participant(content, user)
                     await message.edit(content=content)
 
+                    if thread := extract_thread(guild, content):
+                        await thread.remove_user(user)
+                        if first_message := await get_thread_initial_message(thread):
+                            await first_message.edit(content=remove_participant(first_message.content, user))
+
+                    name = extract_mission_name(content)
+                    if name and (report_thread := find_report_thread(name, guild)):
+                        await report_thread.remove_user(user)
+                        if first_message := await get_thread_initial_message(report_thread):
+                            await first_message.edit(content=remove_participant(first_message.content, user))
+
         await self._process_message_safely(payload.message_id, process_remove)
+
+
+async def get_thread_initial_message(thread: Thread) -> Message | None:
+    """Get the initial message content of a thread."""
+    message = await thread.fetch_message(thread.id)
+    return message or None
+
+
+def remove_participant(content: str, user: Member) -> str:
+    """Remove a participant from the mission announcement content."""
+    lines = content.split("\n")
+    lines = [line for line in lines if user.mention not in line or line.strip().startswith("Narrador:")]
+    return "\n".join(lines)
 
 
 def add_participant(content: str, user: Member, emoji: str) -> str:
     """Add a participant to the mission announcement content."""
     if "**Participantes:**" not in content:
         content += "\n**Participantes:**"
-
-    content += f"\n- {emoji} {get_cached_name(user.id)} ({user.mention}): {pretty_roles(user.id)}"
+    if user.mention not in content:
+        content += f"\n- {emoji} {get_cached_name(user.id)} ({user.mention}): {pretty_roles(user.id)}"
     return content
 
 

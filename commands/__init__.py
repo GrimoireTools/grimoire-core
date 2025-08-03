@@ -34,6 +34,7 @@ from commands.skills import SkillCommands
 from commands.victory_points import VictoryPointsCommands
 from commands.info import InfoCommands
 from commands.salary import SalaryCommands
+from commands.roles import RolesCommands
 
 
 def setup_all_commands(bot: Bot) -> None:
@@ -53,6 +54,7 @@ def setup_all_commands(bot: Bot) -> None:
         FormulasCommands,
         DowntimeCommands,
         DeleteCharacterCommands,
+        RolesCommands,
         InfoCommands,
         SalaryCommands,
         ConsentFormCommands,

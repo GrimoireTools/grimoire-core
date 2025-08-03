@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 import types
 from typing import Any, Generic, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
 import json
+
+from loguru import logger
 from .utils import num_to_column
 
 Col = int | str
@@ -239,9 +241,16 @@ class JsonData(dict[K, V], Generic[K, V]):
 
         If data is a list, it is converted to a dictionary with the index as the key.
         """
-        if isinstance(data, str):
+        if isinstance(data, list):
+            data = dict(enumerate(data))
+            logger.debug(f"Parsed list into dict: {data}")
+        elif isinstance(data, dict):
+            # If data is a dict, we assume it is already in the correct format
+            pass
+        elif isinstance(data, str):
             parsed = json.loads(data)
             if isinstance(parsed, list):
                 parsed = dict(enumerate(parsed))
+                logger.debug(f"Parsed list into dict: {parsed}")
             data = dict(parsed)
         super().__init__(data or {})  # type: ignore

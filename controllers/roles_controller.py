@@ -7,7 +7,7 @@ from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import JsonData, Row
 from controllers.lib.utils import DataNotFoundError
 
-ROLES_SHEET_ID = 41455486
+ROLES_SHEET_ID = 778606547
 
 ROLES = {
     "Healer": "⛑️",
