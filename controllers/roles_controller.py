@@ -27,7 +27,7 @@ class RolesRow(Row):
     Discord_id: str
     Roles: JsonData[int, str]  # {index: role}
 
-    def roles_list(self, user_id: int) -> list[str]:
+    def roles_list(self) -> list[str]:
         """Get the list of roles for a given user_id."""
         return list(self.Roles.values())
 
@@ -80,7 +80,7 @@ def cache_roles(roles_rows: list[RolesRow]) -> None:
     global ROLES_CACHE
     ROLES_CACHE = {
         pj.Discord_id: {
-            "Roles": pj.roles_list(int(pj.Discord_id)),
+            "Roles": pj.roles_list(),
         }
         for pj in roles_rows
     }

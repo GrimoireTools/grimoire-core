@@ -26,7 +26,7 @@ class RolesCommands(Cog):
     ) -> Any:
         """Display the roles known by the specified player or the command issuer."""
         user_id: int = target.id if target is not None else interaction.user.id
-        roles = get_cached_roles(user_id)
+        roles = RolesController().get_roles_row(user_id).roles_list()
         if roles:
             role_list = "\n- ".join(f"{ROLES[role]} {role}" for role in roles)
             message = f"**Roles de {get_cached_name(user_id)}:**\n- {role_list}"
@@ -54,7 +54,7 @@ class RolesCommands(Cog):
 
         logger.debug(f"Current roles for user {user_id}: {row}")
 
-        roles = row.roles_list(user_id)
+        roles = row.roles_list()
 
         if addedrole not in roles:
             roles.append(addedrole)
