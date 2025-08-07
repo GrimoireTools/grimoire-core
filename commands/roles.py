@@ -10,7 +10,7 @@ from nextcord import Interaction, SlashOption, Member
 
 from controllers.lib.row import JsonData
 from controllers.pjs_controller import get_cached_name
-from controllers.roles_controller import RolesController, ROLES, RolesRow, get_cached_roles
+from controllers.roles_controller import RolesController, ROLES, RolesRow
 from controllers.lib.cog import standard_command, Cog
 from controllers.lib.utils import default_user_option
 
