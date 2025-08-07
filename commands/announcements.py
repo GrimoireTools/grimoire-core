@@ -105,7 +105,7 @@ class AnnouncementsCommands(Cog):
         interaction: nextcord.Interaction,
         turn: int,
         mission_name: str,
-        description: str,
+        players: str,
         tier: str = SlashOption("tier", "tier de la misión", choices=["Alto", "Bajo"]),
         disponibility: str = SlashOption("disponibilidad", "Disponibilidad de la mesa"),
         tags: str = SlashOption(
@@ -113,7 +113,6 @@ class AnnouncementsCommands(Cog):
             "tags de la misión, separados por comas (ej. 'exploración, combate')",
         ),
         duration: str = SlashOption("duración", "Duración de la mesa", default="4-5 horas"),
-        players: str = "4-5",
         user: Member = default_user_option,  # type: ignore[assignment]
     ) -> Any:
         """Generate a mission notice."""
@@ -121,40 +120,59 @@ class AnnouncementsCommands(Cog):
         narrator = check_narrator(interaction.user)
         if user is not None:
             narrator = check_narrator(user)
+        # Get the message being responded to, if any
+        try:
+            mission_channel, _, _ = get_channels(interaction)
+        except Exception as e:
+            raise StopError(f"No se pudo obtener el mensaje de descripción: {e}") from e
 
         print(f"Mission notice requested by {narrator.name} ({narrator.id})")
         # Get the mission channel and forum
         mission_channel, mission_forum, informes_forum = get_channels(interaction)
 
         mission_name = f"T{turn} Lvl {tier}: {mission_name}"
-
-        # Create forum thread
-        gm_tag, tier_tag = get_tags(mission_forum, narrator, tier)
-        if not gm_tag or not tier_tag:
-            raise StopError(f"Could not find a valid {'GM' if not gm_tag else 'tier'} tag.")
-
-        announcement = mission_announcement(description, tags, mission_name, narrator, players, duration, disponibility)
-
-        thread = await post_forum_announcement(
-            interaction, mission_name, announcement, tags=[gm_tag, tier_tag], forum=mission_forum
+        await interaction.followup.send(
+            f"Generando aviso de misión: {mission_name} en {mission_channel.mention}...\n"
+            f"Por favor, responde al mensaje con la descripción de la misión dentro de los siguientes 2 minutos."
         )
-        if thread is None:
-            raise StopError("Could not create the forum thread for the mission.")
-        announcement += f"Coordinación: {thread.mention}"
 
-        gm_tag, tier_tag = get_tags(informes_forum, narrator, tier)
-        if not gm_tag or not tier_tag:
-            raise StopError(f"Could not find a valid {'GM' if not gm_tag else 'tier'} tag.")
-        thread = await post_forum_announcement(
-            interaction, mission_name, announcement, tags=[gm_tag, tier_tag], forum=informes_forum
-        )
-        if thread is None:
-            raise StopError("Could not create the forum thread for the mission.")
-        announcement += f"\nInforme: {thread.mention}\n\n**Participantes:**"
+        def check_response(interaction: nextcord.Interaction) -> None:
+            async def wait_for_response() -> None:
+                og_msg = await interaction.original_message()
+                try:
+                    response: Message = await self.client.wait_for(
+                        "message",
+                        timeout=120,
+                        check=lambda m: (
+                            m.channel == interaction.channel
+                            and m.author == interaction.user
+                            and m.reference is not None
+                            and m.reference.message_id == og_msg.id
+                        ),
+                    )
+                    description = response.content.strip()
+                    if not description:
+                        await interaction.followup.send("La descripción no puede estar vacía.")
+                        return
 
-        # Create the announcement message
-        await mission_channel.send(content=announcement)
-        await interaction.followup.send(f"Misión anunciada: {mission_name}. Puedes ver el hilo en {thread.mention}.")
+                    announcement = mission_announcement(
+                        description, tags, mission_name, narrator, players, duration, disponibility
+                    )
+                    announcement, report_thread = await create_threads(
+                        interaction, mission_name, tier, narrator, mission_forum, informes_forum, announcement
+                    )
+
+                    # Create the announcement message
+                    await mission_channel.send(content=announcement)
+                    await response.reply(
+                        f"Misión anunciada: {mission_name}. Puedes ver el hilo en {report_thread.mention}."
+                    )
+                except TimeoutError:
+                    await og_msg.reply("No se recibió respuesta dentro del período de espera.")
+
+            asyncio.create_task(wait_for_response())  # noqa: RUF006
+
+        check_response(interaction)
 
     async def _process_message_safely(self, message_id: int, processor_func: Callable[[], Awaitable[None]]) -> None:
         """Process message with lock to avoid race conditions."""
@@ -232,6 +250,41 @@ class AnnouncementsCommands(Cog):
                             await first_message.edit(content=remove_participant(first_message.content, user))
 
         await self._process_message_safely(payload.message_id, process_remove)
+
+
+async def create_threads(
+    interaction: Interaction,
+    mission_name: str,
+    tier: str,
+    narrator: Member,
+    mission_forum: ForumChannel,
+    informes_forum: ForumChannel,
+    announcement: str,
+) -> tuple[str, Thread]:
+    """Create mission coordination and report threads in the specified forums."""
+    # Create coordination forum thread
+    gm_tag, tier_tag = get_tags(mission_forum, narrator, tier)
+    if not gm_tag or not tier_tag:
+        raise StopError(f"Could not find a valid {'GM' if not gm_tag else 'tier'} tag.")
+
+    coord_thread = await post_forum_announcement(
+        interaction, mission_name, announcement, tags=[gm_tag, tier_tag], forum=mission_forum
+    )
+    if coord_thread is None:
+        raise StopError("Could not create the forum thread for the mission.")
+    announcement += f"Coordinación: {coord_thread.mention}"
+
+    # Create report forum thread
+    gm_tag, tier_tag = get_tags(informes_forum, narrator, tier)
+    if not gm_tag or not tier_tag:
+        raise StopError(f"Could not find a valid {'GM' if not gm_tag else 'tier'} tag.")
+    report_thread = await post_forum_announcement(
+        interaction, mission_name, announcement, tags=[gm_tag, tier_tag], forum=informes_forum
+    )
+    if report_thread is None:
+        raise StopError("Could not create the forum thread for the mission.")
+    announcement += f"\nInforme: {report_thread.mention}\n\n**Participantes:**"
+    return announcement, report_thread
 
 
 async def get_thread_initial_message(thread: Thread) -> Message | None:
@@ -318,10 +371,10 @@ def mission_announcement(
 
     # Ensure description is wrapped in a code block if not already
     desc = description.strip()
-    desc = f"```ansi\n{desc}\n```" if not (desc.startswith("```") and desc.endswith("```")) else desc
 
     return f"""# __{mission_name}__
 {desc}
+
 Narrador: {narrator.mention}
 Tamaño de party: {players}
 Duración: {duration}
