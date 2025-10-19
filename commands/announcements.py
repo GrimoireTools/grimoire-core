@@ -187,6 +187,129 @@ class AnnouncementsCommands(Cog):
             except Exception as e:
                 print(f"Error processing message {message_id}: {e}")
 
+    @standard_command("Edita un anuncio de misión")
+    async def edit_notice(
+        self,
+        interaction: Interaction,
+        message_id: int,
+        turn: int | None = SlashOption("turn", "número de turno", default=None),
+        mission_name: str | None = SlashOption("mission_name", "nombre de la misión", default=None),
+        players: str | None = SlashOption("players", "tamaño de la party", default=None),
+        tier: str | None = SlashOption("tier", "tier de la misión", choices=["Alto", "Bajo"], default=None),
+        disponibility: str | None = SlashOption("disponibilidad", "Disponibilidad de la mesa", default=None),
+        tags: str | None = SlashOption(
+            "tags",
+            "tags de la misión, separados por comas (ej. 'exploración, combate')",
+            default=None,
+        ),
+        duration: str | None = SlashOption("duración", "Duración de la mesa", default=None),
+        user: Member = default_user_option,  # type: ignore[assignment]
+    ) -> None:
+        """Edits an existing mission announcement and corresponding threads."""
+        # Check if user has the required role
+        narrator = check_narrator(interaction.user)
+        if user is not None:
+            narrator = check_narrator(user)
+
+        try:
+            mission_channel, mission_forum, informes_forum = get_channels(interaction)
+        except Exception as e:
+            raise StopError(f"No se pudo obtener los canales necesarios: {e}") from e
+
+        # Find and parse the original message
+        try:
+            original_message = await mission_channel.fetch_message(message_id)
+            if not (original_message.author == self.client.user and original_message.content.startswith("# __T")):
+                raise StopError("El mensaje especificado no es un anuncio de misión válido.")
+        except nextcord.NotFound as e:
+            raise StopError("No se pudo encontrar el mensaje especificado.") from e
+
+        parsed_notice = parse_notice(original_message.content)
+        # Override values with provided inputs (keep existing if None)
+        parsed_notice["turn"] = turn or parsed_notice["turn"]
+        parsed_notice["mission_name"] = mission_name or parsed_notice["mission_name"]
+        parsed_notice["players"] = players or parsed_notice["players"]
+        parsed_notice["tier"] = tier or parsed_notice["tier"]
+        parsed_notice["disponibility"] = disponibility or parsed_notice["disponibility"]
+        parsed_notice["tags"] = [tag.strip() for tag in tags.split(",")] if tags else parsed_notice["tags"]
+        parsed_notice["duration"] = duration or parsed_notice["duration"]
+
+        # Validate that no required values are None or empty
+        for key, val in parsed_notice.items():
+            if not val and key not in ["participants", "tags"]:
+                raise StopError(f"Campo requerido '{key}' está vacío o no se pudo extraer del anuncio original.")
+
+        await interaction.followup.send(
+            f"Editando anuncio de misión: {parsed_notice['mission_name']}...\n"
+            f"Por favor, responde al mensaje con la nueva descripción de la misión dentro de los siguientes 2 minutos. "
+            f"Si no quieres cambiar la descripción, responde con 'sin cambios'."
+        )
+
+        def check_response(interaction: nextcord.Interaction) -> None:
+            async def wait_for_response() -> None:
+                og_msg = await interaction.original_message()
+                try:
+                    response: Message = await self.client.wait_for(
+                        "message",
+                        timeout=120,
+                        check=lambda m: (
+                            m.channel == interaction.channel
+                            and m.author == interaction.user
+                            and m.reference is not None
+                            and m.reference.message_id == og_msg.id
+                        ),
+                    )
+                    new_description = response.content.strip()
+                    if new_description.lower() != "sin cambios":
+                        parsed_notice["description"] = new_description
+
+                    # Generate new announcement content
+                    new_announcement = mission_announcement(
+                        parsed_notice["description"],
+                        ", ".join(parsed_notice["tags"]),
+                        parsed_notice["mission_name"],
+                        narrator,
+                        parsed_notice["players"],
+                        parsed_notice["duration"],
+                        parsed_notice["disponibility"],
+                    )
+
+                    # Preserve participants section from original message
+                    if parsed_notice["participants"]:
+                        new_announcement += "\n**Participantes:**"
+                    for participant in parsed_notice["participants"]:
+                        new_announcement += (
+                            f"\n- {participant['emoji']} {participant['mention']}: {participant['roles']}"
+                        )
+                    coord_thread_id = parsed_notice["coord_thread"]
+                    report_thread_id = parsed_notice["report_thread"]
+                    coord_thread = mission_channel.guild.get_thread(int(coord_thread_id))
+                    report_thread = mission_channel.guild.get_thread(int(report_thread_id))
+                    if not coord_thread or not report_thread:
+                        raise StopError("No se pudieron encontrar los hilos de coordinación o informe.")
+                    # Preserve thread links
+                    new_announcement += f"Coordinación: {coord_thread.mention}"
+                    new_announcement += f"\nInforme: {report_thread.mention}"
+
+                    # Update the original message
+                    await original_message.edit(content=new_announcement)
+
+                    # Update corresponding threads
+                    if first_message := await get_thread_initial_message(coord_thread):
+                        await first_message.edit(content=new_announcement)
+
+                        if first_message := await get_thread_initial_message(report_thread):
+                            await first_message.edit(content=new_announcement)
+
+                    await response.reply(f"Anuncio de misión editado exitosamente: {parsed_notice['mission_name']}")
+
+                except TimeoutError:
+                    await og_msg.reply("No se recibió respuesta dentro del período de espera.")
+
+            asyncio.create_task(wait_for_response())  # noqa: RUF006
+
+        check_response(interaction)
+
     @Cog.listener()
     async def on_raw_reaction_add(self, payload: nextcord.RawReactionActionEvent) -> None:
         """Handle reaction added to mission announcement messages."""
@@ -418,3 +541,92 @@ def get_channels(interaction: Interaction) -> tuple[TextChannel, ForumChannel, F
     if not isinstance(mission_channel, nextcord.TextChannel):
         raise StopError("The mission channel is not a valid text channel.")
     return mission_channel, mission_forum, informes_forum
+
+
+def parse_notice(text: str) -> dict[str, Any]:
+    """Parse a mission announcement text into its components."""
+    lines = text.split("\n")
+    mission_info = {
+        "mission_name": "",
+        "tier": "",
+        "turn": 0,
+        "description": "",
+        "narrator": "",
+        "players": "",
+        "duration": "",
+        "disponibility": "",
+        "tags": [],
+        "participants": [],
+    }
+
+    # Extract mission name
+    if lines and lines[0].startswith("# __") and lines[0].endswith("__"):
+        mission_line = lines[0][4:-2].strip()
+        # Extract turn, tier and mission name in one regex
+        turn_tier_match = re.match(r"T(\d+) Lvl (Alto|Bajo): (.+)", mission_line)
+        if turn_tier_match:
+            mission_info["turn"] = int(turn_tier_match.group(1))
+            mission_info["tier"] = turn_tier_match.group(2)
+            mission_info["mission_name"] = turn_tier_match.group(3)
+        else:
+            mission_info["mission_name"] = mission_line
+
+    # Extract description
+    desc_lines = []
+    for line in lines[1:]:
+        if line.startswith("Narrador:"):
+            break
+        desc_lines.append(line)
+    mission_info["description"] = "\n".join(desc_lines).strip()
+
+    # Extract other fields
+    for line in lines:
+        if line.startswith("Narrador:"):
+            mission_info["narrator"] = line[len("Narrador:") :].strip()
+        elif line.startswith("Tamaño de party:"):
+            mission_info["players"] = line[len("Tamaño de party:") :].strip()
+        elif line.startswith("Duración:"):
+            mission_info["duration"] = line[len("Duración:") :].strip()
+        elif line.startswith("Disponibilidad:"):
+            mission_info["disponibility"] = line[len("Disponibilidad:") :].strip()
+        elif line.startswith("Tags:"):
+            tags_str = line[len("Tags:") :].strip()
+            mission_info["tags"] = [tag.strip() for tag in tags_str.split(",")] if tags_str else []
+
+    # Extract participants
+    participant_section = False
+    for line in lines:
+        if line.startswith("**Participantes:**"):
+            participant_section = True
+            continue
+        if participant_section:
+            if line.startswith("- "):
+                match = re.match(r"- (.+?) \((<@!?\d+>)\): (.+)", line)
+                if match:
+                    emoji, mention, roles = match.groups()
+                    mission_info["participants"].append({"emoji": emoji, "mention": mention, "roles": roles})
+            else:
+                break
+
+    # Extract coordination and report thread links
+    coord_thread = None
+    report_thread = None
+    for line in lines:
+        if line.startswith("Coordinación:") and "<#" in line:
+            match = re.search(r"<#(\d+)>", line)
+            if match:
+                coord_thread = match.group(1)
+        elif line.startswith("Informe:") and "<#" in line:
+            match = re.search(r"<#(\d+)>", line)
+            if match:
+                report_thread = match.group(1)
+
+    if coord_thread is None:
+        raise ValueError("Coordination thread ID not found in mission announcement")
+    if report_thread is None:
+        raise ValueError("Report thread ID not found in mission announcement")
+
+    mission_info["coord_thread"] = coord_thread
+    mission_info["report_thread"] = report_thread
+
+    return mission_info
