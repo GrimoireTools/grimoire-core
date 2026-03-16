@@ -33,12 +33,14 @@ MISSION_FORUM_GM_TAGS: dict[int, str] = {
     380098969709314054: "Luciano",
     137054851791060992: "Cris",
     779413237565227051: "Alonso",
-    190073840607559680: "Fran",
+    190073840607559680: "Emi",
     334582584967430144: "Taco",
     329424775678001152: "Jua",
     360212346137739265: "Tommy",
     952634365484077116: "Nilo",
     302902786494824449: "Axl",
+    801992897045463070: "Sofi"
+
 }
 """ID de cada master narrador y su tag en el foro de misiones."""
 
@@ -582,15 +584,15 @@ def parse_notice(text: str) -> dict[str, Any]:
     # Extract other fields
     for line in lines:
         if line.startswith("Narrador:"):
-            mission_info["narrator"] = line[len("Narrador:") :].strip()
+            mission_info["narrator"] = line[len("Narrador:"):].strip()
         elif line.startswith("Tamaño de party:"):
-            mission_info["players"] = line[len("Tamaño de party:") :].strip()
+            mission_info["players"] = line[len("Tamaño de party:"):].strip()
         elif line.startswith("Duración:"):
-            mission_info["duration"] = line[len("Duración:") :].strip()
+            mission_info["duration"] = line[len("Duración:"):].strip()
         elif line.startswith("Disponibilidad:"):
-            mission_info["disponibility"] = line[len("Disponibilidad:") :].strip()
+            mission_info["disponibility"] = line[len("Disponibilidad:"):].strip()
         elif line.startswith("Tags:"):
-            tags_str = line[len("Tags:") :].strip()
+            tags_str = line[len("Tags:"):].strip()
             mission_info["tags"] = [tag.strip() for tag in tags_str.split(",")] if tags_str else []
 
     # Extract participants
