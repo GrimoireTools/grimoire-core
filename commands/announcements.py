@@ -39,7 +39,7 @@ MISSION_FORUM_GM_TAGS: dict[int, str] = {
     360212346137739265: "Tommy",
     952634365484077116: "Nilo",
     302902786494824449: "Axl",
-    801992897045463070: "Sofi"
+    801992897045463070: "Tolquiem"
 
 }
 """ID de cada master narrador y su tag en el foro de misiones."""
@@ -171,6 +171,11 @@ class AnnouncementsCommands(Cog):
                     )
                 except TimeoutError:
                     await og_msg.reply("No se recibió respuesta dentro del período de espera.")
+                except StopError as e:
+                    await og_msg.reply(f"Error: {e}")
+                except Exception as e:
+                    print(f"Unexpected error in mission_notice: {e}")
+                    await og_msg.reply(f"Error inesperado: {e}")
 
             asyncio.create_task(wait_for_response())  # noqa: RUF006
 
@@ -307,6 +312,11 @@ class AnnouncementsCommands(Cog):
 
                 except TimeoutError:
                     await og_msg.reply("No se recibió respuesta dentro del período de espera.")
+                except StopError as e:
+                    await og_msg.reply(f"Error: {e}")
+                except Exception as e:
+                    print(f"Unexpected error in edit_notice: {e}")
+                    await og_msg.reply(f"Error inesperado: {e}")
 
             asyncio.create_task(wait_for_response())  # noqa: RUF006
 
@@ -390,7 +400,7 @@ async def create_threads(
     # Create coordination forum thread
     gm_tag, tier_tag = get_tags(mission_forum, narrator, tier)
     if not gm_tag or not tier_tag:
-        raise StopError(f"Could not find a valid {'GM' if not gm_tag else 'tier'} tag.")
+        raise StopError(f"Could not find a valid forum {'GM' if not gm_tag else 'tier'} tag: narrator={narrator.name}, narrator_id={narrator.id}, id_type={type(narrator.id)}, tier={tier}")
 
     coord_thread = await post_forum_announcement(
         interaction, mission_name, announcement, tags=[gm_tag, tier_tag], forum=mission_forum
@@ -402,7 +412,7 @@ async def create_threads(
     # Create report forum thread
     gm_tag, tier_tag = get_tags(informes_forum, narrator, tier)
     if not gm_tag or not tier_tag:
-        raise StopError(f"Could not find a valid {'GM' if not gm_tag else 'tier'} tag.")
+        raise StopError(f"Could not find a valid forum {'GM' if not gm_tag else 'tier'} tag: narrator={narrator.name}, narrator_id={narrator.id}, id_type={type(narrator.id)}, tier={tier}")
     report_thread = await post_forum_announcement(
         interaction, mission_name, announcement, tags=[gm_tag, tier_tag], forum=informes_forum
     )
