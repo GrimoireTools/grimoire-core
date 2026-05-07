@@ -3,6 +3,7 @@ name = "costilla-bot"
 version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
+    "axiom-py>=0.10.0",
     "dndice>=2.8",
     "gspread>=6.1",
     "icecream>=2.1.3",

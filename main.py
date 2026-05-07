@@ -18,14 +18,13 @@ Important classes/functions:
 from loguru import logger
 
 from nextcord.ext import commands  # type: ignore
-import sys
 from commands import setup_all_commands
 from varenv import get_var
 from icecream import install, ic
+from logging_setup import setup_logging
 
 # Logging
-logger.remove()
-logger.add(sys.stderr, colorize=True)
+setup_logging()
 install()
 ic.configureOutput(includeContext=True)
 
