@@ -20,6 +20,7 @@ from controllers.lib.cog import Cog, standard_command
 from controllers.pjs_controller import get_cached_name
 import re
 import asyncio
+from loguru import logger
 
 from controllers.roles_controller import pretty_roles
 
@@ -94,7 +95,7 @@ class AnnouncementsCommands(Cog):
                 # Fallback to getting user from client cache
                 user = self.client.get_user(payload.user_id)
                 if not user or not isinstance(user, nextcord.Member):
-                    print(f"User not found anywhere: user_id={payload.user_id}, guild_id={payload.guild_id}")
+                    logger.warning(f"User not found anywhere: user_id={payload.user_id}, guild_id={payload.guild_id}")
                     return None, None, None
         channel = guild.get_channel(payload.channel_id)
         if not channel or not isinstance(channel, nextcord.TextChannel):
@@ -128,7 +129,7 @@ class AnnouncementsCommands(Cog):
         except Exception as e:
             raise StopError(f"No se pudo obtener el mensaje de descripción: {e}") from e
 
-        print(f"Mission notice requested by {narrator.name} ({narrator.id})")
+        logger.info(f"Mission notice requested by {narrator.name} ({narrator.id})")
         # Get the mission channel and forum
         mission_channel, mission_forum, informes_forum = get_channels(interaction)
 
@@ -174,7 +175,7 @@ class AnnouncementsCommands(Cog):
                 except StopError as e:
                     await og_msg.reply(f"Error: {e}")
                 except Exception as e:
-                    print(f"Unexpected error in mission_notice: {e}")
+                    logger.warning(f"Unexpected error in mission_notice: {e}")
                     await og_msg.reply(f"Error inesperado: {e}")
 
             asyncio.create_task(wait_for_response())  # noqa: RUF006
@@ -192,7 +193,7 @@ class AnnouncementsCommands(Cog):
             try:
                 await processor_func()
             except Exception as e:
-                print(f"Error processing message {message_id}: {e}")
+                logger.warning(f"Error processing message {message_id}: {e}")
 
     @standard_command("Edita un anuncio de misión")
     async def edit_notice(
@@ -315,7 +316,7 @@ class AnnouncementsCommands(Cog):
                 except StopError as e:
                     await og_msg.reply(f"Error: {e}")
                 except Exception as e:
-                    print(f"Unexpected error in edit_notice: {e}")
+                    logger.warning(f"Unexpected error in edit_notice: {e}")
                     await og_msg.reply(f"Error inesperado: {e}")
 
             asyncio.create_task(wait_for_response())  # noqa: RUF006
@@ -331,7 +332,7 @@ class AnnouncementsCommands(Cog):
 
         async def process_add() -> None:
             message = await channel.fetch_message(payload.message_id)
-            print(f"Reaction added by {user.name} ({user.id}) to message {message.id}")
+            logger.info(f"Reaction added by {user.name} ({user.id}) to message {message.id}")
             emoji = f"{payload.emoji}" or "❓"
             if message.author == self.client.user and message.content.startswith("# __T"):
                 content = message.content
@@ -365,7 +366,7 @@ class AnnouncementsCommands(Cog):
 
         async def process_remove() -> None:
             message = await channel.fetch_message(payload.message_id)
-            print(f"Reaction removed by {user.name} ({user.id}) from message {message.id}")
+            logger.info(f"Reaction removed by {user.name} ({user.id}) from message {message.id}")
 
             if message.author == self.client.user and message.content.startswith("# __T"):
                 content = message.content
