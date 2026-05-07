@@ -233,11 +233,8 @@ def log_command(func: Any) -> Any:
     @logger.catch
     async def logged_command(self: Any, interaction: Interaction, *args: Any, **kwargs: Any) -> None:
         user = interaction.user
-        if user is not None:
-            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
-        else:
-            logger.info(f"[{func.__name__}] called by null user.")
-        logger.debug(f"[{func.__name__}] called with {kwargs}.")
+        user_str = f"{user.name} ({user.id})" if user is not None else "null user"
+        logger.info(f"[{func.__name__}] called by {user_str} with {kwargs}.")
 
         await func(self, interaction, *args, **kwargs)
 
@@ -251,11 +248,8 @@ def log_command_not_cog(func: Any) -> Any:
     @logger.catch
     async def logged_command(interaction: Interaction, *args: Any, **kwargs: Any) -> None:
         user = interaction.user
-        if user is not None:
-            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
-        else:
-            logger.info(f"[{func.__name__}] called by null user.")
-        logger.debug(f"[{func.__name__}] called with {kwargs}.")
+        user_str = f"{user.name} ({user.id})" if user is not None else "null user"
+        logger.info(f"[{func.__name__}] called by {user_str} with {kwargs}.")
         await func(interaction, *args, **kwargs)
 
     return logged_command
