@@ -33,7 +33,7 @@ def _build_axiom_sink():
         record = message.record
         event = {
             "message": record["message"],
-            "level": record["level"].name,
+            "level": record["level"].name.lower(),
             "time": record["time"].isoformat(),
             "module": record["module"],
             "function": record["function"],
