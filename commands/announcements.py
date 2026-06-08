@@ -40,7 +40,8 @@ MISSION_FORUM_GM_TAGS: dict[int, str] = {
     360212346137739265: "Tommy",
     952634365484077116: "Nilo",
     302902786494824449: "Axl",
-    801992897045463070: "Tolquiem"
+    801992897045463070: "Tolquiem",
+    270690478599438336: "Quemares"
 
 }
 """ID de cada master narrador y su tag en el foro de misiones."""
