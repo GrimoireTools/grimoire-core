@@ -65,7 +65,7 @@ class SalaryCommands(Cog):
             f"\n Se te suman {sueldo_dt} días de dt "
             f"(ahora tienes {pj.Downtime} dias de dt)"
         )
-        await caliban_speaks(interaction, 50, "mission")
+        await caliban_speaks(interaction, "mission")
 
     @standard_command("Gana el downtime y dinero obtenido en un turno en que no jugaste.")
     async def afk_salary(

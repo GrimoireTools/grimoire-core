@@ -98,7 +98,7 @@ class PjCache(TypedDict):
     """Cache for a Player Character (PJ)."""
 
     Level: int
-    Caliban: bool
+    Caliban: int
     Name: str
     Level_group: LevelGroup
     Class: str
@@ -118,13 +118,13 @@ def cache_pjs(pj_rows: list[PJRow]) -> None:
     """Cache the list of characters that have met Caliban."""
     global PJ_CACHE
     PJ_CACHE = {
-        pj.Discord_id: {
-            "Level": pj.level(),
-            "Caliban": pj.Caliban_met == 1,
-            "Name": pj.Name,
-            "Level_group": pj.Level_group,
-            "Class": pj.Class,
-        }
+        pj.Discord_id: PjCache(
+            Level=pj.level(),
+            Caliban=pj.Caliban_met or 0,
+            Name=pj.Name,
+            Level_group=pj.Level_group,
+            Class=pj.Class,
+        )
         for pj in pj_rows
     }
     logger.debug("Cached PJ data")
@@ -145,9 +145,9 @@ def _get_cache(user_id: str | int, key: str, default: K) -> K:
     return PJ_CACHE[user_id].get(key, default)
 
 
-def get_caliban_met(user_id: str | int) -> bool:
-    """Return True if the character has met Caliban."""
-    return _get_cache(user_id, "Caliban", False)
+def get_caliban_met(user_id: str | int) -> int:
+    """Return the character's Caliban group ID (0 means none)."""
+    return _get_cache(user_id, "Caliban", 0)
 
 
 def get_cached_level(user_id: str | int) -> int:

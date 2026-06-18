@@ -29,7 +29,7 @@ class InfoCommands(Cog):
     - Downtime: {dt // 7} semanas y {dt % 7} dias ({dt} dias)
     """
         await interaction.followup.send(message)
-        await caliban_speaks(interaction, 40)
+        await caliban_speaks(interaction)
 
     @standard_command("Calcula el costo de DT de hacer múltiples retrain a la vez")
     async def retrain_info(
