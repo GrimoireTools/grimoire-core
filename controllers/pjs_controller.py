@@ -35,29 +35,10 @@ class PJRow(Row):
     Name: str
     Discord_id: str
     Player: str
-    Title: str
-    Classes: JsonData[Class, tuple[str, int]]
-    """{class: ["subclass", level]}"""
-    Race: str
-    Subrace: str
-    Alignment: str
-    Downtime: float
-    Money_pp: int
-    Money_gp: int
-    Money_ep: int
-    Money_sp: int
-    Money_cp: int
-    Money_total: float
-    Last_turn: str
-    God: str
-    Devotion: int
-    Renown: int
-    Divine_favor: int
-    Reputation: int
-    Crianza: int
-    Expression: int
-    Mecenas: int
-    Infamy: int
+    Char_type: str
+    Attributes: JsonData
+    Skills: JsonData
+    Resources: JsonData
 
     @classmethod
     def partial_create(
