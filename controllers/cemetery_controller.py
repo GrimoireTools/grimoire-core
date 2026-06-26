@@ -1,18 +1,17 @@
-from loguru import logger
-
 from controllers.lib.utils import DataNotFoundError
-from controllers.lib.base_controller import SheetsControllerBase, Value
+from controllers.lib.base_controller import SheetsControllerBase
+from controllers.pjs_controller import Attribute, Ability, Resource
 from controllers.lib.row import JsonData, Row
-from system_data import Attribute, Ability, Resource
-from icecream import ic
-PJ_SHEET_ID = 0  # TODO: set real sheet ID
+
+CEMETERY_SHEET_ID = 416758615
 
 
-class PJRow(Row):
+class CemeteryRow(Row):
     Name: str
     Discord_id: str
     Player: str
-    Last_turn: int
+    Turn_of_death: int
+    Cause_of_death: str
     Char_type: str
     Attributes: JsonData[Attribute, int]
     Abilities: JsonData[Ability, int]
@@ -20,25 +19,21 @@ class PJRow(Row):
     Resources: JsonData[Resource, int]
 
     def resource(self, resource: Resource, set_value: int | None = None) -> int:
-        """Returns the current value of a resource, optionally setting a new value."""
         if set_value is not None:
             self.Resources[resource] = set_value
         return self.Resources.get(resource, 0)
 
     def ability(self, ability: Ability, set_value: int | None = None) -> int:
-        """Returns the current value of an ability, optionally setting a new value."""
         if set_value is not None:
             self.Abilities[ability] = set_value
         return self.Abilities.get(ability, 0)
 
     def attribute(self, attribute: Attribute, set_value: int | None = None) -> int:
-        """Returns the current value of an attribute, optionally setting a new value."""
         if set_value is not None:
             self.Attributes[attribute] = set_value
         return self.Attributes.get(attribute, 0)
 
     def specialty(self, ability: Ability, set_value: str | None = None) -> str:
-        """Returns the current specialty of an ability, optionally setting a new one."""
         if set_value is not None:
             self.Specialties[ability] = set_value
         return self.Specialties.get(ability, "")
@@ -49,35 +44,24 @@ class PJRow(Row):
     def set_abilities(self, abilities: dict[Ability, int]):
         self.Abilities.update(abilities)
 
-    def set_specialties(self, specialties: dict[Ability, str]):
-        self.Specialties.update(specialties)
-
     def set_resources(self, resources: dict[Resource, int]):
         self.Resources.update(resources)
 
-    def max_attr(self) -> int:
-        """Return the max value an attribute can have based on the character type."""
-        if self.Char_type == "Vampire":
-            return 8
-        else:
-            return 5  # Default max for other character types
 
-
-class PJsController(SheetsControllerBase[PJRow]):
+class CemeteryController(SheetsControllerBase[CemeteryRow]):
     def __init__(self):
-        super().__init__(PJ_SHEET_ID, PJRow)
+        super().__init__(CEMETERY_SHEET_ID, CemeteryRow)
 
-    def get_pj_row(self, user_id: int) -> PJRow:
+    def get_row_by_user(self, user_id: int) -> CemeteryRow:
         try:
             return self.get_row(self.find_pj_row_index(user_id))
-        except ValueError as e:
-            logger.exception(
-                f"Character with user_id {user_id} not found: {e}")
+        except ValueError:
             raise DataNotFoundError(
-                f"Character with user_id {user_id} not found: {e.__traceback__}") from None
+                f"No deceased character found for user_id {user_id}"
+            ) from None
 
     def character_exists(self, user_id: int) -> bool:
         try:
-            return self.get_pj_row(user_id) is not None
+            return self.get_row_by_user(user_id) is not None
         except DataNotFoundError:
             return False

@@ -4,12 +4,11 @@ from nextcord.ext import commands  # type: ignore
 import sys
 from commands import setup_all_commands
 from varenv import getVar
-from icecream import install, ic
-
+from icecream import ic
+from controllers.pjs_controller import PJsController
 # Logging
 logger.remove()
 logger.add(sys.stderr, colorize=True)
-install()
 ic.configureOutput(includeContext=True)
 
 BOT_TOKEN = getVar("TOKEN")
@@ -20,8 +19,11 @@ bot = commands.Bot()
 @bot.event
 async def on_ready() -> None:
     logger.info(f"We have logged in as {bot.user}")
+    await bot.sync_application_commands()
     logger.info("Bot is ready")
 
+# Load PJs
+PJsController()
 
 logger.info("Setting up commands...")
 setup_all_commands(bot)

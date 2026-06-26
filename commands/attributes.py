@@ -1,44 +1,109 @@
 from typing import Any, Self
-from nextcord import Interaction
 
-from commands.utils.skill_utils import *
-from controllers.lib.cog import Cog, standard_command
-from controllers.lib.utils import DataNotFoundError, not_none
+from nextcord import slash_command, Interaction, SlashOption
+
+from controllers.lib.cog import Cog
+from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJsController
-from controllers.attributes_controller import AttributesController, AttributesRow
+from commands.utils.wod_utils import dots
+from system_data import Attribute, ATTRIBUTES
 
-CODEBLOCK_LANG = "ansi"
+ATTRIBUTE_CHOICES = ATTRIBUTES
 
 
 class AttributesCommands(Cog):
 
-    @standard_command("Define los Ability Scores de tu personaje")
-    async def set_ability_scores(
+    @slash_command(name="attribute", guild_ids=[CRI_GUILD_ID], description="Manage character attributes")
+    async def attribute_group(self, interaction: Interaction):
+        pass
+
+    # ── /attribute set ────────────────────────────────────────────────────────
+    @attribute_group.subcommand(name="set", description="Sets a single attribute to a value (1–5) (max 8 for vampires)")
+    @try_command
+    async def attribute_set(
         self: Self,
         interaction: Interaction,
-        strength: int,
-        dexterity: int,
-        constitution: int,
-        intelligence: int,
-        wisdom: int,
-        charisma: int,
+        attribute: Attribute = SlashOption(
+            "attribute", "Attribute to set", required=True, choices=ATTRIBUTE_CHOICES),
+        value: int = SlashOption(
+            "value", "New value (1–5)", required=True, min_value=1, max_value=5),
     ) -> Any:
         user_id = not_none(interaction.user).id
-        pj = PJsController().get_pj_row(user_id)
-        sh_mods = AttributesController()
-        try:
-            mods_row = sh_mods.get_mods_row(user_id)
-        except DataNotFoundError:
-            mods_row = AttributesRow(
-                PJ_name=pj.Name,
-                Discord_id=user_id,
+        sh = PJsController()
+        pj = sh.get_pj_row(user_id)
+        max_value = pj.max_attr()
+        if value > max_value:
+            return await interaction.followup.send(
+                f"Error: The value for {attribute} exceeds the maximum of {max_value} for your character type ({pj.Char_type})."
             )
-        mods_row.STR = strength
-        mods_row.DEX = dexterity
-        mods_row.CON = constitution
-        mods_row.INT = intelligence
-        mods_row.WIS = wisdom
-        mods_row.CHA = charisma
+        old = pj.attribute(attribute)
+        pj.attribute(attribute, value)
+        sh.set_row(pj)
+        await interaction.followup.send(f"**{pj.Name}** — {attribute}: {dots(old, max_value)} → {dots(value, max_value)} ({old} → {value})")
 
-        sh_mods.update_or_insert(mods_row)
-        return await interaction.followup.send(f"Actualizados las ability scores de {pj.Name}: \n{mods_row.pretty()}")
+    # ── /attribute view ───────────────────────────────────────────────────────
+    @attribute_group.subcommand(name="view", description="Shows the current value of a single attribute")
+    @try_command
+    async def attribute_view(
+        self: Self,
+        interaction: Interaction,
+        attribute: Attribute = SlashOption(
+            "attribute", "Attribute to view", required=True, choices=ATTRIBUTE_CHOICES),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        pj = PJsController.cached().get_pj_row(user_id)
+        value = pj.attribute(attribute)
+        max_value = pj.max_attr()
+        await interaction.followup.send(f"**{pj.Name}** — {f"{attribute} ({value}):".rjust(20)} {dots(value, max_value)}")
+
+    # ── /attributes set_all ───────────────────────────────────────────────────
+    @slash_command(name="attributes", guild_ids=[CRI_GUILD_ID], description="Set all 9 attributes at once")
+    @try_command
+    async def attributes_set_all(
+        self: Self,
+        interaction: Interaction,
+        strength: int = SlashOption(
+            "strength", required=True, min_value=1, max_value=8),
+        dexterity: int = SlashOption(
+            "dexterity", required=True, min_value=1, max_value=8),
+        stamina: int = SlashOption(
+            "stamina", required=True, min_value=1, max_value=8),
+        charisma: int = SlashOption(
+            "charisma", required=True, min_value=1, max_value=8),
+        manipulation: int = SlashOption(
+            "manipulation", required=True, min_value=1, max_value=8),
+        appearance: int = SlashOption(
+            "appearance", required=True, min_value=1, max_value=8),
+        perception: int = SlashOption(
+            "perception", required=True, min_value=1, max_value=8),
+        intelligence: int = SlashOption(
+            "intelligence", required=True, min_value=1, max_value=8),
+        wits: int = SlashOption("wits", required=True,
+                                min_value=1, max_value=8),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj = sh.get_pj_row(user_id)
+        max_value = pj.max_attr()
+        if any(attr > max_value for attr in [strength, dexterity, stamina, charisma, manipulation, appearance, perception, intelligence, wits]):
+            return await interaction.followup.send(
+                f"Error: One or more attributes exceed the maximum value of {max_value} for your character type ({pj.Char_type})."
+            )
+
+        pj.set_attributes({
+            "Strength": strength,
+            "Dexterity": dexterity,
+            "Stamina": stamina,
+            "Charisma": charisma,
+            "Manipulation": manipulation,
+            "Appearance": appearance,
+            "Perception": perception,
+            "Intelligence": intelligence,
+            "Wits": wits,
+        })
+        sh.set_row(pj)
+        lines = "\n".join(
+            f"  {k:<14} {dots(v, max_value)} ({v})"
+            for k, v in pj.Attributes.items()
+        )
+        await interaction.followup.send(f"**{pj.Name}** — Attributes updated:\n```\n{lines}\n```")

@@ -1,5 +1,6 @@
 from typing import (
     Generic,
+    Self,
     Type,
 )
 from .utils import DataNotFoundError, column_to_num
@@ -16,9 +17,15 @@ credentials = json.loads(getVar("GOOGLE"), strict=False)
 
 
 gc = gspread.auth.service_account_from_dict(credentials)
+logger.debug("Google Sheets API authenticated successfully.")
+logger.debug(
+    f"Available spreadsheets: {[s['name'] for s in gc.list_spreadsheet_files()]}")
+
 Col = int | str
 
 Value = str | int | float
+
+WODMARCH_KEY = "1SPm1tJK3ZtpB-jvgwsWCCH4GjG6gpYCU371cnKZoXlM"
 
 
 class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
@@ -36,16 +43,31 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     row_type: Type[RowType]
     marker_col: int = 1  # Columna que se revisa para saber si la fila existe
 
-    def __init__(self, sheet_id: int, cls: type[RowType], doc: str = "Dungeonmarch"):
+    @classmethod
+    def cached(cls) -> Self:
+        """Returns the in-memory instance without hitting the API.
+
+        Falls back to a full fetch if no instance exists yet.
+        """
+        try:
+            return cls._instances[cls]
+        except KeyError:
+            raise RuntimeError(
+                f"{cls.__name__} has not been instantiated yet."
+            )
+
+    def __init__(self, sheet_id: int, cls: type[RowType], doc_key: str = WODMARCH_KEY):
         """Initializes the class with the given sheet_id and row type."""
-        logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
+        logger.debug(
+            f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls
-        self.sheet = gc.open(doc).get_worksheet_by_id(sheet_id)
+        self.sheet = gc.open_by_key(doc_key).get_worksheet_by_id(sheet_id)
 
     def fetch_data(self):
         """Fetches all data from the sheet. Called each time __init__() is called."""
         logger.debug("Fetching data from sheet...")
-        self.DATA = self.sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
+        self.DATA = self.sheet.get_all_values(
+            value_render_option=ValueRenderOption.unformatted)
         self._after_fetch()
 
     def _after_fetch(self):
@@ -69,7 +91,8 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     def get_row(self, row: int) -> RowType:
         """Returns a row as a dataclass instance. Row is 0-indexed. Remember that the first row is generally the header."""
         if row == -1:
-            raise ValueError(f"Row index {row} not set and not present in values.")
+            raise ValueError(
+                f"Row index {row} not set and not present in values.")
         data_row = self._convert_row(self.DATA[row])
         data_row.set_index(row)
         return data_row
@@ -94,11 +117,11 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         return [row[col] for row in self.DATA]
 
     def set_cell(self, row: int, col: Col, value: Value):
-        """Sets a cell to a given value. Row and col are 0-indexed. Col can optinoally be the letter identifier."""
+        """Sets a cell to a given value. Row and col are 0-indexed. Col can optionally be the letter identifier."""
         if isinstance(col, str):
             col = column_to_num(col)
-        else:
-            self.sheet.update_cell(row + 1, col + 1, value)
+        self.sheet.update_cell(row + 1, col + 1, value)
+        self.DATA[row][col] = value
 
     def set_row(self, values: RowType, row: int = -1):
         """Sets a row to a given value."""
@@ -110,6 +133,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
             ranges,
             value_input_option=ValueInputOption.user_entered,
         )
+        self.DATA[row] = values.to_list()
 
     update_row = set_row
 
@@ -122,6 +146,8 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
             ranges,
             value_input_option=ValueInputOption.user_entered,
         )
+        for value in values:
+            self.DATA[value.get_index()] = value.to_list()
 
     def find_first_empty_row(self, col: Col, strict: bool = False) -> int:
         """Finds the first empty row in a given column. Strict makes it manually look for the first empty cell, insteda of giving the length of the column."""
@@ -130,8 +156,8 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
             for i, cell in enumerate(column):
                 if cell == "" or cell is None:
                     return i
-            return len(column) + 1
-        return len(column) + 1
+            return len(column)
+        return len(column)
 
     def col_letter(self, col_name: str) -> str:
         """Returns the column letter of a given column name."""
@@ -168,8 +194,12 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         """Finds the index of the first row with a given discord_id in a given column."""
         id = str(discord_id)
         i_col = self.col_index(col_name)
+        logger.debug(
+            f"Searching for discord_id '{id}' in column {col_name} (index {i_col})")
         for i, row in enumerate(self.DATA):
+            logger.debug(f"Checking row index {i}: {row[i_col]}")
             if str(row[i_col]) == id:
+                logger.debug(f"Found discord_id '{id}' at row index {i}")
                 return i
         raise DataNotFoundError("Row with given discord_id not found")
 
@@ -180,16 +210,21 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
 
     def insert_rows(self, values: list[RowType], row: int = -1):
         """Inserts multiple rows at the end of the sheet."""
-        if row == -1:
-            row = len(self.DATA)
+        start_row = row if row != -1 else len(self.DATA)
         ranges = []
-        for value in values:
-            ranges.extend(value._ranges(row))
-            row += 1
+        for i, value in enumerate(values):
+            ranges.extend(value._ranges(start_row + i))
         self.sheet.batch_update(
             ranges,
             value_input_option=ValueInputOption.user_entered,
         )
+        for i, value in enumerate(values):
+            target = start_row + i
+            row_list = value.to_list()
+            if target < len(self.DATA):
+                self.DATA[target] = row_list
+            else:
+                self.DATA.append(row_list)
 
     def insert_row(self, value: RowType, row: int = -1):
         """Inserts a row at the end of the sheet."""
