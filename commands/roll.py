@@ -19,7 +19,7 @@ class RollCommands(Cog):
         interaction: Interaction,
         attribute: Attribute = SlashOption(
             "attribute", "Attribute to roll with",
-            required=True, choices=ATTRIBUTES,
+            required=False, default=None, autocomplete=True,
         ),
         ability: Ability = SlashOption(
             "ability", "Ability to roll with (optional)",
@@ -41,7 +41,7 @@ class RollCommands(Cog):
         user_id = not_none(interaction.user).id
         pj = PJsController.cached().get_pj_row(user_id)
 
-        attr_val = pj.attribute(attribute)
+        attr_val = pj.attribute(attribute) if attribute else 0
         ability_val = pj.ability(ability) if ability else 0
         has_specialty = bool(ability and pj.specialty(
             ability)) and apply_specialty
@@ -50,7 +50,8 @@ class RollCommands(Cog):
         result = wod_roll(pool, difficulty, has_specialty)
 
         # Build label line
-        parts = [f"**{attribute}** {attr_val}"]
+        parts = []
+        if attribute: parts.append(f"**{attribute}** {attr_val}")
         if ability:
             spec = pj.specialty(ability)
             spec_tag = f" *({spec})*" if spec and apply_specialty else ""
