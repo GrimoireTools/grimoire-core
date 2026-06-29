@@ -10,32 +10,49 @@ from system_data import ATTRIBUTES, PREDEFINED_ABILITIES, Ability, Attribute
 
 
 class RollCommands(Cog):
-
     # ── /roll ─────────────────────────────────────────────────────────────────
-    @slash_command(name="roll", guild_ids=[CRI_GUILD_ID], description="Roll an attribute + ability dice pool")
+    @slash_command(
+        name="roll",
+        guild_ids=[CRI_GUILD_ID],
+        description="Roll an attribute + ability dice pool",
+    )
     @try_command
     async def roll(
         self: Self,
         interaction: Interaction,
         attribute: Attribute = SlashOption(
-            "attribute", "Attribute to roll with",
-            required=False, default=None, autocomplete=True,
+            "attribute",
+            "Attribute to roll with",
+            required=False,
+            default=None,
+            choices=ATTRIBUTES,
         ),
         ability: Ability = SlashOption(
-            "ability", "Ability to roll with (optional)",
-            required=False, default=None, autocomplete=True,
+            "ability",
+            "Ability to roll with (optional)",
+            required=False,
+            default="",
+            autocomplete=True,
         ),
         apply_specialty: bool = SlashOption(
-            "specialty", "Apply specialty (10s = 2 successes)",
-            required=False, default=False,
+            "specialty",
+            "Apply specialty (10s = 2 successes)",
+            required=False,
+            default=False,
         ),
         modifier: int = SlashOption(
-            "modifier", "Extra dice to add (negative to remove)",
-            required=False, default=0,
+            "modifier",
+            "Extra dice to add (negative to remove)",
+            required=False,
+            default=0,
         ),
         difficulty: int = SlashOption(
-            "difficulty", "Target number for a success (default 6)",
-            required=False, default=6, min_value=2, max_value=10,
+            "difficulty",
+            "Target number for a success (default 6)",
+            required=False,
+            default=6,
+            min_value=2,
+            max_value=10,
         ),
     ) -> Any:
         user_id = not_none(interaction.user).id
@@ -43,50 +60,56 @@ class RollCommands(Cog):
 
         attr_val = pj.attribute(attribute) if attribute else 0
         ability_val = pj.ability(ability) if ability else 0
-        has_specialty = bool(ability and pj.specialty(
-            ability)) and apply_specialty
+        has_specialty = bool(ability and pj.specialty(ability)) and apply_specialty
         pool = attr_val + ability_val + modifier
 
         result = wod_roll(pool, difficulty, has_specialty)
 
         # Build label line
         parts = []
-        if attribute: parts.append(f"**{attribute}** {attr_val}")
+        if attribute:
+            parts.append(f"**{attribute}** {attr_val}")
         if ability:
             spec = pj.specialty(ability)
             spec_tag = f" *({spec})*" if spec and apply_specialty else ""
             parts.append(f"**{ability}** {ability_val}{spec_tag}")
         if modifier:
             parts.append(f"modifier {modifier:+}")
-        label = " + ".join(parts) + \
-            f"  |  pool **{pool}**  diff **{difficulty}**"
+        label = " + ".join(parts) + f"  |  pool **{pool}**  diff **{difficulty}**"
 
-        await interaction.followup.send(
-            f"{label}\n```ansi\n{format_roll(result)}\n```"
-        )
+        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```")
 
     # ── /roll_pool ────────────────────────────────────────────────────────────
-    @slash_command(name="roll_pool", guild_ids=[CRI_GUILD_ID], description="Roll a raw dice pool (no character lookup)")
+    @slash_command(
+        name="roll_pool",
+        guild_ids=[CRI_GUILD_ID],
+        description="Roll a raw dice pool (no character lookup)",
+    )
     @try_command
     async def roll_pool(
         self: Self,
         interaction: Interaction,
         pool: int = SlashOption(
-            "pool", "Number of dice to roll", required=True, min_value=0),
+            "pool", "Number of dice to roll", required=True, min_value=0
+        ),
         difficulty: int = SlashOption(
-            "difficulty", "Target number for a success (default 6)",
-            required=False, default=6, min_value=2, max_value=10,
+            "difficulty",
+            "Target number for a success (default 6)",
+            required=False,
+            default=6,
+            min_value=2,
+            max_value=10,
         ),
         specialty: bool = SlashOption(
-            "specialty", "Apply specialty (10s = 2 successes)",
-            required=False, default=False,
+            "specialty",
+            "Apply specialty (10s = 2 successes)",
+            required=False,
+            default=False,
         ),
     ) -> Any:
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
-        await interaction.followup.send(
-            f"{label}\n```ansi\n{format_roll(result)}\n```"
-        )
+        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```")
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 
