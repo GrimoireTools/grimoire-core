@@ -2,6 +2,7 @@ from typing import Any, Self
 
 from nextcord import slash_command, Interaction, SlashOption
 
+from commands.utils.quotes import quotify
 from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJsController
@@ -60,7 +61,8 @@ class RollCommands(Cog):
 
         attr_val = pj.attribute(attribute) if attribute else 0
         ability_val = pj.ability(ability) if ability else 0
-        has_specialty = bool(ability and pj.specialty(ability)) and apply_specialty
+        has_specialty = bool(ability and pj.specialty(
+            ability)) and apply_specialty
         pool = attr_val + ability_val + modifier
 
         result = wod_roll(pool, difficulty, has_specialty)
@@ -75,9 +77,10 @@ class RollCommands(Cog):
             parts.append(f"**{ability}** {ability_val}{spec_tag}")
         if modifier:
             parts.append(f"modifier {modifier:+}")
-        label = " + ".join(parts) + f"  |  pool **{pool}**  diff **{difficulty}**"
+        label = " + ".join(parts) + \
+            f"  |  pool **{pool}**  diff **{difficulty}**"
 
-        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```")
+        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```"))
 
     # ── /roll_pool ────────────────────────────────────────────────────────────
     @slash_command(
@@ -109,7 +112,7 @@ class RollCommands(Cog):
     ) -> Any:
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
-        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```")
+        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```"))
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 

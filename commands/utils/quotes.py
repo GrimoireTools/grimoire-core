@@ -27,4 +27,7 @@ def random_quote() -> str:
 
 
 def quotify(text: str) -> str:
-    return f"{text}{random_quote()}"
+    r = random.choice([True, False])
+    if r:
+        return f"{text}{random_quote()}"
+    return text

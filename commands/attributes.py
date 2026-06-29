@@ -2,6 +2,7 @@ from typing import Any, Self
 
 from nextcord import slash_command, Interaction, SlashOption
 
+from commands.utils.quotes import quotify
 from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJsController
@@ -33,13 +34,13 @@ class AttributesCommands(Cog):
         pj = sh.get_pj_row(user_id)
         max_value = pj.max_attr()
         if value > max_value:
-            return await interaction.followup.send(
+            return await interaction.followup.send(quotify(
                 f"Error: The value for {attribute} exceeds the maximum of {max_value} for your character type ({pj.Char_type})."
-            )
+            ))
         old = pj.attribute(attribute)
         pj.attribute(attribute, value)
         sh.set_row(pj)
-        await interaction.followup.send(f"**{pj.Name}** — {attribute}: {dots(old, max_value)} → {dots(value, max_value)} ({old} → {value})")
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {attribute}: {dots(old, max_value)} → {dots(value, max_value)} ({old} → {value})"))
 
     # ── /attribute view ───────────────────────────────────────────────────────
     @attribute_group.subcommand(name="view", description="Shows the current value of a single attribute")
@@ -54,7 +55,7 @@ class AttributesCommands(Cog):
         pj = PJsController.cached().get_pj_row(user_id)
         value = pj.attribute(attribute)
         max_value = pj.max_attr()
-        await interaction.followup.send(f"**{pj.Name}** — {f"{attribute} ({value}):".rjust(20)} {dots(value, max_value)}")
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {f"{attribute} ({value}):".rjust(20)} {dots(value, max_value)}"))
 
     # ── /attributes set_all ───────────────────────────────────────────────────
     @slash_command(name="attributes", guild_ids=[CRI_GUILD_ID], description="Set all 9 attributes at once")
@@ -106,4 +107,4 @@ class AttributesCommands(Cog):
             f"  {k:<14} {dots(v, max_value)} ({v})"
             for k, v in pj.Attributes.items()
         )
-        await interaction.followup.send(f"**{pj.Name}** — Attributes updated:\n```\n{lines}\n```")
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Attributes updated:\n```\n{lines}\n```"))
