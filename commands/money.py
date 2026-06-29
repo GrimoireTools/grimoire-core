@@ -62,7 +62,7 @@ class MoneyCommands(Cog):
                 f"Dinero restante: {pj_coins.pretty_print()}, **Total: {pj_coins.total():.2f}gp**"
             )
         await interaction.send(msg)
-        await caliban_speaks(interaction, 10, "money")
+        await caliban_speaks(interaction, "money")
 
     @standard_command("Suma dinero a tu cuenta.")
     async def addmoney(
@@ -86,6 +86,7 @@ class MoneyCommands(Cog):
         pj: PJRow = sh.get_pj_row(user_id)
         coins = sh.set_money(user_id, pj.calc_money() + amount)
 
-        return await interaction.followup.send(
+        await interaction.followup.send(
             f"{pj.Name} obtiene {amount:.2f}gp. Ahora tiene {coins.pretty_print()}, **Total: {coins.total():.2f}gp**"
         )
+        await caliban_speaks(interaction, "money")
