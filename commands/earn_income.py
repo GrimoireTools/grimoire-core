@@ -326,6 +326,7 @@ class EarnIncomeCommands(Cog):
 def job_message(skill: str, base_lvl: int) -> str:
     """Generate a job message for a specific skill and base level."""
     lvl = min(21, base_lvl + random.choices([0, 1, 2], [0.6, 0.3, 0.1])[0])
+
     if skill_is_standard(skill):
         dc_adjustment = random.choice([-0, -1, -2])
         dc_message = f"{dc_adjustment:+} al DC"
@@ -335,6 +336,11 @@ def job_message(skill: str, base_lvl: int) -> str:
         dc_adjustment = random.choice([-1, -2, -3])
         dc_message = f"{dc_adjustment:+} al DC (+3 por skill no estandar)"
         extra_dc = 3
+
+    if lvl == 21:
+        lvl = 20
+        dc_adjustment -= 2
+        dc_message += " (-2 al DC por lotería)"
 
     dc = EARN_INCOME[lvl][0] + dc_adjustment + extra_dc
 
