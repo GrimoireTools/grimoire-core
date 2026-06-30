@@ -27,7 +27,7 @@ class AttributesCommands(Cog):
         attribute: Attribute = SlashOption(
             "attribute", "Attribute to set", required=True, choices=ATTRIBUTE_CHOICES),
         value: int = SlashOption(
-            "value", "New value (1–5)", required=True, min_value=1, max_value=5),
+            "value", "New value (0–5)", required=True, min_value=0, max_value=5),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -64,23 +64,23 @@ class AttributesCommands(Cog):
         self: Self,
         interaction: Interaction,
         strength: int = SlashOption(
-            "strength", required=True, min_value=1, max_value=8),
+            "strength", required=True, min_value=0, max_value=8),
         dexterity: int = SlashOption(
-            "dexterity", required=True, min_value=1, max_value=8),
+            "dexterity", required=True, min_value=0, max_value=8),
         stamina: int = SlashOption(
-            "stamina", required=True, min_value=1, max_value=8),
+            "stamina", required=True, min_value=0, max_value=8),
         charisma: int = SlashOption(
-            "charisma", required=True, min_value=1, max_value=8),
+            "charisma", required=True, min_value=0, max_value=8),
         manipulation: int = SlashOption(
-            "manipulation", required=True, min_value=1, max_value=8),
+            "manipulation", required=True, min_value=0, max_value=8),
         appearance: int = SlashOption(
-            "appearance", required=True, min_value=1, max_value=8),
+            "appearance", required=True, min_value=0, max_value=8),
         perception: int = SlashOption(
-            "perception", required=True, min_value=1, max_value=8),
+            "perception", required=True, min_value=0, max_value=8),
         intelligence: int = SlashOption(
-            "intelligence", required=True, min_value=1, max_value=8),
+            "intelligence", required=True, min_value=0, max_value=8),
         wits: int = SlashOption("wits", required=True,
-                                min_value=1, max_value=8),
+                                min_value=0, max_value=8),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
