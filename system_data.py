@@ -12,8 +12,17 @@ Attribute = Literal[
     "Wits",
 ]
 
-ATTRIBUTES: list[Attribute] = list(
-    Attribute.__args__)  # type: ignore[attr-defined]
+ATTRIBUTES: list[Attribute] = [
+    "Strength",
+    "Dexterity",
+    "Stamina",
+    "Charisma",
+    "Manipulation",
+    "Appearance",
+    "Perception",
+    "Intelligence",
+    "Wits",
+]
 
 Ability = str
 
@@ -29,6 +38,10 @@ PREDEFINED_ABILITIES: list[Ability] = [
     "Linguistics", "Medicine", "Occult", "Politics", "Science",
 
 ]
+
+TALENTS: list[Ability] = PREDEFINED_ABILITIES[:10]
+SKILLS: list[Ability] = PREDEFINED_ABILITIES[10:20]
+KNOWLEDGES: list[Ability] = PREDEFINED_ABILITIES[20:]
 
 Resource = str
 

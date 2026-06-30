@@ -10,6 +10,12 @@ from commands.utils.wod_utils import dots
 from system_data import PREDEFINED_ABILITIES
 
 
+def set_opt(name: str) -> SlashOption:
+    return SlashOption(
+        name.lower(), f"New value for {name.replace('_', ' ').title()} (0–5)", required=True, autocomplete=True
+    )
+
+
 class AbilitiesCommands(Cog):
 
     @slash_command(name="ability", guild_ids=[CRI_GUILD_ID], description="Manage character abilities")
@@ -35,7 +41,125 @@ class AbilitiesCommands(Cog):
         sh.set_row(pj)
         await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(old)} → {dots(value)}"))
 
+    @ability_group.subcommand(name="set_talents", description="Sets all talents to a value (0–5)")
+    @try_command
+    async def ability_set_talents(
+        self: Self,
+        interaction: Interaction,
+        alertness: int = set_opt("Alertness"),
+        athletics: int = set_opt("Athletics"),
+        brawl: int = set_opt("Brawl"),
+        empathy: int = set_opt("Empathy"),
+        expression: int = set_opt("Expression"),
+        intimidation: int = set_opt("Intimidation"),
+        leadership: int = set_opt("Leadership"),
+        streetwise: int = set_opt("Streetwise"),
+        subterfuge: int = set_opt("Subterfuge"),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj = sh.get_pj_row(user_id)
+        old_values = pj.talent_abilities(all=True)
+        new_values = {
+            "Alertness": alertness,
+            "Athletics": athletics,
+            "Brawl": brawl,
+            "Empathy": empathy,
+            "Expression": expression,
+            "Intimidation": intimidation,
+            "Leadership": leadership,
+            "Streetwise": streetwise,
+            "Subterfuge": subterfuge,
+        }
+        pj.set_abilities(new_values)
+        sh.set_row(pj)
+        changes = "\n".join(
+            f"  {ability:<14} {dots(old_values[ability])} → {dots(new_values[ability])}"
+            for ability in new_values
+        )
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Talents updated:\n```\n{changes}\n```"))
+
+    @ability_group.subcommand(name="set_skills", description="Sets all skills to a value (0–5)")
+    @try_command
+    async def ability_set_skills(
+        self: Self,
+        interaction: Interaction,
+        animal_ken: int = set_opt("Animal_Ken"),
+        crafts: int = set_opt("Crafts"),
+        drive: int = set_opt("Drive"),
+        etiquette: int = set_opt("Etiquette"),
+        firearms: int = set_opt("Firearms"),
+        larceny: int = set_opt("Larceny"),
+        melee: int = set_opt("Melee"),
+        performance: int = set_opt("Performance"),
+        stealth: int = set_opt("Stealth"),
+        survival: int = set_opt("Survival"),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj = sh.get_pj_row(user_id)
+        old_values = pj.skill_abilities(all=True)
+        new_values = {
+            "Animal Ken": animal_ken,
+            "Crafts": crafts,
+            "Drive": drive,
+            "Etiquette": etiquette,
+            "Firearms": firearms,
+            "Larceny": larceny,
+            "Melee": melee,
+            "Performance": performance,
+            "Stealth": stealth,
+            "Survival": survival,
+        }
+        pj.set_abilities(new_values)
+        sh.set_row(pj)
+        changes = "\n".join(
+            f"  {ability:<14} {dots(old_values[ability])} → {dots(new_values[ability])}"
+            for ability in new_values
+        )
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Skills updated:\n```\n{changes}\n```"))
+
+    @ability_group.subcommand(name="set_knowledges", description="Sets all knowledges to a value (0–5)")
+    @try_command
+    async def ability_set_knowledges(
+        self: Self,
+        interaction: Interaction,
+        academics: int = set_opt("Academics"),
+        computer: int = set_opt("Computer"),
+        finance: int = set_opt("Finance"),
+        investigation: int = set_opt("Investigation"),
+        law: int = set_opt("Law"),
+        linguistics: int = set_opt("Linguistics"),
+        medicine: int = set_opt("Medicine"),
+        occult: int = set_opt("Occult"),
+        politics: int = set_opt("Politics"),
+        science: int = set_opt("Science"),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj = sh.get_pj_row(user_id)
+        old_values = pj.knowledge_abilities(all=True)
+        new_values = {
+            "Academics": academics,
+            "Computer": computer,
+            "Finance": finance,
+            "Investigation": investigation,
+            "Law": law,
+            "Linguistics": linguistics,
+            "Medicine": medicine,
+            "Occult": occult,
+            "Politics": politics,
+            "Science": science,
+        }
+        pj.set_abilities(new_values)
+        sh.set_row(pj)
+        changes = "\n".join(
+            f"  {ability:<14} {dots(old_values[ability])} → {dots(new_values[ability])}"
+            for ability in new_values
+        )
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Knowledges updated:\n```\n{changes}\n```"))
     # ── /ability view ───────────────────────────────────────────────────────────
+
     @ability_group.subcommand(name="view", description="Shows an ability value and specialty if any")
     @try_command
     async def ability_view(
@@ -45,11 +169,45 @@ class AbilitiesCommands(Cog):
             "ability", "Ability name", required=True, autocomplete=True),
     ) -> Any:
         user_id = not_none(interaction.user).id
-        pj = PJsController.cached().get_pj_row(user_id)
+        pj = PJsController().get_pj_row(user_id)
         value = pj.ability(ability)
         spec = pj.specialty(ability)
         spec_str = f"  *(specialty: {spec})*" if spec else ""
         await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(value)}{spec_str}"))
+
+    @ability_group.subcommand(name="all", description="Shows all the abilities and their values, including specialties")
+    @try_command
+    async def ability_all(
+        self: Self,
+        interaction: Interaction,
+        all: bool = SlashOption(
+            "all", "Show all abilities including ones at 0", required=False, default=False),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        pj = PJsController().get_pj_row(user_id)
+        knowledges = pj.knowledge_abilities(all)
+        skills = pj.skill_abilities(all)
+        talents = pj.talent_abilities(all)
+        customs = pj.custom_abilities()
+
+        lines = "Talents:\n" + "\n".join(
+            f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
+            for k, v in talents.items()
+        ) + "\n\n" if talents else ""
+        lines += "Knowledges:\n" + "\n".join(
+            f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
+            for k, v in knowledges.items()
+        ) + "\n\n" if knowledges else ""
+        lines += "Skills:\n" + "\n".join(
+            f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
+            for k, v in skills.items()
+        ) + "\n\n" if skills else ""
+
+        lines += "Custom Abilities:\n" + "\n".join(
+            f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
+            for k, v in customs.items()
+        ) if customs else ""
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Abilities:\n```\n{lines}\n```"))
 
     # ── /specialty set ────────────────────────────────────────────────────────
     @slash_command(name="specialty", guild_ids=[CRI_GUILD_ID], description="Manage ability specialties")
@@ -62,7 +220,7 @@ class AbilitiesCommands(Cog):
         self: Self,
         interaction: Interaction,
         ability: str = SlashOption(
-            "ability", "Ability to specialise in", required=True, autocomplete=True),
+            "ability", "Ability or Attribute to specialise in", required=True, autocomplete=True),
         description: str = SlashOption(
             "description", "Specialty description (e.g. 'Haymaker')", required=True),
     ) -> Any:
@@ -106,7 +264,7 @@ class AbilitiesCommands(Cog):
     @specialty_set.on_autocomplete("ability")
     async def _ac_specialty_set(self, interaction: Interaction, query: str):
         # Only abilities the character actually has a value in
-        await self._ability_autocomplete(interaction, query, only_known=True)
+        await self._ability_or_attribute_autocomplete(interaction, query, only_known=True)
 
     @specialty_remove.on_autocomplete("ability")
     async def _ac_specialty_remove(self, interaction: Interaction, query: str):
@@ -140,6 +298,34 @@ class AbilitiesCommands(Cog):
             names = known
         elif include_custom:
             # Predefined first, then any custom skills the character already has
+            custom = [s for s in known if s not in PREDEFINED_ABILITIES]
+            names = PREDEFINED_ABILITIES + custom
+        else:
+            names = PREDEFINED_ABILITIES
+
+        if query:
+            names = [s for s in names if s.lower().startswith(query.lower())]
+        await interaction.response.send_autocomplete(names[:25])
+
+    async def _ability_or_attribute_autocomplete(
+        self,
+        interaction: Interaction,
+        query: str,
+        include_custom: bool = False,
+        only_known: bool = False,
+    ):
+        try:
+            user_id = not_none(interaction.user).id
+            pj = PJsController.cached().get_pj_row(user_id)
+            known = list(pj.Abilities.keys()) + list(pj.Attributes.keys())
+        except Exception:
+            known = []
+            pj = None
+
+        if only_known:
+            names = known
+        elif include_custom:
+            # Predefined first, then any custom skills or attributes the character already has
             custom = [s for s in known if s not in PREDEFINED_ABILITIES]
             names = PREDEFINED_ABILITIES + custom
         else:

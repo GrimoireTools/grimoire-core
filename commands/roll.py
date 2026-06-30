@@ -61,25 +61,33 @@ class RollCommands(Cog):
 
         attr_val = pj.attribute(attribute) if attribute else 0
         ability_val = pj.ability(ability) if ability else 0
-        has_specialty = bool(ability and pj.specialty(
-            ability)) and apply_specialty
+        attr_spec = bool(attribute and pj.specialty(attribute))
+        ability_spec = bool(ability and pj.specialty(ability))
+        has_specialty = (attr_spec or ability_spec)
+
         pool = attr_val + ability_val + modifier
 
-        result = wod_roll(pool, difficulty, has_specialty)
+        result = wod_roll(pool, difficulty, has_specialty and apply_specialty)
 
         # Build label line
         parts = []
         if attribute:
             parts.append(f"**{attribute}** {attr_val}")
+            if attr_spec and apply_specialty:
+                parts[-1] += f" [{pj.specialty(attribute)}]"
         if ability:
-            spec = pj.specialty(ability)
-            spec_tag = f" *({spec})*" if spec and apply_specialty else ""
-            parts.append(f"**{ability}** {ability_val}{spec_tag}")
+            parts.append(f"**{ability}** {ability_val}")
+            if ability_spec and apply_specialty:
+                parts[-1] += f" [{pj.specialty(ability)}]"
+
         if modifier:
             parts.append(f"modifier {modifier:+}")
         label = " + ".join(parts) + \
             f"  |  pool **{pool}**  diff **{difficulty}**"
-
+        if apply_specialty and not has_specialty:
+            label += "  |  specialty ignored (no specialty found)"
+        elif apply_specialty and has_specialty:
+            label += "  |  specialty applied"
         await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```"))
 
     # ── /roll_pool ────────────────────────────────────────────────────────────

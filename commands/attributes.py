@@ -55,9 +55,24 @@ class AttributesCommands(Cog):
         pj = PJsController.cached().get_pj_row(user_id)
         value = pj.attribute(attribute)
         max_value = pj.max_attr()
-        await interaction.followup.send(quotify(f"**{pj.Name}** — {f"{attribute} ({value}):".rjust(20)} {dots(value, max_value)}"))
+        specialty = f"[{pj.specialty(attribute)}]" if pj.specialty(
+            attribute) else ""
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {f"{attribute} ({value}):".rjust(20)} {dots(value, max_value)} {specialty}"))
 
+    @attribute_group.subcommand(name="view_all", description="Shows all attributes and their current values")
+    @try_command
+    async def attribute_view_all(self: Self, interaction: Interaction) -> Any:
+        user_id = not_none(interaction.user).id
+        pj = PJsController.cached().get_pj_row(user_id)
+        max_value = pj.max_attr()
+        lines = "\n".join(
+            f"  {k:<14} {dots(v, max_value)} ({v}) {f'[{pj.specialty(k)}]' if pj.specialty(
+                k) else ''}"
+            for k, v in pj.Attributes.items()
+        )
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Attributes:\n```\n{lines}\n```"))
     # ── /attributes set_all ───────────────────────────────────────────────────
+
     @slash_command(name="attributes", guild_ids=[CRI_GUILD_ID], description="Set all 9 attributes at once")
     @try_command
     async def attributes_set_all(
