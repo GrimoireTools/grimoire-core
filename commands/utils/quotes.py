@@ -207,7 +207,7 @@ def get_random_message(elohim: str, type: MessageType = "default") -> str:
 #    await interaction.followup.send(f"`{message}`")
 
 def quotify(text: str, interaction: Interaction, type: MessageType = "default") -> str:
-    r = random.randint(1,100) <= 75
+    r = random.randint(1,100) <= 15
     if r:
         quote = elohim_quote(interaction, type)
         quote = f"\n\n*{quote}*"

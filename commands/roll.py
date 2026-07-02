@@ -87,7 +87,13 @@ class RollCommands(Cog):
             label += "  |  specialty ignored (no specialty found)"
         elif apply_specialty and has_specialty:
             label += "  |  specialty applied"
-        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction))
+        
+        if result.successes > 0:
+            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "success"))
+        elif result.is_botch:
+            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "botch"))
+        else:
+            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "failure"))
 
     # ── /roll_pool ────────────────────────────────────────────────────────────
     @slash_command(
