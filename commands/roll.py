@@ -2,13 +2,12 @@ from typing import Any, Self
 
 from nextcord import slash_command, Interaction, SlashOption
 
-from commands.utils.quotes import quotify
+from commands.utils.quotes import quotify, elohim_speaks
 from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJsController
 from commands.utils.wod_roll_utils import wod_roll, format_roll
 from system_data import ATTRIBUTES, PREDEFINED_ABILITIES, Ability, Attribute
-
 
 class RollCommands(Cog):
     # ── /roll ─────────────────────────────────────────────────────────────────
@@ -120,7 +119,8 @@ class RollCommands(Cog):
     ) -> Any:
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
-        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```"))
+        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```")
+        await elohim_speaks(interaction, "default")
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 

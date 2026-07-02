@@ -1,23 +1,62 @@
 import random
+from typing import Literal, TypedDict
+from nextcord import Interaction, Embed, Color
 
+from controllers.lib.utils import not_none
+from controllers.pjs_controller import PJsController
 
-edward_quotes = [
-    "And so the lion fell in love with the lamb.",
-    "What a stupid lamb.",
-    "What a sick, masochistic lion.",
-    "You better hold on tight, spider monkey.",
-    "You're my own personal brand of heroin.",
-    "Bella, where the hell have you been, loca?",
-    "I don't have the strength to stay away from you anymore.",
-    "As if you could outrun me.",
-    "As if you could fight me off.",
-    "You are exactly my brand of crazy.",
-    "You give me everything just by breathing.",
-    "I wanted to kill you. I've never wanted a human's blood so much in my life.",
-    "You are the most important thing to me now. The most important thing to me ever.",
-    "Before you, Bella, my life was like a moonless night.",
-    "I can't live in a world where you don't exist."
-]
+MessageType = Literal["default", "success", "failure", "botch"]
+
+class ElohimType(TypedDict):
+    type: str  
+    message: dict[MessageType, list[str]]
+
+ELOHIM: dict[str, ElohimType] = {
+    "elohim_default":{
+        "type": "Default",
+        "message": {
+            "default": [
+                "And every one had four faces, and every one had four wings.",
+                "Their wings were joined one to another. They turned not when they went; they went every one straight forward.",
+                "And the living creatures ran and returned, like the appearance of a flash of lightning."
+            ],
+            "success": [],
+            "failure": [],
+            "botch": [],
+        }
+    },
+    "elohim_vampire":{
+        "type": "Vampire",
+        "message": {
+            "default": [
+                "Cain's shadow is long. You stand within it and call it home.",
+                "Your reflection does not lie to you. I find that I envy it its honesty.",
+                "The blood remembers whose it was. Does it trouble you, what you carry?"
+            ],
+            "success": [],
+            "failure": [],
+            "botch": [],
+        }
+    },
+    "elohim_mage":{
+        "type": "Mage",
+        "message": {
+            "default": [],
+            "success": [],
+            "failure": [],
+            "botch": [],
+        }
+    },
+    "elohim_hunter":{
+        "type": "Hunter",
+        "message": {
+            "default": [],
+            "success": [],
+            "failure": [],
+            "botch": [],
+        }
+    },
+}
 
 ezekiel_quotes = [
     "Also out of the midst thereof came the likeness of four living creatures. And this was their appearance: they had the likeness of a man.",
@@ -31,6 +70,26 @@ ezekiel_quotes = [
     "As for the likeness of the living creatures, their appearance was like burning coals of fire and like the appearance of lamps; it went up and down among the living creatures, and the fire was bright, and out of the fire went forth lightning.",
     "And the living creatures ran and returned, like the appearance of a flash of lightning."
 ]
+
+async def elohim_speaks(interaction: Interaction, type: MessageType = "default") -> None:
+    user_id = not_none(interaction.user).id
+    pj = PJsController.cached().get_pj_row(user_id)
+    if random.choice([True, False]):
+        message = get_random_message(pj.Char_type,type)
+        await send_elohim_message(interaction, message)
+
+def get_random_message(pj_chartype: str, type: MessageType = "default") -> str:
+    elohim_types = ELOHIM[pj_chartype]
+    pool = elohim_types["message"].get(type) or elohim_types["message"]["default"]
+    return random.choice(pool)
+
+async def send_elohim_message(
+        interaction: Interaction,
+        message: str | None,
+) -> None:
+    if not message: 
+        return
+    await interaction.followup.send(f"`{message}`")
 
 
 def random_quote() -> str:
