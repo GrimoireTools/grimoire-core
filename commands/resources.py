@@ -27,7 +27,7 @@ class ResourcesCommands(Cog):
         pj = sh.get_pj_row(user_id)
         pj.resource(name, value)
         sh.set_row(pj)
-        await interaction.followup.send(quotify(f"**{pj.Name}** — {name} set to **{value}**."))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {name} set to **{value}**.", interaction))
 
     @resource_group.subcommand(name="add", description="Adds to or subtracts from a resource (negative to subtract)")
     @try_command
@@ -47,7 +47,7 @@ class ResourcesCommands(Cog):
         sh.set_row(pj)
         direction = "gains" if amount >= 0 else "loses"
         await interaction.followup.send(quotify(
-            f"**{pj.Name}** {direction} **{abs(amount)}** {name}.\n{before} -> {after}"
+            f"**{pj.Name}** {direction} **{abs(amount)}** {name}.\n{before} -> {after}", interaction
         ))
 
     @resource_group.subcommand(name="remove", description="Removes a resource from the character sheet")
@@ -65,7 +65,7 @@ class ResourcesCommands(Cog):
             return await interaction.followup.send(f"Resource **{name}** not found.")
         del pj.Resources[name]
         sh.set_row(pj)
-        await interaction.followup.send(quotify(f"**{pj.Name}** — **{name}** removed."))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — **{name}** removed.", interaction))
 
     @resource_group.subcommand(name="list", description="Shows all resources for your character")
     @try_command
@@ -76,10 +76,10 @@ class ResourcesCommands(Cog):
         user_id = not_none(interaction.user).id
         pj = PJsController.cached().get_pj_row(user_id)
         if not pj.Resources:
-            return await interaction.followup.send(quotify(f"**{pj.Name}** has no resources."))
+            return await interaction.followup.send(quotify(f"**{pj.Name}** has no resources.", interaction))
         lines = "\n".join(f"  {k}: {v}" for k,
                           v in sorted(pj.Resources.items()))
-        await interaction.followup.send(quotify(f"**{pj.Name}** — Resources:\n```\n{lines}\n```"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Resources:\n```\n{lines}\n```", interaction))
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 

@@ -2,7 +2,7 @@ from typing import Any, Self
 
 from nextcord import slash_command, Interaction, SlashOption
 
-from commands.utils.quotes import quotify, elohim_speaks
+from commands.utils.quotes import quotify
 from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJsController
@@ -87,7 +87,7 @@ class RollCommands(Cog):
             label += "  |  specialty ignored (no specialty found)"
         elif apply_specialty and has_specialty:
             label += "  |  specialty applied"
-        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```"))
+        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction))
 
     # ── /roll_pool ────────────────────────────────────────────────────────────
     @slash_command(
@@ -119,7 +119,8 @@ class RollCommands(Cog):
     ) -> Any:
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
-        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```\n*{await elohim_speaks(interaction, "default")}*")
+        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n", interaction))
+        
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 
