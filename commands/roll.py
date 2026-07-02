@@ -119,7 +119,7 @@ class RollCommands(Cog):
     ) -> Any:
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
-        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n", interaction))
+        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction))
         
 
     # ── Autocomplete ──────────────────────────────────────────────────────────

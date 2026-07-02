@@ -230,5 +230,6 @@ def quotify(text: str, interaction: Interaction, type: MessageType = "default") 
     r = random.randint(1,100) <= 25
     if r:
         quote = elohim_quote(interaction, type)
+        quote = f"\n\n*{quote}*"
         return f"{text}{quote}"
     return text
