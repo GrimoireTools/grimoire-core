@@ -119,8 +119,12 @@ class RollCommands(Cog):
     ) -> Any:
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
-        await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction))
-        
+        if result.successes > 0:
+            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "success"))
+        elif result.is_botch:
+            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "botch"))
+        else:
+            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "failure"))
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 
