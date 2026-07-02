@@ -12,7 +12,7 @@ class ElohimType(TypedDict):
     message: dict[MessageType, list[str]]
 
 ELOHIM: dict[str, ElohimType] = {
-    "elohim_default":{
+    "Default":{
         "type": "Default",
         "message": {
             "default": [
@@ -25,7 +25,7 @@ ELOHIM: dict[str, ElohimType] = {
             "botch": [],
         }
     },
-    "elohim_vampire":{
+    "Vampire":{
         "type": "Vampire",
         "message": {
             "default": [
@@ -38,7 +38,7 @@ ELOHIM: dict[str, ElohimType] = {
             "botch": [],
         }
     },
-    "elohim_mage":{
+    "Mage":{
         "type": "Mage",
         "message": {
             "default": [],
@@ -47,7 +47,7 @@ ELOHIM: dict[str, ElohimType] = {
             "botch": [],
         }
     },
-    "elohim_hunter":{
+    "Hunter":{
         "type": "Hunter",
         "message": {
             "default": [],
