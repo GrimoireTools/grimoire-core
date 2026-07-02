@@ -119,7 +119,7 @@ class RollCommands(Cog):
     ) -> Any:
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
-        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```\n*{elohim_speaks(interaction, "default")}*")
+        await interaction.followup.send(f"{label}\n```ansi\n{format_roll(result)}\n```\n*{await elohim_speaks(interaction, "default")}*")
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 

@@ -97,7 +97,6 @@ def random_quote() -> str:
     quote = f"\n\n*{quote}*"
     return quote
 
-
 def quotify(text: str) -> str:
     r = random.choice([True, False])
     if r:
