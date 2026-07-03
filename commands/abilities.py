@@ -39,7 +39,7 @@ class AbilitiesCommands(Cog):
         old = pj.ability(ability)
         pj.ability(ability, value)
         sh.set_row(pj)
-        await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(old)} → {dots(value)}"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(old)} → {dots(value)}", interaction))
 
     @ability_group.subcommand(name="set_talents", description="Sets all talents to a value (0–5)")
     @try_command
@@ -77,7 +77,7 @@ class AbilitiesCommands(Cog):
             f"  {ability:<14} {dots(old_values[ability])} → {dots(new_values[ability])}"
             for ability in new_values
         )
-        await interaction.followup.send(quotify(f"**{pj.Name}** — Talents updated:\n```\n{changes}\n```"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Talents updated:\n```\n{changes}\n```", interaction))
 
     @ability_group.subcommand(name="set_skills", description="Sets all skills to a value (0–5)")
     @try_command
@@ -117,7 +117,7 @@ class AbilitiesCommands(Cog):
             f"  {ability:<14} {dots(old_values[ability])} → {dots(new_values[ability])}"
             for ability in new_values
         )
-        await interaction.followup.send(quotify(f"**{pj.Name}** — Skills updated:\n```\n{changes}\n```"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Skills updated:\n```\n{changes}\n```", interaction))
 
     @ability_group.subcommand(name="set_knowledges", description="Sets all knowledges to a value (0–5)")
     @try_command
@@ -157,7 +157,7 @@ class AbilitiesCommands(Cog):
             f"  {ability:<14} {dots(old_values[ability])} → {dots(new_values[ability])}"
             for ability in new_values
         )
-        await interaction.followup.send(quotify(f"**{pj.Name}** — Knowledges updated:\n```\n{changes}\n```"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Knowledges updated:\n```\n{changes}\n```", interaction))
     # ── /ability view ───────────────────────────────────────────────────────────
 
     @ability_group.subcommand(name="view", description="Shows an ability value and specialty if any")
@@ -173,7 +173,7 @@ class AbilitiesCommands(Cog):
         value = pj.ability(ability)
         spec = pj.specialty(ability)
         spec_str = f"  *(specialty: {spec})*" if spec else ""
-        await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(value)}{spec_str}"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(value)}{spec_str}", interaction))
 
     @ability_group.subcommand(name="all", description="Shows all the abilities and their values, including specialties")
     @try_command
@@ -207,7 +207,7 @@ class AbilitiesCommands(Cog):
             f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
             for k, v in customs.items()
         ) if customs else ""
-        await interaction.followup.send(quotify(f"**{pj.Name}** — Abilities:\n```\n{lines}\n```"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Abilities:\n```\n{lines}\n```", interaction))
 
     # ── /specialty set ────────────────────────────────────────────────────────
     @slash_command(name="specialty", guild_ids=[CRI_GUILD_ID], description="Manage ability specialties")
@@ -231,7 +231,7 @@ class AbilitiesCommands(Cog):
         sh.set_row(pj)
         await interaction.followup.send(quotify(
             f"**{pj.Name}** — {ability} specialty set to **{description}**. "
-            f"10s will count as 2 successes when rolling this ability."
+            f"10s will count as 2 successes when rolling this ability.", interaction
         ))
 
     @specialty_group.subcommand(name="remove", description="Removes the specialty from an ability")
@@ -246,10 +246,10 @@ class AbilitiesCommands(Cog):
         sh = PJsController()
         pj = sh.get_pj_row(user_id)
         if ability not in pj.Specialties:
-            return await interaction.followup.send(quotify(f"**{ability}** has no specialty."))
+            return await interaction.followup.send(quotify(f"**{ability}** has no specialty.", interaction))
         del pj.Specialties[ability]
         sh.set_row(pj)
-        await interaction.followup.send(quotify(f"**{pj.Name}** — specialty for **{ability}** removed."))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — specialty for **{ability}** removed.", interaction))
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 

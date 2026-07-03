@@ -35,12 +35,12 @@ class AttributesCommands(Cog):
         max_value = pj.max_attr()
         if value > max_value:
             return await interaction.followup.send(quotify(
-                f"Error: The value for {attribute} exceeds the maximum of {max_value} for your character type ({pj.Char_type})."
+                f"Error: The value for {attribute} exceeds the maximum of {max_value} for your character type ({pj.Char_type}).", interaction
             ))
         old = pj.attribute(attribute)
         pj.attribute(attribute, value)
         sh.set_row(pj)
-        await interaction.followup.send(quotify(f"**{pj.Name}** — {attribute}: {dots(old, max_value)} → {dots(value, max_value)} ({old} → {value})"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {attribute}: {dots(old, max_value)} → {dots(value, max_value)} ({old} → {value})", interaction))
 
     # ── /attribute view ───────────────────────────────────────────────────────
     @attribute_group.subcommand(name="view", description="Shows the current value of a single attribute")
@@ -57,7 +57,7 @@ class AttributesCommands(Cog):
         max_value = pj.max_attr()
         specialty = f"[{pj.specialty(attribute)}]" if pj.specialty(
             attribute) else ""
-        await interaction.followup.send(quotify(f"**{pj.Name}** — {f"{attribute} ({value}):".rjust(20)} {dots(value, max_value)} {specialty}"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — {f"{attribute} ({value}):".rjust(20)} {dots(value, max_value)} {specialty}", interaction))
 
     @attribute_group.subcommand(name="view_all", description="Shows all attributes and their current values")
     @try_command
@@ -70,7 +70,7 @@ class AttributesCommands(Cog):
                 k) else ''}"
             for k, v in pj.Attributes.items()
         )
-        await interaction.followup.send(quotify(f"**{pj.Name}** — Attributes:\n```\n{lines}\n```"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Attributes:\n```\n{lines}\n```", interaction))
     # ── /attributes set_all ───────────────────────────────────────────────────
 
     @slash_command(name="attributes", guild_ids=[CRI_GUILD_ID], description="Set all 9 attributes at once")
@@ -122,4 +122,4 @@ class AttributesCommands(Cog):
             f"  {k:<14} {dots(v, max_value)} ({v})"
             for k, v in pj.Attributes.items()
         )
-        await interaction.followup.send(quotify(f"**{pj.Name}** — Attributes updated:\n```\n{lines}\n```"))
+        await interaction.followup.send(quotify(f"**{pj.Name}** — Attributes updated:\n```\n{lines}\n```", interaction))
