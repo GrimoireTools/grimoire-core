@@ -1,6 +1,6 @@
 import random
 from typing import Literal, TypedDict
-from nextcord import Interaction, Embed, Color
+from nextcord import Interaction
 
 from controllers.lib.utils import not_none
 from controllers.pjs_controller import PJsController
@@ -31,7 +31,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "La Confederación se autodenomina neutral. Yo me considero observador. Continúa.",
                 "Sirves a un país fingiendo que no tiene bando. Yo no tengo esa pretensión. Veo todos los bandos.",
                 "Las montañas guardan bien los secretos de este país. Yo guardo mejores. Sigue.",
-                "Esta noche, todos los gobiernos de Europa le mienten a alguien. Mentir me resulta tedioso. Continúa con la verdad."
+                "Esta noche, todos los gobiernos de Europa le mienten a alguien. Mentir me resulta tedioso. Continúa con la verdad.",
             ],
             "success": [
                 "Has triunfado. Él también te está observando, me imagino, y sospecho que está complacido."
@@ -48,7 +48,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Lo has conseguido. Los secretos de la Confederación, por esta noche, seguirán siendo secretos.",
                 "Una victoria limpia, en una década que ha olvidado cómo son esas victorias.",
                 "Éxito. Independientemente de lo que Berlín o Londres crean que está sucediendo aquí esta noche, no es esto.",
-                "Bien jugado. Incluso en terreno neutral se necesita a alguien competente para mantenerse firme."
+                "Bien jugado. Incluso en terreno neutral se necesita a alguien competente para mantenerse firme.",
             ],
             "failure": [
                 "Las cosas no salen como esperabas. Estas cosas pasan, incluso bajo mi mirada.",
@@ -64,7 +64,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Esta noche no hay éxito. Paciencia. La neutralidad en sí misma es, en gran medida, paciencia disfrazada de política.",
                 "Se nos escapa de las manos. La Confederación ha sobrevivido descuidos peores que el de esta noche.",
                 "Un esfuerzo fallido. He visto frentes enteros colapsar por motivos menores.",
-                "El resultado es decepcionante. He registrado decepciones peores en Berlín este mes."
+                "El resultado es decepcionante. He registrado decepciones peores en Berlín este mes.",
             ],
             "botch": [
                 "Eso fue catastrófico. Ni yo me lo esperaba.",
@@ -80,9 +80,9 @@ ELOHIM: dict[str, ElohimType] = {
                 "Un auténtico desastre. Tan raro que alguien en una oficina gris acabará oyendo de aquello.",
                 "Un desastre, y uno muy inconveniente; Berna no perdona los inconvenientes fácilmente.",
                 "Catástrofe. Voy a documentar esto con todo detalle, y sospecho que alguien en la OFP también lo hará.",
-                "Ese fracaso deja algo sin resolver. Me encargaria de aquello antes de que Berlín, Londres o Berna se den cuenta."
+                "Ese fracaso deja algo sin resolver. Me encargaria de aquello antes de que Berlín, Londres o Berna se den cuenta.",
             ],
-        }
+        },
     },
     "Vampire": {
         "type": "Vampire",
@@ -94,7 +94,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Tu reflejo no te miente. Envidio su honestidad.",
                 "Cada dia que no mueres es un dia en que alguien me pregunta por qué.",
                 "La sangre recuerda de quién era. ¿Te inquieta lo que llevas dentro?",
-                "Vi cómo el Diluvio se llevaba a los primeros pecadores del mundo. A veces me pregunto por qué El perdonó a los tuyos."
+                "Vi cómo el Diluvio se llevaba a los primeros pecadores del mundo. A veces me pregunto por qué El perdonó a los tuyos.",
             ],
             "success": [
                 "Éxito, hijo de Caín. Ni siquiera su mano fallaba siempre.",
@@ -109,7 +109,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "La fortuna sonríe aquí, en ese rincón de Europa que finge no estar en guerra. Muy conveniente para ti.",
                 "Victoria. Úsala con prudencia: la paciencia de la Confederación con sus silenciosos monstruos no es infinita.",
                 "La rueda gira a tu favor. Roma ardió una vez. Berna simplemente presenta papeleo. Lo hiciste bien dentro de ese marco.",
-                "Tienes éxito, y en algún lugar un funcionario suizo firma un formulario que jamás mencionará lo que realmente sucedió."
+                "Tienes éxito, y en algún lugar un funcionario suizo firma un formulario que jamás mencionará lo que realmente sucedió.",
             ],
             "failure": [
                 "Esta noche no tendrás éxito. Quizás la Bestia hace demasiado ruido para oír mi consejo.",
@@ -123,7 +123,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "De esto no se saca nada en claro. Tu paciencia debería ser mayor que la de una nación, y esta noche no lo fue.",
                 "Una noche de fracaso, en un país construido enteramente sobre la base de que las noches de fracaso pasan desapercibidas.",
                 "Las cosas no salen como uno quiere. Ni siquiera la neutralidad puede comprar la buena suerte.",
-                "Fracaso, simple y llanamente, algo raro en un año que se empeña en ser extraordinario en todos los demás aspectos."
+                "Fracaso, simple y llanamente, algo raro en un año que se empeña en ser extraordinario en todos los demás aspectos.",
             ],
             "botch": [
                 "La Bestia se rió de eso. A mí no me hizo ninguna gracia.",
@@ -139,9 +139,9 @@ ELOHIM: dict[str, ElohimType] = {
                 "Aquí, donde la discreción es la religión nacional, la suerte te maldice a gritos.",
                 "Un desastre, hijo de la noche, en el único país de Europa que no puede permitirse semejantes errores.",
                 "Esto tendrá consecuencias más allá de esta noche, y Berna lleva un registro muy preciso de las consecuencias.",
-                "Te has vuelto enemigo del momento, y posiblemente de algun agente federal. Un trabajo excepcional."
+                "Te has vuelto enemigo del momento, y posiblemente de algun agente federal. Un trabajo excepcional.",
             ],
-        }
+        },
     },
     "Mage": {
         "type": "Mage",
@@ -153,7 +153,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Cada Esfera que dominas es una puerta. No todas las puertas llevan a habitaciones a las que estabas destinado a entrar.",
                 "Él creó el mundo con una palabra. Tú todavía estás aprendiendo la gramática.",
                 "El Avatar que hay en ti es antiguo. Más antiguo que tu certeza de que eres su amo.",
-                "La realidad se doblegó para ti hoy. En algún lugar, algo más tuvo que ceder."
+                "La realidad se doblegó para ti hoy. En algún lugar, algo más tuvo que ceder.",
             ],
             "success": [
                 "Éxito, y aún no se ha formado ninguna Paradoja. No lo confundas con un permiso.",
@@ -169,7 +169,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Una muestra de maestría, en una nación que ha hecho un arte el aparentar no hacer absolutamente nada.",
                 "La fórmula se mantiene, más estable que la mayoría de las fronteras europeas en la actualidad.",
                 "Esta noche, vuestra voluntad y la del mundo coinciden. Ojalá pudiera decir lo mismo de los Aliados y del Reich.",
-                "Bien hecho. Bern nunca sabrá lo que casi salió mal aquí, y ese es precisamente el punto."
+                "Bien hecho. Bern nunca sabrá lo que casi salió mal aquí, y ese es precisamente el punto.",
             ],
             "failure": [
                 "El patrón se resiste. La realidad, a veces, tiene sus propias opiniones.",
@@ -185,7 +185,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Sin éxito. Agradece que no te haya costado nada más que el intento, especialmente en esta epoca.",
                 "El mundo rechaza tu petición. Con toda cortesía; al fin y al cabo, esto sigue siendo Suiza.",
                 "Tu Avatar está en silencio esta noche. Quizás incluso aquello presiente lo estrepitoso que sería un error aquí.",
-                "Nada cambia. En un país cuya política se basa precisamente en que nada cambie, quizás sea apropiado."
+                "Nada cambia. En un país cuya política se basa precisamente en que nada cambie, quizás sea apropiado.",
             ],
             "botch": [
                 "El Tapiz no solo se resiste, sino que contraataca. Prepárate.",
@@ -201,9 +201,9 @@ ELOHIM: dict[str, ElohimType] = {
                 "Algo se ha soltado, algo que debería haber permanecido atado. Encuéntralo antes del toque de queda, si es que puedes.",
                 "La Paradoja no olvida y, según he observado, tampoco lo hace el registro federal suizo.",
                 "El universo se resiste con fuerza en un país cuya estrategia se basa precisamente en aparentar no resistirse.",
-                "Catastrófico. Tu Avatar está tan alarmado como las autoridades locales cuando se enteren."
+                "Catastrófico. Tu Avatar está tan alarmado como las autoridades locales cuando se enteren.",
             ],
-        }
+        },
     },
     "Hunter": {
         "type": "Hunter",
@@ -215,7 +215,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "No fuiste elegido por tu fuerza. Fuiste elegido porque alguien tenía que serlo.",
                 "No suelo compadecer a los mortales. Esta noche, al verte, lo estoy pensando.",
                 "Los demás tienen siglos. Tú tienes solo esta vida mortal. Vívela como si alguien contara los momentos. Yo lo hago.",
-                "Morirás una muerte mortal y serás olvidado por los libros de historia, si no por mí."
+                "Morirás una muerte mortal y serás olvidado por los libros de historia, si no por mí.",
             ],
             "success": [
                 "Éxito, mortal: sin disciplina, sin esfera, solo manos firmes en un país que finge que no hay guerra.",
@@ -231,7 +231,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Un triunfo mortal, sin registro en ningún sitio, sin atribuirse a nadie, exactamente como a Berna le gusta.",
                 "Usted mismo lo hizo, en una guerra que Berna insiste no estar involucrada.",
                 "Éxito. Anótalo en algún lugar donde ningún funcionario lo lea jamás.",
-                "Esta noche triunfarás. Mañana, las fronteras cambiaran, y tendrás que volver a hacerlo."
+                "Esta noche triunfarás. Mañana, las fronteras cambiaran, y tendrás que volver a hacerlo.",
             ],
             "failure": [
                 "No funciona, mortal. Esos errores están permitidos. De hecho, a menudo.",
@@ -246,7 +246,7 @@ ELOHIM: dict[str, ElohimType] = {
                 "Tu puntería fallo. Descansa; Berna ocultará las pruebas de una mala noche.",
                 "Fallaste. Incluso el país neutral que te rodea está teniendo un noche difícil como esta.",
                 "Fracaso, y sin una excusa sobrenatural tras la que esconderse. Eso requiere su propio tipo de valentía.",
-                "Te quedas corto. Como la diplomacia de todos este año. Al menos, estás en buena compañía."
+                "Te quedas corto. Como la diplomacia de todos este año. Al menos, estás en buena compañía.",
             ],
             "botch": [
                 "Un fallo garrafal, mortal. Ni Bestia, ni Paradoja a quien culpar; solo el azar, y se volvió cruelmente contra ti.",
@@ -261,9 +261,9 @@ ELOHIM: dict[str, ElohimType] = {
                 "Esto dolerá, y no hay disciplina ni esfera que pueda adormecerlo. Lo siento, de verdad, esta vez.",
                 "Catástrofe, simple y mortal, en una nación con muy poca tolerancia para esos resultados este año.",
                 "La situación se ha vuelto violentamente en tu contra. Muévete rápido; Berna ya no te puede proteger.",
-                "Un desastre. Ni siquiera los elegidos se libran de esto, especialmente en una guerra que pretende no afectarles."
+                "Un desastre. Ni siquiera los elegidos se libran de esto, especialmente en una guerra que pretende no afectarles.",
             ],
-        }
+        },
     },
 }
 
@@ -277,8 +277,7 @@ def elohim_quote(interaction: Interaction, type: MessageType = "default") -> str
 
 def get_random_message(elohim: str, type: MessageType = "default") -> str:
     elohim_type = ELOHIM[elohim]
-    pool = elohim_type["message"].get(
-        type) or elohim_type["message"]["default"]
+    pool = elohim_type["message"].get(type) or elohim_type["message"]["default"]
     return random.choice(pool)
 
 
@@ -289,6 +288,7 @@ def quotify(text: str, interaction: Interaction, type: MessageType = "default", 
         quote = f"\n\n*{quote}*"
         return f"{text}{quote}"
     return text
+
 
 # async def send_elohim_message(
 #        interaction: Interaction,

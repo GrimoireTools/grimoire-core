@@ -4,23 +4,23 @@ from abc import ABC
 from collections import OrderedDict
 from dataclasses import dataclass, field
 import types
-from typing import Any, Dict, Generic, Literal, Type, TypeVar, Union, get_args, get_origin, get_type_hints
+from typing import Any, Generic, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
 import json
-from .utils import num_to_column, column_to_num
+from .utils import num_to_column
 
 Col = int | str
 Value = str | int | float
 T = TypeVar("T")
 
 
-def rangeify(row: int, start: int, end: int):
+def rangeify(row: int, start: int, end: int) -> str:
     return f"{num_to_column(start + 1)}{row}:{num_to_column(end + 1)}{row}"
 
 
 def row_none_default(cls=None, **kwargs):
     def wrap(cls):
         hints = get_type_hints(cls)
-        for name, type_hint in hints.items():
+        for name, _type_hint in hints.items():
             if not hasattr(cls, name):
                 setattr(cls, name, field(default=None))
         return dataclass(**kwargs)(cls)
@@ -42,13 +42,13 @@ class Row(ABC):
     __index = -1
 
     @classmethod
-    def from_dict(cls: Type[T], row: dict[str, Value | None]) -> T:
+    def from_dict(cls: type[T], row: dict[str, Value | None]) -> T:
         """Creates a new instance of the class from a dictionary."""
         return cls(**row)
 
     @classmethod
-    def from_list(cls: Type[T], row: list[Value]) -> T:
-        """Creates a new instance of the class from a list"""
+    def from_list(cls: type[T], row: list[Value]) -> T:
+        """Creates a new instance of the class from a list."""
         hints = get_type_hints(cls)
         keys = list(hints.keys())
         return cls(**{keys[i]: value for i, value in enumerate(row)})
@@ -59,7 +59,7 @@ class Row(ABC):
         Attributes not given are set to None.
         """
         hints = get_type_hints(self)
-        for name, type_hint in hints.items():
+        for name, _type_hint in hints.items():
             if name not in kwargs:
                 kwargs[name] = None
         for key, value in kwargs.items():
@@ -73,7 +73,7 @@ class Row(ABC):
     def to_dict(self) -> dict[str, Value]:
         """Returns a dictionary representation of the row."""
         hints = get_type_hints(self)
-        vals = [(name, self.__getattribute__(name)) for name in hints.keys()]
+        vals = [(name, self.__getattribute__(name)) for name in hints]
         return OrderedDict(vals)
 
     def to_list(self) -> list[Value]:
@@ -90,13 +90,14 @@ class Row(ABC):
         else:
             super().__setattr__(name, value)
 
-    def set_index(self, index: int):
+    def set_index(self, index: int) -> None:
         """Sets the 0-based index of the row in the sheet."""
         self.__index = index
 
     def get_index(self) -> int:
         """Returns the 0-based index of the row in the sheet
-        or -1 if the row has not been added to the sheet yet"""
+        or -1 if the row has not been added to the sheet yet.
+        """
         return self.__index
 
     def _cast_value(self, name: str, value: Value) -> Value:
@@ -202,7 +203,7 @@ class Row(ABC):
                     curr_range.append(val)
         app_range(col_start, col_end, curr_range)
 
-        return [{"range": range, "values": [values]} for range, values in zip(coord_ranges, val_ranges)]
+        return [{"range": range, "values": [values]} for range, values in zip(coord_ranges, val_ranges, strict=False)]
 
 
 def rfield(default: T | None = None) -> T:
@@ -221,14 +222,14 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
-class JsonData(Dict[K, V], Generic[K, V]):
+class JsonData(dict[K, V], Generic[K, V]):
     """A dictionary that can be serialized to JSON."""
 
-    def __init__(self, data=None):
+    def __init__(self, data=None) -> None:
         """Initializes the JsonData object. If data is a list, it is converted to a dictionary with the index as the key."""
         if isinstance(data, str):
             parsed = json.loads(data)
             if isinstance(parsed, list):
-                parsed = {i: v for i, v in enumerate(parsed)}
+                parsed = dict(enumerate(parsed))
             data = dict(parsed)
         super().__init__(data or {})  # type: ignore

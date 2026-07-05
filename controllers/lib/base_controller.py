@@ -1,7 +1,6 @@
 from typing import (
     Generic,
     Self,
-    Type,
 )
 from .utils import DataNotFoundError, column_to_num
 from gspread.worksheet import Worksheet
@@ -18,8 +17,7 @@ credentials = json.loads(getVar("GOOGLE"), strict=False)
 
 gc = gspread.auth.service_account_from_dict(credentials)
 logger.debug("Google Sheets API authenticated successfully.")
-logger.debug(
-    f"Available spreadsheets: {[s['name'] for s in gc.list_spreadsheet_files()]}")
+logger.debug(f"Available spreadsheets: {[s['name'] for s in gc.list_spreadsheet_files()]}")
 
 Col = int | str
 
@@ -40,7 +38,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
 
     DATA: list[list[Value]]
     sheet: Worksheet
-    row_type: Type[RowType]
+    row_type: type[RowType]
     marker_col: int = 1  # Columna que se revisa para saber si la fila existe
 
     @classmethod
@@ -52,25 +50,21 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         try:
             return cls._instances[cls]
         except KeyError:
-            raise RuntimeError(
-                f"{cls.__name__} has not been instantiated yet."
-            )
+            raise RuntimeError(f"{cls.__name__} has not been instantiated yet.")
 
-    def __init__(self, sheet_id: int, cls: type[RowType], doc_key: str = WODMARCH_KEY):
+    def __init__(self, sheet_id: int, cls: type[RowType], doc_key: str = WODMARCH_KEY) -> None:
         """Initializes the class with the given sheet_id and row type."""
-        logger.debug(
-            f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
+        logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls
         self.sheet = gc.open_by_key(doc_key).get_worksheet_by_id(sheet_id)
 
-    def fetch_data(self):
+    def fetch_data(self) -> None:
         """Fetches all data from the sheet. Called each time __init__() is called."""
         logger.debug("Fetching data from sheet...")
-        self.DATA = self.sheet.get_all_values(
-            value_render_option=ValueRenderOption.unformatted)
+        self.DATA = self.sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
         self._after_fetch()
 
-    def _after_fetch(self):
+    def _after_fetch(self) -> None:
         """Called after fetching data. Override this method to perform any additional processing."""
         pass
 
@@ -91,8 +85,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     def get_row(self, row: int) -> RowType:
         """Returns a row as a dataclass instance. Row is 0-indexed. Remember that the first row is generally the header."""
         if row == -1:
-            raise ValueError(
-                f"Row index {row} not set and not present in values.")
+            raise ValueError(f"Row index {row} not set and not present in values.")
         data_row = self._convert_row(self.DATA[row])
         data_row.set_index(row)
         return data_row
@@ -116,14 +109,14 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
             col = column_to_num(col)
         return [row[col] for row in self.DATA]
 
-    def set_cell(self, row: int, col: Col, value: Value):
+    def set_cell(self, row: int, col: Col, value: Value) -> None:
         """Sets a cell to a given value. Row and col are 0-indexed. Col can optionally be the letter identifier."""
         if isinstance(col, str):
             col = column_to_num(col)
         self.sheet.update_cell(row + 1, col + 1, value)
         self.DATA[row][col] = value
 
-    def set_row(self, values: RowType, row: int = -1):
+    def set_row(self, values: RowType, row: int = -1) -> None:
         """Sets a row to a given value."""
         row = row if row != -1 else values.get_index()
         if row == -1:
@@ -137,7 +130,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
 
     update_row = set_row
 
-    def update_rows(self, values: list[RowType]):
+    def update_rows(self, values: list[RowType]) -> None:
         """Updates multiple rows at once."""
         ranges = []
         for value in values:
@@ -194,8 +187,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         """Finds the index of the first row with a given discord_id in a given column."""
         id = str(discord_id)
         i_col = self.col_index(col_name)
-        logger.debug(
-            f"Searching for discord_id '{id}' in column {col_name} (index {i_col})")
+        logger.debug(f"Searching for discord_id '{id}' in column {col_name} (index {i_col})")
         for i, row in enumerate(self.DATA):
             logger.debug(f"Checking row index {i}: {row[i_col]}")
             if str(row[i_col]) == id:
@@ -208,7 +200,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         # By default we assume that the discord id column has the name Discord_id
         return self.find_id_row_index(discord_id, "Discord_id")
 
-    def insert_rows(self, values: list[RowType], row: int = -1):
+    def insert_rows(self, values: list[RowType], row: int = -1) -> None:
         """Inserts multiple rows at the end of the sheet."""
         start_row = row if row != -1 else len(self.DATA)
         ranges = []
@@ -230,7 +222,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         """Inserts a row at the end of the sheet."""
         return self.insert_rows([value], row)
 
-    def delete_rows(self, start: int, end: int = -1):
+    def delete_rows(self, start: int, end: int = -1) -> None:
         """Deletes a row from the sheet. 0-indexed."""
         if start == -1:
             raise ValueError("Row index for deletion cannot be negative.")
@@ -239,7 +231,7 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         self.sheet.delete_rows(start, end)
         self.fetch_data()
 
-    def delete_row(self, row: RowType):
+    def delete_row(self, row: RowType) -> None:
         """Deletes a row from the sheet. 0-indexed."""
         self.delete_rows(row.get_index())
 

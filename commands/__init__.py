@@ -8,7 +8,7 @@ from commands.abilities import AbilitiesCommands
 from commands.roll import RollCommands
 
 
-def setup_all_commands(bot: Bot):
+def setup_all_commands(bot: Bot) -> None:
     """
     This function is used to set up all commands in the bot.
     It imports all command modules and registers them with the bot.

@@ -9,9 +9,8 @@ from controllers.pjs_controller import PJsController
 
 
 class ResourcesCommands(Cog):
-
     @slash_command(name="resource", guild_ids=[CRI_GUILD_ID], description="Manage character resources")
-    async def resource_group(self, interaction: Interaction):
+    async def resource_group(self, interaction: Interaction) -> None:
         pass
 
     @resource_group.subcommand(name="set", description="Creates or overwrites a named resource")
@@ -34,10 +33,8 @@ class ResourcesCommands(Cog):
     async def resource_add(
         self: Self,
         interaction: Interaction,
-        name: str = SlashOption("name", "Resource name",
-                                required=True, autocomplete=True),
-        amount: int = SlashOption(
-            "amount", "Amount to add (negative to subtract)", required=True),
+        name: str = SlashOption("name", "Resource name", required=True, autocomplete=True),
+        amount: int = SlashOption("amount", "Amount to add (negative to subtract)", required=True),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -46,17 +43,16 @@ class ResourcesCommands(Cog):
         after = pj.resource(name, before + amount)
         sh.set_row(pj)
         direction = "gains" if amount >= 0 else "loses"
-        await interaction.followup.send(quotify(
-            f"**{pj.Name}** {direction} **{abs(amount)}** {name}.\n{before} -> {after}", interaction
-        ))
+        await interaction.followup.send(
+            quotify(f"**{pj.Name}** {direction} **{abs(amount)}** {name}.\n{before} -> {after}", interaction)
+        )
 
     @resource_group.subcommand(name="remove", description="Removes a resource from the character sheet")
     @try_command
     async def resource_remove(
         self: Self,
         interaction: Interaction,
-        name: str = SlashOption(
-            "name", "Resource to remove", required=True, autocomplete=True),
+        name: str = SlashOption("name", "Resource to remove", required=True, autocomplete=True),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -77,21 +73,20 @@ class ResourcesCommands(Cog):
         pj = PJsController.cached().get_pj_row(user_id)
         if not pj.Resources:
             return await interaction.followup.send(quotify(f"**{pj.Name}** has no resources.", interaction))
-        lines = "\n".join(f"  {k}: {v}" for k,
-                          v in sorted(pj.Resources.items()))
+        lines = "\n".join(f"  {k}: {v}" for k, v in sorted(pj.Resources.items()))
         await interaction.followup.send(quotify(f"**{pj.Name}** — Resources:\n```\n{lines}\n```", interaction))
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 
     @resource_add.on_autocomplete("name")
-    async def _autocomplete_add(self, interaction: Interaction, name: str):
+    async def _autocomplete_add(self, interaction: Interaction, name: str) -> None:
         await self._resource_autocomplete(interaction, name)
 
     @resource_remove.on_autocomplete("name")
-    async def _autocomplete_remove(self, interaction: Interaction, name: str):
+    async def _autocomplete_remove(self, interaction: Interaction, name: str) -> None:
         await self._resource_autocomplete(interaction, name)
 
-    async def _resource_autocomplete(self, interaction: Interaction, query: str):
+    async def _resource_autocomplete(self, interaction: Interaction, query: str) -> None:
         try:
             user_id = not_none(interaction.user).id
             pj = PJsController.cached().get_pj_row(user_id)

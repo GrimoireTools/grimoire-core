@@ -1,10 +1,10 @@
 from loguru import logger
 
 from controllers.lib.utils import DataNotFoundError
-from controllers.lib.base_controller import SheetsControllerBase, Value
+from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import JsonData, Row
 from system_data import PREDEFINED_ABILITIES, Attribute, Ability, Resource, KNOWLEDGES, TALENTS, SKILLS
-from icecream import ic
+
 PJ_SHEET_ID = 0  # TODO: set real sheet ID
 
 
@@ -43,16 +43,16 @@ class PJRow(Row):
             self.Specialties[ability] = set_value
         return self.Specialties.get(ability, "")
 
-    def set_attributes(self, attributes: dict[Attribute, int]):
+    def set_attributes(self, attributes: dict[Attribute, int]) -> None:
         self.Attributes.update(attributes)
 
-    def set_abilities(self, abilities: dict[Ability, int]):
+    def set_abilities(self, abilities: dict[Ability, int]) -> None:
         self.Abilities.update(abilities)
 
-    def set_specialties(self, specialties: dict[Ability | Attribute, str]):
+    def set_specialties(self, specialties: dict[Ability | Attribute, str]) -> None:
         self.Specialties.update(specialties)
 
-    def set_resources(self, resources: dict[Resource, int]):
+    def set_resources(self, resources: dict[Resource, int]) -> None:
         self.Resources.update(resources)
 
     def max_attr(self) -> int:
@@ -64,10 +64,10 @@ class PJRow(Row):
 
     def full_abilities(self) -> dict[Ability, int]:
         """Return a dictionary of all abilities, including predefined and custom ones."""
-        all_abilities = {ability: self.Abilities.get(
-            ability, 0) for ability in PREDEFINED_ABILITIES}
-        all_abilities.update({ability: value for ability, value in self.Abilities.items(
-        ) if ability not in PREDEFINED_ABILITIES})
+        all_abilities = {ability: self.Abilities.get(ability, 0) for ability in PREDEFINED_ABILITIES}
+        all_abilities.update(
+            {ability: value for ability, value in self.Abilities.items() if ability not in PREDEFINED_ABILITIES}
+        )
         return all_abilities
 
     def knowledge_abilities(self, all: bool = False) -> dict[Ability, int]:
@@ -97,17 +97,15 @@ class PJRow(Row):
 
 
 class PJsController(SheetsControllerBase[PJRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(PJ_SHEET_ID, PJRow)
 
     def get_pj_row(self, user_id: int) -> PJRow:
         try:
             return self.get_row(self.find_pj_row_index(user_id))
         except ValueError as e:
-            logger.exception(
-                f"Character with user_id {user_id} not found: {e}")
-            raise DataNotFoundError(
-                f"Character with user_id {user_id} not found: {e.__traceback__}") from None
+            logger.exception(f"Character with user_id {user_id} not found: {e}")
+            raise DataNotFoundError(f"Character with user_id {user_id} not found: {e.__traceback__}") from None
 
     def character_exists(self, user_id: int) -> bool:
         try:

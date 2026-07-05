@@ -5,7 +5,7 @@ from typing import Any
 
 
 def getFromLocal(varname: str) -> Any:
-    with open("secretsWodmarch.json", "r") as f:
+    with open("secretsWodmarch.json") as f:
         dic = json.load(f)
         return dic[varname]
 

@@ -4,19 +4,17 @@ from nextcord import slash_command, Interaction, SlashOption, Member
 
 from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command, default_user_option
-from controllers.pjs_controller import PJRow, PJsController
+from controllers.pjs_controller import PJsController
 from controllers.cemetery_controller import CemeteryRow, CemeteryController
 
 
 class KillCommands(Cog):
-
     @slash_command(name="kill", guild_ids=[CRI_GUILD_ID], description="Move a character to the cemetery")
     @try_command
     async def kill(
         self: Self,
         interaction: Interaction,
-        turn: int = SlashOption(
-            "turn", "Turn on which the character died", required=True),
+        turn: int = SlashOption("turn", "Turn on which the character died", required=True),
         cause: str = SlashOption("cause", "Cause of death", required=True),
         user: Member = default_user_option,
     ) -> Any:
@@ -44,6 +42,5 @@ class KillCommands(Cog):
         pj_sh.delete_row(pj)
 
         await interaction.followup.send(
-            f"**{pj.Name}** ({pj.Char_type}) has been moved to the cemetery.\n"
-            f"Died on turn **{turn}**. Cause: {cause}"
+            f"**{pj.Name}** ({pj.Char_type}) has been moved to the cemetery.\nDied on turn **{turn}**. Cause: {cause}"
         )

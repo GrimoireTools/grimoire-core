@@ -9,7 +9,6 @@ from system_data import ATTRIBUTES, CHARACTER_TYPES, DEFAULT_RESOURCES, CharType
 
 
 class RegisterCommands(Cog):
-
     @slash_command(name="register", guild_ids=[CRI_GUILD_ID], description="Register a new character")
     @try_command
     async def register(
@@ -18,7 +17,8 @@ class RegisterCommands(Cog):
         name: str = SlashOption("name", "Character name", required=True),
         player: str = SlashOption("player", "Player name", required=True),
         char_type: CharType = SlashOption(
-            "type", "Character type",
+            "type",
+            "Character type",
             required=True,
             choices=CHARACTER_TYPES,
         ),
@@ -39,7 +39,7 @@ class RegisterCommands(Cog):
             Player=player,
             Last_turn=0,
             Char_type=char_type,
-            Attributes={attr: 0 for attr in ATTRIBUTES},
+            Attributes=dict.fromkeys(ATTRIBUTES, 0),
             Abilities={},
             Specialties={},
             Resources=DEFAULT_RESOURCES[char_type].copy(),
@@ -47,8 +47,7 @@ class RegisterCommands(Cog):
 
         sh.insert_row(pj, sh.find_first_empty_row("A", strict=True))
 
-        resources_str = ", ".join(
-            f"{k}: {v}" for k, v in DEFAULT_RESOURCES[char_type].items())
+        resources_str = ", ".join(f"{k}: {v}" for k, v in DEFAULT_RESOURCES[char_type].items())
         await interaction.followup.send(
             f"**{name}** registered as a **{char_type}**!\n"
             f"Starting resources: {resources_str}\n"

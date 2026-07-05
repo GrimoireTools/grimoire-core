@@ -28,15 +28,38 @@ Ability = str
 
 PREDEFINED_ABILITIES: list[Ability] = [
     # Talents
-    "Alertness", "Athletics", "Awareness", "Brawl", "Empathy",
-    "Expression", "Intimidation", "Leadership", "Streetwise", "Subterfuge",
+    "Alertness",
+    "Athletics",
+    "Awareness",
+    "Brawl",
+    "Empathy",
+    "Expression",
+    "Intimidation",
+    "Leadership",
+    "Streetwise",
+    "Subterfuge",
     # Skills
-    "Animal Ken", "Crafts", "Drive", "Etiquette", "Firearms",
-    "Larceny", "Melee", "Performance", "Stealth", "Survival",
+    "Animal Ken",
+    "Crafts",
+    "Drive",
+    "Etiquette",
+    "Firearms",
+    "Larceny",
+    "Melee",
+    "Performance",
+    "Stealth",
+    "Survival",
     # Knowledges
-    "Academics", "Computer", "Finance", "Investigation", "Law",
-    "Linguistics", "Medicine", "Occult", "Politics", "Science",
-
+    "Academics",
+    "Computer",
+    "Finance",
+    "Investigation",
+    "Law",
+    "Linguistics",
+    "Medicine",
+    "Occult",
+    "Politics",
+    "Science",
 ]
 
 TALENTS: list[Ability] = PREDEFINED_ABILITIES[:10]

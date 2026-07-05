@@ -4,7 +4,7 @@ ALTERNATE = True
 c_d20 = compile("1d20")
 
 
-def nat_20_1_message(dice_result: int):
+def nat_20_1_message(dice_result: int) -> str:
     if dice_result == 20:
         return "**Nat 20!** "
     elif dice_result == 1:
@@ -25,9 +25,7 @@ def fb(bonus: int, bold: bool = False) -> str:
 
 
 def _d20() -> int:
-    """
-    Rolls a d20 and returns the result.
-    """
+    """Rolls a d20 and returns the result."""
     return int(basic(c_d20))
 
 
@@ -37,6 +35,6 @@ def format_diceroll(dice: int, total: int, bold: bool = True, underline: bool = 
     RED = f"\033[{b};31m"
     CYAN = f"\033[{b};36m"
     WHITE = f"\033[{b};37m"
-    RESET = f"\033[0m"
+    RESET = "\033[0m"
     color = RED if dice == 1 else CYAN if dice == 20 else WHITE
     return f"{color}{total}{RESET}"

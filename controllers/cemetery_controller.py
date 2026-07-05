@@ -38,27 +38,25 @@ class CemeteryRow(Row):
             self.Specialties[ability] = set_value
         return self.Specialties.get(ability, "")
 
-    def set_attributes(self, attributes: dict[Attribute, int]):
+    def set_attributes(self, attributes: dict[Attribute, int]) -> None:
         self.Attributes.update(attributes)
 
-    def set_abilities(self, abilities: dict[Ability, int]):
+    def set_abilities(self, abilities: dict[Ability, int]) -> None:
         self.Abilities.update(abilities)
 
-    def set_resources(self, resources: dict[Resource, int]):
+    def set_resources(self, resources: dict[Resource, int]) -> None:
         self.Resources.update(resources)
 
 
 class CemeteryController(SheetsControllerBase[CemeteryRow]):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(CEMETERY_SHEET_ID, CemeteryRow)
 
     def get_row_by_user(self, user_id: int) -> CemeteryRow:
         try:
             return self.get_row(self.find_pj_row_index(user_id))
         except ValueError:
-            raise DataNotFoundError(
-                f"No deceased character found for user_id {user_id}"
-            ) from None
+            raise DataNotFoundError(f"No deceased character found for user_id {user_id}") from None
 
     def character_exists(self, user_id: int) -> bool:
         try:

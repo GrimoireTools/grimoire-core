@@ -3,7 +3,7 @@ import os
 
 
 def getFromLocal(varname: str) -> str:
-    with open("secretsWodmarch.json", "r") as f:
+    with open("secretsWodmarch.json") as f:
         dic = json.load(f)
         return dic[varname]
 

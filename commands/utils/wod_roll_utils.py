@@ -33,8 +33,7 @@ def wod_roll(pool: int, difficulty: int = 6, has_specialty: bool = False) -> Wod
     - With specialty, 10s count as 2 successes instead of 1.
     - Botch: net successes <= 0 and at least one 1 rolled.
     """
-    result = WodRollResult(pool=pool, difficulty=difficulty,
-                           has_specialty=has_specialty)
+    result = WodRollResult(pool=pool, difficulty=difficulty, has_specialty=has_specialty)
 
     if pool <= 0:
         result.ones = 1  # 0-pool auto-botch
@@ -78,8 +77,7 @@ def _fmt_die(die: int, difficulty: int, has_specialty: bool) -> str:
 
 def format_roll(result: WodRollResult) -> str:
     """Return an ANSI-formatted string for display in a Discord ```ansi block."""
-    dice_str = "  ".join(_fmt_die(d, result.difficulty,
-                         result.has_specialty) for d in result.dice)
+    dice_str = "  ".join(_fmt_die(d, result.difficulty, result.has_specialty) for d in result.dice)
 
     if result.pool <= 0:
         dice_str = f"{_RED}No dice (pool = 0){_RESET}"
@@ -89,6 +87,6 @@ def format_roll(result: WodRollResult) -> str:
     if result.successes > 0:
         result_line += f"  ({result_color}{result.successes} success{'es' if result.successes != 1 else ''}{_RESET})"
 
-    specialty_note = f"  ★ specialty (10s = 2 successes)" if result.has_specialty else ""
+    specialty_note = "  ★ specialty (10s = 2 successes)" if result.has_specialty else ""
 
     return f"[ {dice_str} ]\n{result_line}{specialty_note}"

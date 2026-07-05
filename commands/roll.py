@@ -9,6 +9,7 @@ from controllers.pjs_controller import PJsController
 from commands.utils.wod_roll_utils import wod_roll, format_roll
 from system_data import ATTRIBUTES, PREDEFINED_ABILITIES, Ability, Attribute
 
+
 class RollCommands(Cog):
     # ── /roll ─────────────────────────────────────────────────────────────────
     @slash_command(
@@ -62,7 +63,7 @@ class RollCommands(Cog):
         ability_val = pj.ability(ability) if ability else 0
         attr_spec = bool(attribute and pj.specialty(attribute))
         ability_spec = bool(ability and pj.specialty(ability))
-        has_specialty = (attr_spec or ability_spec)
+        has_specialty = attr_spec or ability_spec
 
         pool = attr_val + ability_val + modifier
 
@@ -81,19 +82,24 @@ class RollCommands(Cog):
 
         if modifier:
             parts.append(f"modifier {modifier:+}")
-        label = " + ".join(parts) + \
-            f"  |  pool **{pool}**  diff **{difficulty}**"
+        label = " + ".join(parts) + f"  |  pool **{pool}**  diff **{difficulty}**"
         if apply_specialty and not has_specialty:
             label += "  |  specialty ignored (no specialty found)"
         elif apply_specialty and has_specialty:
             label += "  |  specialty applied"
-        
+
         if result.successes > 0:
-            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "success"))
+            await interaction.followup.send(
+                quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "success")
+            )
         elif result.is_botch:
-            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "botch", 34))
+            await interaction.followup.send(
+                quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "botch", 34)
+            )
         else:
-            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "failure"))
+            await interaction.followup.send(
+                quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "failure")
+            )
 
     # ── /roll_pool ────────────────────────────────────────────────────────────
     @slash_command(
@@ -105,9 +111,7 @@ class RollCommands(Cog):
     async def roll_pool(
         self: Self,
         interaction: Interaction,
-        pool: int = SlashOption(
-            "pool", "Number of dice to roll", required=True, min_value=0
-        ),
+        pool: int = SlashOption("pool", "Number of dice to roll", required=True, min_value=0),
         difficulty: int = SlashOption(
             "difficulty",
             "Target number for a success (default 6)",
@@ -126,22 +130,28 @@ class RollCommands(Cog):
         result = wod_roll(pool, difficulty, specialty)
         label = f"pool **{pool}**  diff **{difficulty}**"
         if result.successes > 0:
-            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "success"))
+            await interaction.followup.send(
+                quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "success")
+            )
         elif result.is_botch:
-            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "botch", 34))
+            await interaction.followup.send(
+                quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "botch", 34)
+            )
         else:
-            await interaction.followup.send(quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "failure"))
+            await interaction.followup.send(
+                quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "failure")
+            )
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 
     @roll.on_autocomplete("ability")
-    async def _ac_roll_ability(self, interaction: Interaction, query: str):
+    async def _ac_roll_ability(self, interaction: Interaction, query: str) -> None:
         try:
             user_id = not_none(interaction.user).id
             pj = PJsController.cached().get_pj_row(user_id)
-            names = list(pj.Abilities.keys()) + ["No Ability"]
+            names = [*list(pj.Abilities.keys()), "No Ability"]
         except Exception:
-            names = PREDEFINED_ABILITIES + ["No Ability"]
+            names = [*PREDEFINED_ABILITIES, "No Ability"]
         if query:
             names = [s for s in names if s.lower().startswith(query.lower())]
         await interaction.response.send_autocomplete(names[:25])

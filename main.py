@@ -6,6 +6,7 @@ from commands import setup_all_commands
 from varenv import getVar
 from icecream import ic
 from controllers.pjs_controller import PJsController
+
 # Logging
 logger.remove()
 logger.add(sys.stderr, colorize=True)
@@ -21,6 +22,7 @@ async def on_ready() -> None:
     logger.info(f"We have logged in as {bot.user}")
     await bot.sync_application_commands()
     logger.info("Bot is ready")
+
 
 # Load PJs
 PJsController()
