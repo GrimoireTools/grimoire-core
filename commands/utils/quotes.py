@@ -7,12 +7,14 @@ from controllers.pjs_controller import PJsController
 
 MessageType = Literal["default", "success", "failure", "botch"]
 
+
 class ElohimType(TypedDict):
-    type: str  
+    type: str
     message: dict[MessageType, list[str]]
 
+
 ELOHIM: dict[str, ElohimType] = {
-    "Elohim":{
+    "Elohim": {
         "type": "Default",
         "message": {
             "default": [
@@ -82,7 +84,7 @@ ELOHIM: dict[str, ElohimType] = {
             ],
         }
     },
-    "Vampire":{
+    "Vampire": {
         "type": "Vampire",
         "message": {
             "default": [
@@ -141,7 +143,7 @@ ELOHIM: dict[str, ElohimType] = {
             ],
         }
     },
-    "Mage":{
+    "Mage": {
         "type": "Mage",
         "message": {
             "default": [
@@ -203,7 +205,7 @@ ELOHIM: dict[str, ElohimType] = {
             ],
         }
     },
-    "Hunter":{
+    "Hunter": {
         "type": "Hunter",
         "message": {
             "default": [
@@ -265,34 +267,38 @@ ELOHIM: dict[str, ElohimType] = {
     },
 }
 
+
 def elohim_quote(interaction: Interaction, type: MessageType = "default") -> str | None:
     user_id = not_none(interaction.user).id
     pj = PJsController.cached().get_pj_row(user_id)
     elohim = random.choice([pj.Char_type, "Elohim"])
     return get_random_message(elohim, type)
 
+
 def get_random_message(elohim: str, type: MessageType = "default") -> str:
     elohim_type = ELOHIM[elohim]
-    pool = elohim_type["message"].get(type) or elohim_type["message"]["default"]
+    pool = elohim_type["message"].get(
+        type) or elohim_type["message"]["default"]
     return random.choice(pool)
 
+
 def quotify(text: str, interaction: Interaction, type: MessageType = "default", chance: int = 20) -> str:
-    r = random.randint(1,100) <= chance
+    r = random.randint(1, 100) <= chance
     if r:
         quote = elohim_quote(interaction, type)
         quote = f"\n\n*{quote}*"
         return f"{text}{quote}"
     return text
 
-#async def send_elohim_message(
+# async def send_elohim_message(
 #        interaction: Interaction,
 #        message: str | None,
-#) -> None:
-#    if not message: 
+# ) -> None:
+#    if not message:
 #        return
 #    await interaction.followup.send(f"`{message}`")
 
-#async def elohim_speaks(interaction: Interaction, type: MessageType = "default") -> None:
+# async def elohim_speaks(interaction: Interaction, type: MessageType = "default") -> None:
 #    user_id = not_none(interaction.user).id
 #    pj = PJsController.cached().get_pj_row(user_id)
 #    if random.randint(1,100) <= 15:

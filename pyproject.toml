@@ -10,3 +10,60 @@ dependencies = [
     "nextcord==3.2.0",
     "setuptools>=78.1.0",
 ]
+
+[tool.ruff]
+# Same as flake8 default line length
+line-length = 120
+target-version = "py313"
+
+
+[tool.ruff.lint]
+# Enable rules equivalent to your flake8 plugins
+select = [
+    "E",   # pycodestyle errors (equivalent to flake8 base)
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes (equivalent to flake8 base)
+    "B",   # flake8-bugbear
+    "D",   # pydocstyle (equivalent to flake8-docstrings)
+    "N",   # pep8-naming
+    "ANN", # flake8-annotations
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+    "SIM", # flake8-simplify
+    "RUF", # Ruff-specific rules
+    "TC",  # type-checking rules
+]
+
+# Ignore specific rules that might be too strict
+ignore = [
+    "D107",   # Missing docstring in __init__
+    "ANN401", # Using Any without type annotation for public method
+    "D203",   # 1 blank line required before class docstring (conflicts with D211)
+    "D213",   # Multi-line docstring summary should start at the second line (conflicts with D212)
+    "B008",   # Function calls in default arguments
+    "UP046",  # 3.13 Generic types in classes
+    "UP047",  # 3.13 Generic types in functions
+]
+
+
+[tool.ruff.lint.pydocstyle]
+# Use PEP 257 convention for docstrings
+convention = "pep257"
+
+[tool.ruff.lint.per-file-ignores]
+# Allow missing docstrings in test files
+"test/*.py" = ["D"]
+"**/test_*.py" = ["D"]
+
+[tool.ruff.lint.mccabe]
+# Equivalent to flake8's complexity checking
+max-complexity = 10
+
+# Format configuration (equivalent to Black)
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[dependency-groups]
+dev = ["ruff>=0.12.4"]
