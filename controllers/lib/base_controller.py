@@ -9,15 +9,16 @@ from .singleton import Singleton
 from .row import RowType
 import json
 import gspread
-from varenv import getVar
+from varenv import get_env
 from loguru import logger
 
-credentials = json.loads(getVar("GOOGLE"), strict=False)
+credentials = json.loads(get_env("GOOGLE"), strict=False)
 
 
 gc = gspread.auth.service_account_from_dict(credentials)
 logger.debug("Google Sheets API authenticated successfully.")
-logger.debug(f"Available spreadsheets: {[s['name'] for s in gc.list_spreadsheet_files()]}")
+logger.debug(
+    f"Available spreadsheets: {[s['name'] for s in gc.list_spreadsheet_files()]}")
 
 Col = int | str
 
@@ -50,18 +51,21 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         try:
             return cls._instances[cls]
         except KeyError:
-            raise RuntimeError(f"{cls.__name__} has not been instantiated yet.")
+            raise RuntimeError(
+                f"{cls.__name__} has not been instantiated yet.")
 
     def __init__(self, sheet_id: int, cls: type[RowType], doc_key: str = WODMARCH_KEY) -> None:
         """Initializes the class with the given sheet_id and row type."""
-        logger.debug(f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
+        logger.debug(
+            f"Initializing {self.__class__.__name__} with sheet_id {sheet_id} and row type {cls.__name__}")
         self.row_type = cls
         self.sheet = gc.open_by_key(doc_key).get_worksheet_by_id(sheet_id)
 
     def fetch_data(self) -> None:
         """Fetches all data from the sheet. Called each time __init__() is called."""
         logger.debug("Fetching data from sheet...")
-        self.DATA = self.sheet.get_all_values(value_render_option=ValueRenderOption.unformatted)
+        self.DATA = self.sheet.get_all_values(
+            value_render_option=ValueRenderOption.unformatted)
         self._after_fetch()
 
     def _after_fetch(self) -> None:
@@ -85,7 +89,8 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
     def get_row(self, row: int) -> RowType:
         """Returns a row as a dataclass instance. Row is 0-indexed. Remember that the first row is generally the header."""
         if row == -1:
-            raise ValueError(f"Row index {row} not set and not present in values.")
+            raise ValueError(
+                f"Row index {row} not set and not present in values.")
         data_row = self._convert_row(self.DATA[row])
         data_row.set_index(row)
         return data_row
@@ -187,7 +192,8 @@ class SheetsControllerBase(Generic[RowType], metaclass=Singleton):
         """Finds the index of the first row with a given discord_id in a given column."""
         id = str(discord_id)
         i_col = self.col_index(col_name)
-        logger.debug(f"Searching for discord_id '{id}' in column {col_name} (index {i_col})")
+        logger.debug(
+            f"Searching for discord_id '{id}' in column {col_name} (index {i_col})")
         for i, row in enumerate(self.DATA):
             logger.debug(f"Checking row index {i}: {row[i_col]}")
             if str(row[i_col]) == id:

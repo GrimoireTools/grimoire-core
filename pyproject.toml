@@ -1,14 +1,16 @@
 [project]
 name = "costilla-bot"
 version = "0.1.0"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "dndice==2.8.1",
+    "python-dotenv>=1.0.1",
     "gspread==6.2.1",
     "icecream==2.2.0",
     "loguru>=0.7.3",
     "nextcord==3.2.0",
-    "setuptools>=78.1.0",
+    "python-dotenv>=1.2.2",
+    "setuptools>=83.0.0",
 ]
 
 [tool.ruff]
@@ -66,4 +68,4 @@ indent-style = "space"
 line-ending = "auto"
 
 [dependency-groups]
-dev = ["ruff>=0.12.4"]
+dev = ["ruff>=0.15.20"]

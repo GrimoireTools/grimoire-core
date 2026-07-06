@@ -5,9 +5,9 @@ from nextcord import SlashOption, Interaction
 from loguru import logger
 from typing import TypeVar
 
-from .varenv import getVar
+from varenv import get_env
 
-CRI_GUILD_ID = int(getVar("GUILD_ID"))
+CRI_GUILD_ID = int(get_env("GUILD_ID"))
 default_user_option = SlashOption(
     name="usuario-target",
     description="Usuario al que se le aplica el comando",
@@ -92,7 +92,8 @@ def log_command(func):
     async def logged_command(self: Any, interaction: Interaction, *args, **kwargs) -> None:
         user = interaction.user
         if user is not None:
-            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
+            logger.info(
+                f"[{func.__name__}] called by {user.name} ({user.id}).")
         else:
             logger.info(f"[{func.__name__}] called by null user.")
         logger.debug(f"[{func.__name__}] called with {kwargs}.")
@@ -108,7 +109,8 @@ def log_command_not_cog(func):
     async def logged_command(interaction: Interaction, *args, **kwargs) -> None:
         user = interaction.user
         if user is not None:
-            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
+            logger.info(
+                f"[{func.__name__}] called by {user.name} ({user.id}).")
         else:
             logger.info(f"[{func.__name__}] called by null user.")
         logger.debug(f"[{func.__name__}] called with {kwargs}.")
@@ -147,7 +149,8 @@ def column_to_num(column: str) -> int:
     num: int = 0
     for letter in column.lower():
         if letter not in letters:
-            raise ValueError("Column must have only roman alphabet characters.")
+            raise ValueError(
+                "Column must have only roman alphabet characters.")
         num *= len(letters)
         num += letters.index(letter) + 1
 

@@ -1,15 +1,12 @@
-import json
 import os
 
+from dotenv import load_dotenv
 
-def getFromLocal(varname: str) -> str:
-    with open("secretsWodmarch.json") as f:
-        dic = json.load(f)
-        return dic[varname]
+load_dotenv(dotenv_path=".env.wod", encoding="utf-8-sig")
 
 
-def getVar(varname: str) -> str:
-    if varname in os.environ:
-        return os.environ.get(varname)
-    else:
-        return getFromLocal(varname)
+def get_env(varname: str) -> str:
+    value = os.getenv(varname)
+    if value is None:
+        raise KeyError(f"Environment variable '{varname}' not found in .env.wod")
+    return value
