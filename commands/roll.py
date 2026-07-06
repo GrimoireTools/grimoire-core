@@ -176,7 +176,7 @@ class RollCommands(Cog):
         label += f"  |  initiative score **+{initiative_score}**"
 
         await interaction.followup.send(
-            quotify(f"{label}\n```\n[ {dice_result} ]\n#Resultado de Iniciativa: {initiative_result}\n```", interaction)
+            quotify(f"{label}\n```\n[ {dice_result} ]\n#Resultado de Iniciativa: {initiative_result}\n```", interaction, "initiative", 34)
         )
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
