@@ -1,3 +1,4 @@
+import random
 from typing import Any, Self
 
 from nextcord import slash_command, Interaction, SlashOption
@@ -141,6 +142,42 @@ class RollCommands(Cog):
             await interaction.followup.send(
                 quotify(f"{label}\n```ansi\n{format_roll(result)}\n```", interaction, "failure")
             )
+
+    # ── /roll_iniative ─────────────────────────────────────────────────────────────────
+    @slash_command(
+        name="roll_initiative",
+        guild_ids=[CRI_GUILD_ID],
+        description="Roll initiative (1d10 + Dexterity + Wits)",
+    )
+    @try_command
+    async def roll_initiative(
+        self: Self,
+        interaction: Interaction,
+        modifier: int = SlashOption(
+            "modifier",
+            "Extra value to add (negative to remove)",
+            required=False,
+            default=0
+        )
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        pj = PJsController.cached().get_pj_row(user_id)
+
+        dexterity_val = pj.attribute("Dexterity")
+        wits_val = pj.attribute("Wits")
+
+        initiative_score = dexterity_val + wits_val + modifier
+        dice_result = random.randint(1, 10)
+        initiative_result = dice_result + initiative_score
+
+        label = f"**Dexterity** {dexterity_val} + **Wits** {wits_val}"
+        if modifier:
+            label += f" + modifier {modifier:+}"
+        label += f"  |  initiative score **+{initiative_score}**"
+
+        await interaction.followup.send(
+            quotify(f"{label}\n```\n[ {dice_result} ]\n#Resultado de Iniciativa: {initiative_result}\n```", interaction)
+        )
 
     # ── Autocomplete ──────────────────────────────────────────────────────────
 

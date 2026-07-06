@@ -5,7 +5,7 @@ from nextcord import Interaction
 from controllers.lib.utils import not_none
 from controllers.pjs_controller import PJsController
 
-MessageType = Literal["default", "success", "failure", "botch"]
+MessageType = Literal["default", "success", "failure", "botch", "initiative"]
 
 
 class ElohimType(TypedDict):
@@ -82,6 +82,16 @@ ELOHIM: dict[str, ElohimType] = {
                 "Catástrofe. Voy a documentar esto con todo detalle, y sospecho que alguien en la OFP también lo hará.",
                 "Ese fracaso deja algo sin resolver. Me encargaria de aquello antes de que Berlín, Londres o Berna se den cuenta.",
             ],
+            "initiative": [
+                "Ahora, cuchillos y balas. El diario lo considerará un incidente aislado, si es que llega a saber algo.",
+                "El momento se reduce a la violencia. He presenciado esta misma reducción desde la época de Caín y Abel.",
+                "Luchan entre ustedes para tomar la iniciativa. Antes de que esto termine, sospecho que sangre sera derramada.",
+                "La diplomacia ha fracasado, entonces. En este tipo de trabajo, suele fracasar tarde o temprano.",
+                "La sala contiene la respiración. No necesito hacerlo; simplemente observo quién actúa primero.",
+                "El conflicto tiene la costumbre de encontrarse en lugares que suponian ser seguros. Esta noche, este es uno de ellos.",
+                "Ya no te quedan opciones más pacificas. Lo confieso, en cierto modo esto era inevitable.",
+                "Prepárense. He contado todas las batallas que los han traído hasta aquí, y esta era inevitable."
+            ],
         },
     },
     "Vampire": {
@@ -140,6 +150,16 @@ ELOHIM: dict[str, ElohimType] = {
                 "Un desastre, hijo de la noche, en el único país de Europa que no puede permitirse semejantes errores.",
                 "Esto tendrá consecuencias más allá de esta noche, y Berna lleva un registro muy preciso de las consecuencias.",
                 "Te has vuelto enemigo del momento, y posiblemente de algun agente federal. Un trabajo excepcional.",
+            ],
+            "initiative": [
+                "La Bestia despierta al oler lo que se avecina. Ha estado esperando toda la noche para esto.",
+                "La sangre está a punto de derramarse, y la tuya querrá su parte de lo que caiga.",
+                "Siglos de práctica, y aún te tiemblan las manos como si tuvieras hambre. Concéntrate.",
+                "Aquí es donde tu maldición se vuelve útil para alguien más que para ti. Haz que valga la pena.",
+                "Los hijos de Caín siempre fueron buenos en esto. Me pregunto si eso te reconforta o te avergüenza.",
+                "La violencia y el hambre comparten una puerta dentro de ti. Confío en que sabes cuál de las dos la atraviesa.",
+                "La paciencia de la Bestia se ha agotado. Tambien, al parecer, la de este momento.",
+                "La Bestia tira de la correa. No dejes que la sujete en lugar de ti."
             ],
         },
     },
@@ -203,6 +223,16 @@ ELOHIM: dict[str, ElohimType] = {
                 "El universo se resiste con fuerza en un país cuya estrategia se basa precisamente en aparentar no resistirse.",
                 "Catastrófico. Tu Avatar está tan alarmado como las autoridades locales cuando se enteren.",
             ],
+            "initiative": [
+                "La realidad está a punto de tener que hacer concesiones que no ha hecho. Cuidado con las consecuencias.",
+                "El Tapiz se tensa. Sabe lo que se avecina incluso antes de que lances el primer hechizo.",
+                "Tu voluntad está a punto de chocar contra el acero, o contra la voluntad de otro. Elige tus Esferas con sabiduría.",
+                "El patrón se inclina ahora hacia la violencia. Me pregunto qué forma tomará cuando se estabilice.",
+                "El mundo observa cómo empleas su paciencia. Gástala con precisión.",
+                "Todos los Iluminados antes que tú aprendieron esta lección: la magia y el combate son compañeros de cama impacientes.",
+                "Tu Avatar se agita: viejos instintos reconocen un viejo tipo de peligro.",
+                "La fórmula para la violencia es más simple que cualquiera de tus Esferas. Confío en que la recuerdes de todos modos.",
+            ],
         },
     },
     "Hunter": {
@@ -262,6 +292,16 @@ ELOHIM: dict[str, ElohimType] = {
                 "Catástrofe, simple y mortal, en una nación con muy poca tolerancia para esos resultados este año.",
                 "La situación se ha vuelto violentamente en tu contra. Muévete rápido; Berna ya no te puede proteger.",
                 "Un desastre. Ni siquiera los elegidos se libran de esto, especialmente en una guerra que pretende no afectarles.",
+            ],
+            "initiative": [
+                "Sin Disciplina, sin Esfera; solo Convicción y mano firme. Tendrá que ser suficiente.",
+                "Tu corazón late más rápido que el de ellos, mortal. Que eso sea una ventaja, no una debilidad.",
+                "Estás parado donde criaturas mucho más antiguas que tú ahora tienen que tomarte en serio. Bien.",
+                "La fe no detiene una espada. Aunque, a veces, estabiliza la mano que la sostiene.",
+                "Eres el más frágil en esta habitación, y de alguna manera sigues siendo el más peligroso. Recuérdalo.",
+                "El te ha creado fragil y obstinado. Esta noche, esperemos que solo se demuestre tu terquedad."
+                "La sangre mortal se derrama fácilmente. Intenta no derramar la tuya descuidadamente esta noche.",
+                "Los monstruos en esta habitación tienen siglos de práctica. Tú tienes convicción. Ya ha sido suficiente antes.",
             ],
         },
     },
