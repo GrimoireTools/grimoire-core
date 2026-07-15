@@ -5,7 +5,7 @@ from nextcord import slash_command, Interaction, SlashOption
 from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJRow, PJsController
-from system_data import ATTRIBUTES, CHARACTER_TYPES, DEFAULT_RESOURCES, CharType
+from system_data import ATTRIBUTES, CHARACTER_TYPES, DEFAULT_RESOURCES, CharType, SUB_CHARACTER_TYPES
 
 
 class RegisterCommands(Cog):
@@ -39,6 +39,7 @@ class RegisterCommands(Cog):
             Player=player,
             Last_turn=0,
             Char_type=char_type,
+            SubChar_type=SUB_CHARACTER_TYPES[char_type].copy(),
             Attributes=dict.fromkeys(ATTRIBUTES, 0),
             Abilities={},
             Specialties={},
@@ -51,5 +52,42 @@ class RegisterCommands(Cog):
         await interaction.followup.send(
             f"**{name}** registered as a **{char_type}**!\n"
             f"Starting resources: {resources_str}\n"
-            f"Use `/attributes` to set your attributes and `/ability set` to add your abilities."
+            f"Use `/attributes_set_all` to set your attributes"
+            f"Use `/ability_set_talents` to add your talents."
+            f"Use `/ability_set_skills` to add your skills."
+            f"Use `/ability_set_knowledges` to add your knowledges."
         )
+
+    @slash_command(name="set_subtype", guild_ids=[CRI_GUILD_ID], description="Set the subtype of your character")
+    @try_command
+    async def set_subtype(
+        self: Self,
+        interaction: Interaction,
+        subtype: str = SlashOption("subtype", "Character subtype", required=True, autocomplete=True),
+        value: str = SlashOption("value", "Value for the subtype", required=True),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj = sh.get_pj_row(user_id)
+        pj.subtype(subtype, value)
+        sh.set_row(pj)
+        await interaction.followup.send(f"**{pj.Name}**'s **{subtype}** has been set to **{value}**.")
+
+    # ── Autocomplete ──────────────────────────────────────────────────────────
+
+    @set_subtype.on_autocomplete("subtype")
+    async def _autocomplete_set(self, interaction: Interaction, subtype: str) -> None:
+        await self._subtype_autocomplete(interaction, subtype)
+
+    async def _subtype_autocomplete(self, interaction: Interaction, query: str) -> None:
+        try:
+            user_id = not_none(interaction.user).id
+            pj = PJsController.cached().get_pj_row(user_id)
+            subtypes = list(pj.SubChar_type.keys())
+        except Exception:
+            subtypes = []
+        if query:
+            subtypes = [s for s in subtypes if s.lower().startswith(query.lower())]
+        await interaction.response.send_autocomplete(subtypes)
+
+

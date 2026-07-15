@@ -77,3 +77,71 @@ DEFAULT_RESOURCES: dict[CharType, dict[str, int]] = {
     "Hunter": {"Willpower": 7, "Conviction": 3},
     "Mage": {"Quintessence": 5, "Paradox": 0, "Willpower": 7},
 }
+
+SUB_CHARACTER_TYPES: dict[CharType, dict[str, str]] = {
+    "Vampire": {"Clan": "", "Generation": "11"},
+    "Hunter": {"Virtue": "", "Creed": ""},
+    "Mage": {"Affinity": "", "Paradigm": ""}
+}
+
+VampireClans: list[str] = [
+    "Assamita",
+    "Brujah",
+    "Gangrel",
+    "Giovanni",
+    "Lasombra",
+    "Malkavian",
+    "Nosferatu",
+    "Ravnos",
+    "Seguidor de Set",
+    "Toreador",
+    "Tremere",
+    "Tzimisce",
+    "Ventrue",
+]
+
+HunterVirtues: list[str] = [
+    "Mercy",
+    "Vision",
+    "Zeal",
+]
+
+HunterCreeds: list[str] = [
+    #Mercy
+    "Innocence",
+    "Martyrdom",
+    "Redemption",
+    #Vision
+    "Visionary"
+    #Zeal
+    "Defense",
+    "Judgment",
+    "Vengeance",
+]
+
+MageAffinity: list[str] = [
+    "Correspondence",
+    "Entropy",
+    "Forces",
+    "Life",
+    "Matter",
+    "Mind",
+    "Prime",
+    "Spirit",
+    "Time",
+]
+
+MageParadigm: list[str] = [
+    "A Mechanistic Cosmos",
+    "A World of Gods and Monsters",
+    "Bring Back the Golden Age!",
+    "Creation's Divine and Alive",
+    "Divine Order and Earthly Chaos",
+    "Everything is Chaos",
+    "Everything is Data",
+    "Everything's an Illusion, Prison, or Mistake",
+    "It's All Good - Have Faith!",
+    "Might is Right",
+    "One-Way Trip to Oblivion",
+    "Tech Holds All Answers"
+]

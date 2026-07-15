@@ -14,10 +14,17 @@ class PJRow(Row):
     Player: str
     Last_turn: int
     Char_type: str
+    SubChar_type: JsonData[str, str]
     Attributes: JsonData[Attribute, int]
     Abilities: JsonData[Ability, int]
     Specialties: JsonData[Ability | Attribute, str]
     Resources: JsonData[Resource, int]
+
+    def subtype(self, subtype: str, set_value: str | None = None) -> str | int:
+        """Returns the current value of a subtype, optionally setting a new value."""
+        if set_value is not None:
+            self.SubChar_type[subtype] = set_value
+        return self.SubChar_type.get(subtype, "")
 
     def resource(self, resource: Resource, set_value: int | None = None) -> int:
         """Returns the current value of a resource, optionally setting a new value."""
@@ -42,6 +49,9 @@ class PJRow(Row):
         if set_value is not None:
             self.Specialties[ability] = set_value
         return self.Specialties.get(ability, "")
+
+    def set_subtype(self, subtypes: dict[str, str]) -> None:
+        self.SubChar_type.update(subtypes)
 
     def set_attributes(self, attributes: dict[Attribute, int]) -> None:
         self.Attributes.update(attributes)
