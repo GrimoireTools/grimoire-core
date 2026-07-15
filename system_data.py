@@ -145,3 +145,11 @@ MageParadigm: list[str] = [
     "One-Way Trip to Oblivion",
     "Tech Holds All Answers"
 ]
+
+SUBTYPE_VALUE_SOURCE: dict[str, list[str]] = {
+    "Clan": VampireClans,
+    "Affinity": MageAffinity,
+    "Virtue": HunterVirtues,
+    "Creed": HunterCreeds,
+    "Paradigm": MageParadigm,
+}

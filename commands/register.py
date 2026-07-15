@@ -5,7 +5,7 @@ from nextcord import slash_command, Interaction, SlashOption
 from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJRow, PJsController
-from system_data import ATTRIBUTES, CHARACTER_TYPES, DEFAULT_RESOURCES, CharType, SUB_CHARACTER_TYPES
+from system_data import ATTRIBUTES, CHARACTER_TYPES, DEFAULT_RESOURCES, CharType, SUB_CHARACTER_TYPES, SUBTYPE_VALUE_SOURCE
 
 
 class RegisterCommands(Cog):
@@ -64,7 +64,7 @@ class RegisterCommands(Cog):
         self: Self,
         interaction: Interaction,
         subtype: str = SlashOption("subtype", "Character subtype", required=True, autocomplete=True),
-        value: str = SlashOption("value", "Value for the subtype", required=True),
+        value: str = SlashOption("value", "Value for the subtype", required=True, autocomplete=True),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -76,10 +76,7 @@ class RegisterCommands(Cog):
     # ── Autocomplete ──────────────────────────────────────────────────────────
 
     @set_subtype.on_autocomplete("subtype")
-    async def _autocomplete_set(self, interaction: Interaction, subtype: str) -> None:
-        await self._subtype_autocomplete(interaction, subtype)
-
-    async def _subtype_autocomplete(self, interaction: Interaction, query: str) -> None:
+    async def _autocomplete_set(self, interaction: Interaction, query: str) -> None:
         try:
             user_id = not_none(interaction.user).id
             pj = PJsController.cached().get_pj_row(user_id)
@@ -89,5 +86,43 @@ class RegisterCommands(Cog):
         if query:
             subtypes = [s for s in subtypes if s.lower().startswith(query.lower())]
         await interaction.response.send_autocomplete(subtypes)
+
+    @set_subtype.on_autocomplete("value")
+    async def _autocomplete_value(self, interaction: Interaction, query: str) -> None:
+        values: list[str] = []
+
+        choices = interaction.data.get("options") if interaction.data else None
+        if choices:
+            subtype_opt = next(
+                (opt for opt in choices if opt.get("name") == "subtype"), None
+            )
+            raw_subtype = subtype_opt.get("value") if subtype_opt else None
+            if isinstance(raw_subtype, str):
+                values = SUBTYPE_VALUE_SOURCE.get(raw_subtype, [])
+
+        if query:
+            values = [v for v in values if v.lower().startswith(query.lower())]
+
+        await interaction.response.send_autocomplete(values[:25])
+
+#        try:
+#            subtype = interaction.data["options"][0]["value"]
+#            values = SUBTYPE_VALUE_SOURCE.get(subtype, [])
+#        except Exception:
+#            values = []
+#        if query:
+#            values = [v for v in values if v.lower().startswith(query.lower())]
+#        await interaction.response.send_autocomplete(values)
+
+    #async def _subtype_autocomplete(self, interaction: Interaction, query: str) -> None:
+    #    try:
+    #        user_id = not_none(interaction.user).id
+    #        pj = PJsController.cached().get_pj_row(user_id)
+    #        subtypes = list(pj.SubChar_type.keys())
+    #    except Exception:
+    #        subtypes = []
+    #    if query:
+    #        subtypes = [s for s in subtypes if s.lower().startswith(query.lower())]
+    #    await interaction.response.send_autocomplete(subtypes)
 
 
