@@ -46,11 +46,15 @@ class AbilitiesCommands(Cog):
         self: Self,
         interaction: Interaction,
         alertness: int = set_opt("Alertness"),
+        art: int = set_opt("Art"),
         athletics: int = set_opt("Athletics"),
+        awareness: int = set_opt("Awareness"),
         brawl: int = set_opt("Brawl"),
+        dodge: int = set_opt("Dodge"),
         empathy: int = set_opt("Empathy"),
         expression: int = set_opt("Expression"),
         intimidation: int = set_opt("Intimidation"),
+        intuition: int = set_opt("Intuition"),
         leadership: int = set_opt("Leadership"),
         streetwise: int = set_opt("Streetwise"),
         subterfuge: int = set_opt("Subterfuge"),
@@ -61,11 +65,15 @@ class AbilitiesCommands(Cog):
         old_values = pj.talent_abilities(all=True)
         new_values = {
             "Alertness": alertness,
+            "Art": art,
             "Athletics": athletics,
+            "Awareness": awareness,
             "Brawl": brawl,
+            "Dodge": dodge,
             "Empathy": empathy,
             "Expression": expression,
             "Intimidation": intimidation,
+            "Intuition": intuition,
             "Leadership": leadership,
             "Streetwise": streetwise,
             "Subterfuge": subterfuge,
@@ -84,14 +92,20 @@ class AbilitiesCommands(Cog):
         interaction: Interaction,
         animal_ken: int = set_opt("Animal_Ken"),
         crafts: int = set_opt("Crafts"),
+        demolitions: int = set_opt("Demolitions"),
         drive: int = set_opt("Drive"),
         etiquette: int = set_opt("Etiquette"),
         firearms: int = set_opt("Firearms"),
         larceny: int = set_opt("Larceny"),
+        martial_arts: int = set_opt("Martial Arts"),
+        meditation: int = set_opt("Meditation"),
         melee: int = set_opt("Melee"),
         performance: int = set_opt("Performance"),
+        research_sk: int = set_opt("Research_Sk."),
+        security: int = set_opt("Security"),
         stealth: int = set_opt("Stealth"),
         survival: int = set_opt("Survival"),
+        technology_sk: int = set_opt("Technology Sk."),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -100,14 +114,20 @@ class AbilitiesCommands(Cog):
         new_values = {
             "Animal Ken": animal_ken,
             "Crafts": crafts,
+            "Demolitions": demolitions,
             "Drive": drive,
             "Etiquette": etiquette,
             "Firearms": firearms,
             "Larceny": larceny,
+            "Martial Arts": martial_arts,
+            "Meditation": meditation,
             "Melee": melee,
             "Performance": performance,
+            "Research Sk.": research_sk,
+            "Security": security,
             "Stealth": stealth,
             "Survival": survival,
+            "Technology Sk.": technology_sk,
         }
         pj.set_abilities(new_values)
         sh.set_row(pj)
@@ -122,7 +142,11 @@ class AbilitiesCommands(Cog):
         self: Self,
         interaction: Interaction,
         academics: int = set_opt("Academics"),
+        bureaucracy: int = set_opt("Bureaucracy"),
         computer: int = set_opt("Computer"),
+        cosmology: int = set_opt("Cosmology"),
+        enigmas: int = set_opt("Enigmas"),
+        esoterica: int = set_opt("Esoterica"),
         finance: int = set_opt("Finance"),
         investigation: int = set_opt("Investigation"),
         law: int = set_opt("Law"),
@@ -130,7 +154,9 @@ class AbilitiesCommands(Cog):
         medicine: int = set_opt("Medicine"),
         occult: int = set_opt("Occult"),
         politics: int = set_opt("Politics"),
+        research_kn: int = set_opt("Research Kn."),
         science: int = set_opt("Science"),
+        technology_kn: int = set_opt("Technology Kn."),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -138,7 +164,11 @@ class AbilitiesCommands(Cog):
         old_values = pj.knowledge_abilities(all=True)
         new_values = {
             "Academics": academics,
+            "Bureaucracy": bureaucracy,
             "Computer": computer,
+            "Cosmology": cosmology,
+            "Enigmas": enigmas,
+            "Esoterica": esoterica,
             "Finance": finance,
             "Investigation": investigation,
             "Law": law,
@@ -146,7 +176,9 @@ class AbilitiesCommands(Cog):
             "Medicine": medicine,
             "Occult": occult,
             "Politics": politics,
+            "Research Kn.": research_kn,
             "Science": science,
+            "Technology Kn.": technology_kn,
         }
         pj.set_abilities(new_values)
         sh.set_row(pj)
@@ -198,16 +230,6 @@ class AbilitiesCommands(Cog):
             else ""
         )
         lines += (
-            "Knowledges:\n"
-            + "\n".join(
-                f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
-                for k, v in knowledges.items()
-            )
-            + "\n\n"
-            if knowledges
-            else ""
-        )
-        lines += (
             "Skills:\n"
             + "\n".join(
                 f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
@@ -215,6 +237,16 @@ class AbilitiesCommands(Cog):
             )
             + "\n\n"
             if skills
+            else ""
+        )
+        lines += (
+            "Knowledges:\n"
+            + "\n".join(
+                f"  {k:<14} {dots(v)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
+                for k, v in knowledges.items()
+            )
+            + "\n\n"
+            if knowledges
             else ""
         )
 

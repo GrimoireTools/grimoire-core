@@ -104,25 +104,3 @@ class RegisterCommands(Cog):
             values = [v for v in values if v.lower().startswith(query.lower())]
 
         await interaction.response.send_autocomplete(values[:25])
-
-#        try:
-#            subtype = interaction.data["options"][0]["value"]
-#            values = SUBTYPE_VALUE_SOURCE.get(subtype, [])
-#        except Exception:
-#            values = []
-#        if query:
-#            values = [v for v in values if v.lower().startswith(query.lower())]
-#        await interaction.response.send_autocomplete(values)
-
-    #async def _subtype_autocomplete(self, interaction: Interaction, query: str) -> None:
-    #    try:
-    #        user_id = not_none(interaction.user).id
-    #        pj = PJsController.cached().get_pj_row(user_id)
-    #        subtypes = list(pj.SubChar_type.keys())
-    #    except Exception:
-    #        subtypes = []
-    #    if query:
-    #        subtypes = [s for s in subtypes if s.lower().startswith(query.lower())]
-    #    await interaction.response.send_autocomplete(subtypes)
-
-

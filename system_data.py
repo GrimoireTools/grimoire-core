@@ -29,29 +29,42 @@ Ability = str
 PREDEFINED_ABILITIES: list[Ability] = [
     # Talents
     "Alertness",
+    "Art",
     "Athletics",
     "Awareness",
     "Brawl",
+    "Dodge",
     "Empathy",
     "Expression",
     "Intimidation",
+    "Intuition",
     "Leadership",
     "Streetwise",
     "Subterfuge",
     # Skills
     "Animal Ken",
     "Crafts",
+    "Demolitions",
     "Drive",
     "Etiquette",
     "Firearms",
     "Larceny",
+    "Martial Arts",
+    "Meditation",
     "Melee",
     "Performance",
+    "Research Sk.",
+    "Security",
     "Stealth",
     "Survival",
+    "Technology Sk.",
     # Knowledges
     "Academics",
+    "Bureaucracy",
     "Computer",
+    "Cosmology",
+    "Enigmas",
+    "Esoterica",
     "Finance",
     "Investigation",
     "Law",
@@ -59,12 +72,14 @@ PREDEFINED_ABILITIES: list[Ability] = [
     "Medicine",
     "Occult",
     "Politics",
+    "Research Kn.",
     "Science",
+    "Technology Kn."
 ]
 
-TALENTS: list[Ability] = PREDEFINED_ABILITIES[:10]
-SKILLS: list[Ability] = PREDEFINED_ABILITIES[10:20]
-KNOWLEDGES: list[Ability] = PREDEFINED_ABILITIES[20:]
+TALENTS: list[Ability] = PREDEFINED_ABILITIES[:13]
+SKILLS: list[Ability] = PREDEFINED_ABILITIES[13:29]
+KNOWLEDGES: list[Ability] = PREDEFINED_ABILITIES[29:]
 
 Resource = str
 

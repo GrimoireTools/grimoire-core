@@ -68,7 +68,15 @@ class PJRow(Row):
     def max_attr(self) -> int:
         """Return the max value an attribute can have based on the character type."""
         if self.Char_type == "Vampire":
-            return 8
+            match self.SubChar_type["Generation"]:
+                case "5":
+                    return 8
+                case "6":
+                    return 7
+                case "7":
+                    return 6
+                case _:
+                    return 5
         else:
             return 5  # Default max for other character types
 
