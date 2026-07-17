@@ -12,7 +12,7 @@ from system_data import PREDEFINED_ABILITIES
 
 def set_opt(name: str) -> SlashOption:
     return SlashOption(
-        name.lower(), f"New value for {name.replace('_', ' ').title()} (0–5)", required=True, autocomplete=True
+        name.lower(), f"New value for {name.replace('_', ' ').title()} (0-5)", required=True, autocomplete=True
     )
 
 
@@ -23,14 +23,14 @@ class AbilitiesCommands(Cog):
 
     # ── /ability set ────────────────────────────────────────────────────────────
     @ability_group.subcommand(
-        name="set", description="Sets an ability value (0–8); type any name to add a custom ability"
+        name="set", description="Sets an ability value (0-8); type any name to add a custom ability"
     )
     @try_command
     async def ability_set(
         self: Self,
         interaction: Interaction,
         ability: str = SlashOption("ability", "Ability name (predefined or custom)", required=True, autocomplete=True),
-        value: int = SlashOption("value", "New value (0–8)", required=True, min_value=0, max_value=5),
+        value: int = SlashOption("value", "New value (0-8)", required=True, min_value=0, max_value=5),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -40,7 +40,7 @@ class AbilitiesCommands(Cog):
         sh.set_row(pj)
         await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(old)} → {dots(value)}", interaction))
 
-    @ability_group.subcommand(name="set_talents", description="Sets all talents to a value (0–5)")
+    @ability_group.subcommand(name="set_talents", description="Sets all talents to a value (0-5)")
     @try_command
     async def ability_set_talents(
         self: Self,
@@ -85,7 +85,7 @@ class AbilitiesCommands(Cog):
         )
         await interaction.followup.send(quotify(f"**{pj.Name}** — Talents updated:\n```\n{changes}\n```", interaction))
 
-    @ability_group.subcommand(name="set_skills", description="Sets all skills to a value (0–5)")
+    @ability_group.subcommand(name="set_skills", description="Sets all skills to a value (0-5)")
     @try_command
     async def ability_set_skills(
         self: Self,
@@ -136,7 +136,7 @@ class AbilitiesCommands(Cog):
         )
         await interaction.followup.send(quotify(f"**{pj.Name}** — Skills updated:\n```\n{changes}\n```", interaction))
 
-    @ability_group.subcommand(name="set_knowledges", description="Sets all knowledges to a value (0–5)")
+    @ability_group.subcommand(name="set_knowledges", description="Sets all knowledges to a value (0-5)")
     @try_command
     async def ability_set_knowledges(
         self: Self,

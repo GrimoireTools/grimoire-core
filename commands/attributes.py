@@ -18,13 +18,13 @@ class AttributesCommands(Cog):
         pass
 
     # ── /attribute set ────────────────────────────────────────────────────────
-    @attribute_group.subcommand(name="set", description="Sets a single attribute to a value (1–5) (max 8 for vampires)")
+    @attribute_group.subcommand(name="set", description="Sets a single attribute to a value (1-5) (max 8 for vampires)")
     @try_command
     async def attribute_set(
         self: Self,
         interaction: Interaction,
         attribute: Attribute = SlashOption("attribute", "Attribute to set", required=True, choices=ATTRIBUTE_CHOICES),
-        value: int = SlashOption("value", "New value (0–5)", required=True, min_value=0, max_value=5),
+        value: int = SlashOption("value", "New value (0-5)", required=True, min_value=0, max_value=5),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
