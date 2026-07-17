@@ -42,22 +42,22 @@ PREDEFINED_ABILITIES: list[Ability] = [
     "Streetwise",
     "Subterfuge",
     # Skills
-    "Animal_Ken",
+    "Animal Ken",
     "Crafts",
     "Demolitions",
     "Drive",
     "Etiquette",
     "Firearms",
     "Larceny",
-    "Martial_Arts",
+    "Martial Arts",
     "Meditation",
     "Melee",
     "Performance",
-    "Research_Sk",
+    "Research Sk",
     "Security",
     "Stealth",
     "Survival",
-    "Technology_Sk",
+    "Technology Sk",
     # Knowledges
     "Academics",
     "Bureaucracy",
@@ -72,9 +72,9 @@ PREDEFINED_ABILITIES: list[Ability] = [
     "Medicine",
     "Occult",
     "Politics",
-    "Research_Kn",
+    "Research Kn",
     "Science",
-    "Technology_Kn"
+    "Technology Kn"
 ]
 
 TALENTS: list[Ability] = PREDEFINED_ABILITIES[:13]

@@ -119,22 +119,22 @@ class AbilitiesCommands(Cog):
         pj = sh.get_pj_row(user_id)
         old_values = pj.skill_abilities(all=True)
         new_values = {
-            "Animal_Ken": animal_ken,
+            "Animal Ken": animal_ken,
             "Crafts": crafts,
             "Demolitions": demolitions,
             "Drive": drive,
             "Etiquette": etiquette,
             "Firearms": firearms,
             "Larceny": larceny,
-            "Martial_Arts": martial_arts,
+            "Martial Arts": martial_arts,
             "Meditation": meditation,
             "Melee": melee,
             "Performance": performance,
-            "Research_Sk": research_sk,
+            "Research Sk": research_sk,
             "Security": security,
             "Stealth": stealth,
             "Survival": survival,
-            "Technology_Sk": technology_sk,
+            "Technology Sk": technology_sk,
         }
         pj.set_abilities(new_values)
         sh.set_row(pj)
@@ -183,9 +183,9 @@ class AbilitiesCommands(Cog):
             "Medicine": medicine,
             "Occult": occult,
             "Politics": politics,
-            "Research_Kn": research_kn,
+            "Research Kn": research_kn,
             "Science": science,
-            "Technology_Kn": technology_kn,
+            "Technology Kn": technology_kn,
         }
         pj.set_abilities(new_values)
         sh.set_row(pj)
