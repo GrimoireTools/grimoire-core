@@ -1,3 +1,4 @@
+import re
 from typing import Any, Self
 
 from nextcord import slash_command, Interaction, SlashOption
@@ -11,8 +12,14 @@ from system_data import PREDEFINED_ABILITIES
 
 
 def set_opt(name: str) -> SlashOption:
+    # Discord option names must be lowercase and match a strict regex.
+    option_name = re.sub(r"[^a-z0-9_]", "_", name.lower().strip())
+    option_name = re.sub(r"_+", "_", option_name).strip("_")
     return SlashOption(
-        name.lower(), f"New value for {name.replace('_', ' ').title()} (0-5)", required=True, autocomplete=True
+        option_name,
+        f"New value for {name.replace('_', ' ').title()} (0-5)",
+        required=True,
+        autocomplete=True,
     )
 
 
@@ -97,7 +104,7 @@ class AbilitiesCommands(Cog):
         etiquette: int = set_opt("Etiquette"),
         firearms: int = set_opt("Firearms"),
         larceny: int = set_opt("Larceny"),
-        martial_arts: int = set_opt("Martial Arts"),
+        martial_arts: int = set_opt("Martial_Arts"),
         meditation: int = set_opt("Meditation"),
         melee: int = set_opt("Melee"),
         performance: int = set_opt("Performance"),
@@ -112,14 +119,14 @@ class AbilitiesCommands(Cog):
         pj = sh.get_pj_row(user_id)
         old_values = pj.skill_abilities(all=True)
         new_values = {
-            "Animal Ken": animal_ken,
+            "Animal_Ken": animal_ken,
             "Crafts": crafts,
             "Demolitions": demolitions,
             "Drive": drive,
             "Etiquette": etiquette,
             "Firearms": firearms,
             "Larceny": larceny,
-            "Martial Arts": martial_arts,
+            "Martial_Arts": martial_arts,
             "Meditation": meditation,
             "Melee": melee,
             "Performance": performance,
