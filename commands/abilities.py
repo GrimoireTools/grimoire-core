@@ -101,11 +101,11 @@ class AbilitiesCommands(Cog):
         meditation: int = set_opt("Meditation"),
         melee: int = set_opt("Melee"),
         performance: int = set_opt("Performance"),
-        research_sk: int = set_opt("Research_Sk."),
+        research_sk: int = set_opt("Research_Sk"),
         security: int = set_opt("Security"),
         stealth: int = set_opt("Stealth"),
         survival: int = set_opt("Survival"),
-        technology_sk: int = set_opt("Technology Sk."),
+        technology_sk: int = set_opt("Technology_Sk"),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -123,11 +123,11 @@ class AbilitiesCommands(Cog):
             "Meditation": meditation,
             "Melee": melee,
             "Performance": performance,
-            "Research Sk.": research_sk,
+            "Research_Sk": research_sk,
             "Security": security,
             "Stealth": stealth,
             "Survival": survival,
-            "Technology Sk.": technology_sk,
+            "Technology_Sk": technology_sk,
         }
         pj.set_abilities(new_values)
         sh.set_row(pj)
@@ -154,9 +154,9 @@ class AbilitiesCommands(Cog):
         medicine: int = set_opt("Medicine"),
         occult: int = set_opt("Occult"),
         politics: int = set_opt("Politics"),
-        research_kn: int = set_opt("Research Kn."),
+        research_kn: int = set_opt("Research_Kn"),
         science: int = set_opt("Science"),
-        technology_kn: int = set_opt("Technology Kn."),
+        technology_kn: int = set_opt("Technology_Kn"),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
@@ -176,9 +176,9 @@ class AbilitiesCommands(Cog):
             "Medicine": medicine,
             "Occult": occult,
             "Politics": politics,
-            "Research Kn.": research_kn,
+            "Research_Kn": research_kn,
             "Science": science,
-            "Technology Kn.": technology_kn,
+            "Technology_Kn": technology_kn,
         }
         pj.set_abilities(new_values)
         sh.set_row(pj)

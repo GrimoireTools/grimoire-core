@@ -53,11 +53,11 @@ PREDEFINED_ABILITIES: list[Ability] = [
     "Meditation",
     "Melee",
     "Performance",
-    "Research Sk.",
+    "Research_Sk",
     "Security",
     "Stealth",
     "Survival",
-    "Technology Sk.",
+    "Technology_Sk",
     # Knowledges
     "Academics",
     "Bureaucracy",
@@ -72,9 +72,9 @@ PREDEFINED_ABILITIES: list[Ability] = [
     "Medicine",
     "Occult",
     "Politics",
-    "Research Kn.",
+    "Research_Kn",
     "Science",
-    "Technology Kn."
+    "Technology_Kn"
 ]
 
 TALENTS: list[Ability] = PREDEFINED_ABILITIES[:13]
