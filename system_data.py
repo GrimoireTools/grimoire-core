@@ -88,9 +88,9 @@ CharType = Literal["Vampire", "Hunter", "Mage"]
 CHARACTER_TYPES: list[CharType] = ["Vampire", "Hunter", "Mage"]
 
 DEFAULT_RESOURCES: dict[CharType, dict[str, int]] = {
-    "Vampire": {"Blood Pool": 10, "Willpower": 7},
-    "Hunter": {"Willpower": 7, "Conviction": 3},
-    "Mage": {"Quintessence": 5, "Paradox": 0, "Willpower": 7},
+    "Vampire": {"XP": 0, "Blood Pool": 10, "Willpower": 7},
+    "Hunter": {"XP": 0, "Willpower": 7, "Conviction": 3},
+    "Mage": {"XP": 0, "Quintessence": 5, "Paradox": 0, "Willpower": 7},
 }
 
 SUB_CHARACTER_TYPES: dict[CharType, dict[str, str]] = {

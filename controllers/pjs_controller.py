@@ -93,21 +93,21 @@ class PJRow(Row):
         if all:
             return {ability: self.Abilities.get(ability, 0) for ability in KNOWLEDGES}
         else:
-            return {ability: value for ability, value in self.Abilities.items() if ability in KNOWLEDGES}
+            return {ability: value for ability, value in self.Abilities.items() if ability in KNOWLEDGES and value > 0}
 
     def talent_abilities(self, all: bool = False) -> dict[Ability, int]:
         """Return a dictionary of all talent abilities."""
         if all:
             return {ability: self.Abilities.get(ability, 0) for ability in TALENTS}
         else:
-            return {ability: value for ability, value in self.Abilities.items() if ability in TALENTS}
+            return {ability: value for ability, value in self.Abilities.items() if ability in TALENTS and value > 0}
 
     def skill_abilities(self, all: bool = False) -> dict[Ability, int]:
         """Return a dictionary of all skill abilities."""
         if all:
             return {ability: self.Abilities.get(ability, 0) for ability in SKILLS}
         else:
-            return {ability: value for ability, value in self.Abilities.items() if ability in SKILLS}
+            return {ability: value for ability, value in self.Abilities.items() if ability in SKILLS and value > 0}
 
     def custom_abilities(self) -> dict[Ability, int]:
         """Return a dictionary of all custom abilities (not predefined)."""
