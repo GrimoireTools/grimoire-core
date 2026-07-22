@@ -6,6 +6,7 @@ from commands.register import RegisterCommands
 from commands.kill import KillCommands
 from commands.abilities import AbilitiesCommands
 from commands.roll import RollCommands
+from commands.status import StatusCommands
 
 
 def setup_all_commands(bot: Bot) -> None:
@@ -20,6 +21,7 @@ def setup_all_commands(bot: Bot) -> None:
         AttributesCommands,
         AbilitiesCommands,
         RollCommands,
+        StatusCommands,
     ]
 
     for command_class in command_classes:
