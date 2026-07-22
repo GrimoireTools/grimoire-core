@@ -3,7 +3,7 @@ from loguru import logger
 from controllers.lib.utils import DataNotFoundError
 from controllers.lib.base_controller import SheetsControllerBase
 from controllers.lib.row import JsonData, Row
-from system_data import PREDEFINED_ABILITIES, Attribute, Ability, Resource, KNOWLEDGES, TALENTS, SKILLS
+from system_data import PREDEFINED_ABILITIES, Attribute, Ability, Resource, KNOWLEDGES, TALENTS, SKILLS, CORE_ABILITIES, VAMPIRE_VIRTUES
 
 PJ_SHEET_ID = 0  # TODO: set real sheet ID
 
@@ -108,6 +108,20 @@ class PJRow(Row):
             return {ability: self.Abilities.get(ability, 0) for ability in SKILLS}
         else:
             return {ability: value for ability, value in self.Abilities.items() if ability in SKILLS and value > 0}
+
+    def core_abilities(self, all: bool = False) -> dict[Ability, int]:
+        """Return a dictionary of all core abilities."""
+        if all:
+            return {ability: self.Abilities.get(ability, 0) for ability in CORE_ABILITIES}
+        else:
+            return {ability: value for ability, value in self.Abilities.items() if ability in CORE_ABILITIES and value > 0}
+
+    def vampire_virtues(self, all: bool = False) -> dict[Ability, int]:
+        """Return a dictionary of all vampire virtues."""
+        if all:
+            return {ability: self.Abilities.get(ability, 0) for ability in VAMPIRE_VIRTUES}
+        else:
+            return {ability: value for ability, value in self.Abilities.items() if ability in VAMPIRE_VIRTUES and value > 0}
 
     def custom_abilities(self) -> dict[Ability, int]:
         """Return a dictionary of all custom abilities (not predefined)."""

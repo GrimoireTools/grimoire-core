@@ -8,7 +8,7 @@ from controllers.lib.cog import Cog
 from controllers.lib.utils import CRI_GUILD_ID, not_none, try_command
 from controllers.pjs_controller import PJsController
 from commands.utils.wod_utils import dots
-from system_data import PREDEFINED_ABILITIES
+from system_data import PREDEFINED_ABILITIES, CORE_ABILITIES, VAMPIRE_VIRTUES
 
 
 def set_opt(name: str) -> SlashOption:
@@ -37,12 +37,17 @@ class AbilitiesCommands(Cog):
         self: Self,
         interaction: Interaction,
         ability: str = SlashOption("ability", "Ability name (predefined or custom)", required=True, autocomplete=True),
-        value: int = SlashOption("value", "New value (0-8)", required=True, min_value=0, max_value=8),
+        value: int = SlashOption("value", "New value (0-10)", required=True, min_value=0, max_value=10),
     ) -> Any:
         user_id = not_none(interaction.user).id
         sh = PJsController()
         pj = sh.get_pj_row(user_id)
-        max_value = pj.max_attr()
+        if ability in CORE_ABILITIES:
+            max_value = 10
+        elif ability in VAMPIRE_VIRTUES:
+            max_value = 5
+        else:
+            max_value = pj.max_attr()
         if value > max_value:
             return await interaction.followup.send(
                 quotify(
@@ -55,7 +60,7 @@ class AbilitiesCommands(Cog):
         sh.set_row(pj)
         await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(old, max_value)} → {dots(value, max_value)} ({old} → {value})", interaction))
 
-    @ability_group.subcommand(name="set_talents", description="Sets all talents to a value (0-8)")
+    @ability_group.subcommand(name="set_talents", description="Sets all talents to a value (0-10)")
     @try_command
     async def ability_set_talents(
         self: Self,
@@ -123,7 +128,7 @@ class AbilitiesCommands(Cog):
         )
         await interaction.followup.send(quotify(f"**{pj.Name}** — Talents updated:\n```\n{changes}\n```", interaction))
 
-    @ability_group.subcommand(name="set_skills", description="Sets all skills to a value (0-8)")
+    @ability_group.subcommand(name="set_skills", description="Sets all skills to a value (0-10)")
     @try_command
     async def ability_set_skills(
         self: Self,
@@ -199,7 +204,7 @@ class AbilitiesCommands(Cog):
         )
         await interaction.followup.send(quotify(f"**{pj.Name}** — Skills updated:\n```\n{changes}\n```", interaction))
 
-    @ability_group.subcommand(name="set_knowledges", description="Sets all knowledges to a value (0-8)")
+    @ability_group.subcommand(name="set_knowledges", description="Sets all knowledges to a value (0-10)")
     @try_command
     async def ability_set_knowledges(
         self: Self,
@@ -277,6 +282,76 @@ class AbilitiesCommands(Cog):
             quotify(f"**{pj.Name}** — Knowledges updated:\n```\n{changes}\n```", interaction)
         )
 
+    @ability_group.subcommand(name="set_core", description="Sets all core abilities to a value (0-10). Leave at 0 abilities not related to your character")
+    @try_command
+    async def ability_set_core(
+        self: Self,
+        interaction: Interaction,
+        willpower: int = set_opt("Willpower"),
+        humanity: int = set_opt("Humanity"),
+        mercy: int = set_opt("Mercy"),
+        vision: int = set_opt("Vision"),
+        zeal: int = set_opt("Zeal"),
+        arete: int = set_opt("Arete"),
+        selfcontrol: int = set_opt("Self-Control"),
+        conscience: int = set_opt("Conscience"),
+        courage: int = set_opt("Courage"),
+    ) -> Any:
+        user_id = not_none(interaction.user).id
+        sh = PJsController()
+        pj = sh.get_pj_row(user_id)
+        if any(
+            core > 10 for core in [
+                willpower,
+                humanity,
+                mercy,
+                vision,
+                zeal,
+                arete,
+            ]
+        ):
+            return await interaction.followup.send(
+                f"Error: One or more core abilities exceed the maximum value of {10} for your character type ({pj.Char_type})."
+            )
+        if any(
+            virtue > 5 for virtue in [
+                selfcontrol,
+                conscience,
+                courage
+            ]
+        ):
+            return await interaction.followup.send(
+                f"Error: One or more virtues exceed the maximum value of {5} for your character type ({pj.Char_type})."
+            )
+        old_values = pj.core_abilities(all=True)
+        new_values = {
+            "Willpower": willpower,
+            "Humanity": humanity,
+            "Mercy": mercy,
+            "Vision": vision,
+            "Zeal": zeal,
+            "Arete": arete,
+        }
+        old_virtues = pj.vampire_virtues(all=True)
+        new_virtues = {
+            "Self-Control": selfcontrol,
+            "Conscience": conscience,
+            "Courage": courage,
+        }
+        pj.set_abilities(new_values)
+        pj.set_abilities(new_virtues)
+        sh.set_row(pj)
+        changes = "\n".join(
+            f"  {ability:<14} {dots(old_values[ability], 10)} → {dots(new_values[ability], 10)}" for ability in new_values
+        )
+        changes += "\n"
+        changes += "\n".join(
+            f"  {ability:<14} {dots(old_virtues[ability], 5)} → {dots(new_virtues[ability], 5)}" for ability in new_virtues
+        )
+        await interaction.followup.send(
+            quotify(f"**{pj.Name}** — Core abilities updated:\n```\n{changes}\n```", interaction)
+        )
+
     # ── /ability view ───────────────────────────────────────────────────────────
 
     @ability_group.subcommand(name="view", description="Shows an ability value and specialty if any")
@@ -289,7 +364,12 @@ class AbilitiesCommands(Cog):
         user_id = not_none(interaction.user).id
         pj = PJsController().get_pj_row(user_id)
         value = pj.ability(ability)
-        max_value = pj.max_attr()
+        if ability in CORE_ABILITIES:
+            max_value = 10
+        elif ability in VAMPIRE_VIRTUES:
+            max_value = 5
+        else:
+            max_value = pj.max_attr()
         spec = pj.specialty(ability)
         spec_str = f"  *(specialty: {spec})*" if spec else ""
         await interaction.followup.send(quotify(f"**{pj.Name}** — {ability}: {dots(value, max_value)}{spec_str}", interaction))
@@ -307,6 +387,8 @@ class AbilitiesCommands(Cog):
         knowledges = pj.knowledge_abilities(all)
         skills = pj.skill_abilities(all)
         talents = pj.talent_abilities(all)
+        core_abilities = pj.core_abilities()
+        vampire_virtues = pj.vampire_virtues()
         customs = pj.custom_abilities()
 
         lines = (
@@ -337,6 +419,27 @@ class AbilitiesCommands(Cog):
             )
             + "\n\n"
             if knowledges
+            else ""
+        )
+
+        lines += (
+            "Core Abilities:\n"
+            + "\n".join(
+                f"  {k:<14} {dots(v, 10)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
+                for k, v in core_abilities.items()
+            )
+            + "\n"
+            if core_abilities
+            else ""
+        )
+
+        lines += (
+            "\n".join(
+                f"  {k:<14} {dots(v, 5)} ({v}) {f'[{pj.Specialties[k]}]' if k in pj.Specialties else ''}"
+                for k, v in vampire_virtues.items()
+            )
+            + "\n\n"
+            if vampire_virtues
             else ""
         )
 

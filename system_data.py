@@ -74,12 +74,25 @@ PREDEFINED_ABILITIES: list[Ability] = [
     "Politics",
     "Research Kn",
     "Science",
-    "Technology Kn"
+    "Technology Kn",
+    # Core Abilities
+    "Willpower",
+    "Humanity",
+    "Mercy",
+    "Vision",
+    "Zeal",
+    "Arete",
+    # Vampire Virtues
+    "Self-Control",
+    "Conscience",
+    "Courage"
 ]
 
 TALENTS: list[Ability] = PREDEFINED_ABILITIES[:13]
 SKILLS: list[Ability] = PREDEFINED_ABILITIES[13:29]
-KNOWLEDGES: list[Ability] = PREDEFINED_ABILITIES[29:]
+KNOWLEDGES: list[Ability] = PREDEFINED_ABILITIES[29:45]
+CORE_ABILITIES: list[Ability] = PREDEFINED_ABILITIES[45:51]
+VAMPIRE_VIRTUES: list[Ability] = PREDEFINED_ABILITIES[51:]
 
 Resource = str
 
