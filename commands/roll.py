@@ -146,8 +146,27 @@ class RollCommands(Cog):
             required=False,
             default=False,
         ),
+        use_willpower: bool = SlashOption(
+            "willpower",
+            "Use willpower point for automatic success",
+            required=False,
+            default=False,
+        ),
     ) -> Any:
-        result = wod_roll(pool, difficulty, specialty)
+        if use_willpower:
+            user_id = not_none(interaction.user).id
+            sh = PJsController()
+            pj = sh.get_pj_row(user_id)
+            current_willpower = pj.resource("Willpower")
+            if current_willpower <= 0:
+                return await interaction.followup.send(
+                    "Error: No willpower left to spend on this roll."
+                )
+            else:
+                pj.resource("Willpower", current_willpower - 1)
+                sh.set_row(pj)
+
+        result = wod_roll(pool, difficulty, specialty, use_willpower)
         label = f"pool **{pool}**  diff **{difficulty}**"
         if result.successes > 0:
             await interaction.followup.send(
