@@ -7,6 +7,7 @@ class WodRollResult:
     pool: int
     difficulty: int
     has_specialty: bool
+    use_willpower: bool
     dice: list[int] = field(default_factory=list)
     unbotch: bool = False
     successes: int = 0
@@ -25,7 +26,7 @@ class WodRollResult:
         return self.successes <= 0 and self.ones > 0 and not self.unbotch
 
 
-def wod_roll(pool: int, difficulty: int = 6, has_specialty: bool = False) -> WodRollResult:
+def wod_roll(pool: int, difficulty: int = 6, has_specialty: bool = False, use_willpower: bool = False) -> WodRollResult:
     """Roll a WoD dice pool and return the result.
 
     - Each die >= difficulty counts as a success.
@@ -33,7 +34,7 @@ def wod_roll(pool: int, difficulty: int = 6, has_specialty: bool = False) -> Wod
     - With specialty, 10s count as 2 successes instead of 1.
     - Botch: net successes <= 0 and at least one 1 rolled.
     """
-    result = WodRollResult(pool=pool, difficulty=difficulty, has_specialty=has_specialty)
+    result = WodRollResult(pool=pool, difficulty=difficulty, has_specialty=has_specialty, use_willpower=use_willpower)
 
     if pool <= 0:
         result.ones = 1  # 0-pool auto-botch
@@ -50,6 +51,13 @@ def wod_roll(pool: int, difficulty: int = 6, has_specialty: bool = False) -> Wod
             bonus = 2 if (has_specialty and die == 10) else 1
             result.successes += bonus
             result.unbotch = True  # any success unbotches the roll
+
+    if use_willpower:
+        if result.successes <= 0:
+            result.successes = 1
+            result.unbotch = True
+        else:
+            result.successes +=1
 
     return result
 
@@ -88,5 +96,6 @@ def format_roll(result: WodRollResult) -> str:
         result_line += f"  ({result_color}{result.successes} success{'es' if result.successes != 1 else ''}{_RESET})"
 
     specialty_note = "  ★ specialty (10s = 2 successes)" if result.has_specialty else ""
+    willpower_note = "  ★ automatic success (willpower)" if result.use_willpower else ""
 
-    return f"[ {dice_str} ]\n{result_line}{specialty_note}"
+    return f"[ {dice_str} ]\n{result_line}{specialty_note}{willpower_note}"

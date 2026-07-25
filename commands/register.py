@@ -52,10 +52,10 @@ class RegisterCommands(Cog):
         await interaction.followup.send(
             f"**{name}** registered as a **{char_type}**!\n"
             f"Starting resources: {resources_str}\n"
-            f"Use `/attributes_set_all` to set your attributes"
-            f"Use `/ability_set_talents` to add your talents."
-            f"Use `/ability_set_skills` to add your skills."
-            f"Use `/ability_set_knowledges` to add your knowledges."
+            f"Use `/attributes_set_all` to set your attributes.\n"
+            f"Use `/ability_set_talents` to add your talents.\n"
+            f"Use `/ability_set_skills` to add your skills.\n"
+            f"Use `/ability_set_knowledges` to add your knowledges.\n"
         )
 
     @slash_command(name="set_subtype", guild_ids=[CRI_GUILD_ID], description="Set the subtype of your character")

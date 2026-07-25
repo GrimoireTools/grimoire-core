@@ -42,6 +42,12 @@ class RollCommands(Cog):
             required=False,
             default=False,
         ),
+        use_willpower: bool = SlashOption(
+            "willpower",
+            "Use willpower point for automatic success",
+            required=False,
+            default=False,
+        ),
         modifier: int = SlashOption(
             "modifier",
             "Extra dice to add (negative to remove)",
@@ -58,7 +64,18 @@ class RollCommands(Cog):
         ),
     ) -> Any:
         user_id = not_none(interaction.user).id
-        pj = PJsController.cached().get_pj_row(user_id)
+        sh = PJsController()
+        pj = sh.cached().get_pj_row(user_id)
+
+        if use_willpower:
+            current_willpower = pj.resource("Willpower")
+            if current_willpower <= 0:
+                return await interaction.followup.send(
+                    "Error: No willpower left to spend on this roll."
+                )
+            else:
+                pj.resource("Willpower", current_willpower - 1)
+                sh.set_row(pj)
 
         attr_val = pj.attribute(attribute) if attribute else 0
         ability_val = pj.ability(ability) if ability else 0
@@ -68,7 +85,7 @@ class RollCommands(Cog):
 
         pool = attr_val + ability_val + modifier
 
-        result = wod_roll(pool, difficulty, has_specialty and apply_specialty)
+        result = wod_roll(pool, difficulty, has_specialty and apply_specialty, use_willpower)
 
         # Build label line
         parts = []
@@ -88,6 +105,8 @@ class RollCommands(Cog):
             label += "  |  specialty ignored (no specialty found)"
         elif apply_specialty and has_specialty:
             label += "  |  specialty applied"
+        if use_willpower:
+            label += "  |  willpower used"
 
         if result.successes > 0:
             await interaction.followup.send(
