@@ -31,6 +31,8 @@ select = [
     "SIM", # flake8-simplify
     "RUF", # Ruff-specific rules
     "TC",  # type-checking rules
+    "I",   # isort
+
 ]
 
 # Ignore specific rules that might be too strict

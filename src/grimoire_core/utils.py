@@ -5,7 +5,7 @@ from nextcord import SlashOption, Interaction
 from loguru import logger
 from typing import TypeVar
 
-from varenv import get_env
+from grimoire_core.varenv import get_env
 
 CRI_GUILD_ID = int(get_env("GUILD_ID"))
 default_user_option = SlashOption(
