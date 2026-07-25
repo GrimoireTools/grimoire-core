@@ -1,16 +1,13 @@
 [project]
-name = "costilla-bot"
+name = "grimoire-core"
 version = "0.1.0"
 requires-python = ">=3.13"
 dependencies = [
-    "dndice==2.8.1",
-    "python-dotenv>=1.0.1",
     "gspread==6.2.1",
     "icecream==2.2.0",
     "loguru>=0.7.3",
     "nextcord==3.2.0",
     "python-dotenv>=1.2.2",
-    "setuptools>=83.0.0",
 ]
 
 [tool.ruff]
