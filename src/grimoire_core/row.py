@@ -1,12 +1,13 @@
 """Abstract class that represents a single row in a sheet."""
 
+import json
+import types
 from abc import ABC
 from collections import OrderedDict
 from dataclasses import dataclass, field
-import types
 from typing import Any, Generic, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
-import json
-from .utils import num_to_column
+
+from grimoire_core.utils import num_to_column
 
 Col = int | str
 Value = str | int | float
@@ -58,7 +59,7 @@ class Row(ABC):
 
         Attributes not given are set to None.
         """
-        hints = get_type_hints(self)
+        hints = get_type_hints(type(self))
         for name, _type_hint in hints.items():
             if name not in kwargs:
                 kwargs[name] = None
@@ -72,7 +73,7 @@ class Row(ABC):
 
     def to_dict(self) -> dict[str, Value]:
         """Returns a dictionary representation of the row."""
-        hints = get_type_hints(self)
+        hints = get_type_hints(type(self))
         vals = [(name, self.__getattribute__(name)) for name in hints]
         return OrderedDict(vals)
 
@@ -85,7 +86,7 @@ class Row(ABC):
 
         This way, when getting a value from the sheet, it is automatically casted to the correct type.
         """
-        if name in self.__annotations__:
+        if name in get_type_hints(type(self)):
             super().__setattr__(name, self._cast_value(name, value))
         else:
             super().__setattr__(name, value)
@@ -104,7 +105,7 @@ class Row(ABC):
         """Casts a value to the type defined in the annotations."""
         if value is None:
             return None
-        _type = self.__annotations__[name]
+        _type = get_type_hints(type(self))[name]
         if get_origin(_type) in [types.UnionType, Union]:
             _types = get_args(_type)
             for _typ in _types:

@@ -1,9 +1,10 @@
-from nextcord import Interaction, slash_command
 import functools
 from typing import Any
+
+from nextcord import Interaction, slash_command
 from nextcord.ext import commands
 
-from .utils import CRI_GUILD_ID, log_command, try_command
+from grimoire_core.utils import CRI_GUILD_ID, log_command, try_command
 
 
 class Cog(commands.Cog):

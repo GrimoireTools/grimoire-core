@@ -1,9 +1,9 @@
 import functools
-from typing import Any, Self
+from typing import Any, Self, TypeVar
+
 from gspread.exceptions import APIError
-from nextcord import SlashOption, Interaction
 from loguru import logger
-from typing import TypeVar
+from nextcord import Interaction, SlashOption, Member, User
 
 from grimoire_core.varenv import get_env
 
@@ -17,6 +17,12 @@ default_user_option = SlashOption(
 
 
 class DataNotFoundError(Exception):
+    pass
+
+
+class StopError(Exception):
+    """Custom exception to stop the execution of a command."""
+
     pass
 
 
@@ -92,8 +98,7 @@ def log_command(func):
     async def logged_command(self: Any, interaction: Interaction, *args, **kwargs) -> None:
         user = interaction.user
         if user is not None:
-            logger.info(
-                f"[{func.__name__}] called by {user.name} ({user.id}).")
+            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
         else:
             logger.info(f"[{func.__name__}] called by null user.")
         logger.debug(f"[{func.__name__}] called with {kwargs}.")
@@ -109,8 +114,7 @@ def log_command_not_cog(func):
     async def logged_command(interaction: Interaction, *args, **kwargs) -> None:
         user = interaction.user
         if user is not None:
-            logger.info(
-                f"[{func.__name__}] called by {user.name} ({user.id}).")
+            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
         else:
             logger.info(f"[{func.__name__}] called by null user.")
         logger.debug(f"[{func.__name__}] called with {kwargs}.")
@@ -149,9 +153,21 @@ def column_to_num(column: str) -> int:
     num: int = 0
     for letter in column.lower():
         if letter not in letters:
-            raise ValueError(
-                "Column must have only roman alphabet characters.")
+            raise ValueError("Column must have only roman alphabet characters.")
         num *= len(letters)
         num += letters.index(letter) + 1
 
     return num - 1
+
+
+MASTERS_ROLE_ID = 1163525259962626219
+
+
+def check_narrator(user: Member | User | None) -> Member:
+    """Check if the interaction user is a narrator."""
+    narrator = not_none(user)
+    if not isinstance(narrator, Member):
+        raise StopError("You must be a member of the server to create mission notices.")
+    if not any(role.id == MASTERS_ROLE_ID for role in narrator.roles):
+        raise StopError("You don't have the narrator role.")
+    return narrator

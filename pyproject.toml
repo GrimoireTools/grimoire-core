@@ -13,7 +13,7 @@ dependencies = [
 [tool.ruff]
 # Same as flake8 default line length
 line-length = 120
-target-version = "py313"
+target-version = "py314"
 
 
 [tool.ruff.lint]
