@@ -2,7 +2,7 @@
 
 import functools
 from collections.abc import Awaitable, Callable
-from typing import Any, Concatenate, ParamSpec, TypeVar
+from typing import Any, Concatenate, ParamSpec
 
 from gspread.exceptions import APIError
 from loguru import logger
@@ -28,34 +28,50 @@ class Cog(commands.Cog):
 
 
 P = ParamSpec("P")
-R = TypeVar("R")
 
 type CommandFunc[**P] = Callable[
     Concatenate[Any, Interaction, P],
     Awaitable[Any],
 ]
 
-type InteractionFunc[**P] = Callable[
-    Concatenate[Interaction, P],
-    Awaitable[Any],
-]
 
 type AnyCommand = Callable[..., Awaitable[Any]]
 
 
+async def send_error(interaction: Interaction, message: str) -> Any:
+    """Send an error message using the correct interaction response method."""
+    if interaction.response.is_done():
+        await interaction.followup.send(message)
+    else:
+        await interaction.response.send_message(message)
+
+
+def find_interaction(args: tuple[Any, ...], kwargs: dict[str, Any]) -> Interaction | None:
+    """Find the Interaction argument in a command call."""
+    interaction = kwargs.get("interaction")
+
+    if isinstance(interaction, Interaction):
+        return interaction
+
+    for arg in args:
+        if isinstance(arg, Interaction):
+            return arg
+
+    return None
+
+
 def log_command(func: AnyCommand) -> AnyCommand:
-    """Decorator to log the execution of a command function."""
+    """Log command execution."""
 
     @functools.wraps(func)
-    @logger.catch
     async def logged_command(*args: Any, **kwargs: Any) -> Any:
         interaction = kwargs.get("interaction")
 
         if interaction is None:
-            for arg in args:
-                if isinstance(arg, Interaction):
-                    interaction = arg
-                    break
+            interaction = next(
+                (arg for arg in args if isinstance(arg, Interaction)),
+                None,
+            )
 
         if interaction is not None:
             user = interaction.user
@@ -71,49 +87,69 @@ def log_command(func: AnyCommand) -> AnyCommand:
     return logged_command
 
 
-def try_command(func: CommandFunc[P]) -> CommandFunc[P]:
+def try_command(func: AnyCommand) -> AnyCommand:
     """Handle common command exceptions."""
 
     @functools.wraps(func)
-    async def try_command_func(
-        self: Any,
-        interaction: Interaction,
-        *args: P.args,
-        **kwargs: P.kwargs,
-    ) -> Any:
-        try:
-            await interaction.response.defer()
-            if interaction.user is None:
-                return await interaction.followup.send("Error: Null user")
-            return await func(self, interaction, *args, **kwargs)
-        except DataNotFoundError as e:
-            await interaction.followup.send(f"DataNotFoundError: {e}")
-        except NoneError:
-            await interaction.followup.send("None Error: not_none found None value")
-        except APIError as e:
-            await interaction.followup.send(f"API Error: {e!s}")
+    @logger.catch
+    async def wrapped(*args: Any, **kwargs: Any) -> Any:
+        interaction = find_interaction(args, kwargs)
 
-    return try_command_func
+        if interaction is None:
+            raise RuntimeError("Command has no Interaction argument")
+
+        try:
+            return await func(*args, **kwargs)
+
+        except DataNotFoundError as e:
+            await send_error(interaction, f"DataNotFoundError: {e}")
+
+        except NoneError:
+            await send_error(interaction, "None Error: not_none found None value")
+
+        except APIError as e:
+            await send_error(interaction, f"API Error: {e!s}")
+        except Exception:
+            logger.exception("Unhandled command error")
+            await send_error(
+                interaction,
+                "An unexpected error occurred.",
+            )
+
+    return wrapped
+
+
+def defer_command(func: AnyCommand) -> AnyCommand:
+    """Defer the interaction response before executing the command."""
+
+    @functools.wraps(func)
+    async def wrapped(*args: Any, **kwargs: Any) -> Any:
+        interaction = find_interaction(args, kwargs)
+
+        if interaction is None:
+            raise RuntimeError("Command has no Interaction argument")
+
+        await interaction.response.defer()
+
+        return await func(*args, **kwargs)
+
+    return wrapped
+
+
+def command_wrapper(func: CommandFunc[P]) -> CommandFunc[P]:
+    """Apply standard command middleware."""
+    return log_command(defer_command(try_command(func)))
 
 
 def standard_command(description: str) -> Callable[[CommandFunc[P]], SlashApplicationCommand]:
-    """Define a decorator for standard commands.
-
-    Sets the command to be a slash command, logs the command, and wraps the function with error handling.
-    """
+    """Define a standard slash command."""
     if len(description) > 100:
         raise ValueError(f"Description must be less than 100 characters, length is {len(description)}: '{description}'")
 
     def decorator(func: CommandFunc[P]) -> SlashApplicationCommand:
-        """Wrap the function with the standard command decorators."""
-
-        @slash_command(description=description, guild_ids=[CRI_GUILD_ID])
-        @log_command
-        @try_command
-        @functools.wraps(func)
-        async def wrapped(self: Any, interaction: Interaction, *args: P.args, **kwargs: P.kwargs) -> Any:
-            return await func(self, interaction, *args, **kwargs)
-
-        return wrapped
+        return slash_command(
+            description=description,
+            guild_ids=[CRI_GUILD_ID],
+        )(command_wrapper(func))
 
     return decorator
