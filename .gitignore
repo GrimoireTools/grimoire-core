@@ -1,2 +1,48 @@
-.env*
-__pycache__
+# Environment variables
+.env
+.env.*
+
+# Python bytecode / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Type checker / linter caches
+.pyright/
+.ruff_cache/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDEs
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+.vscode/*.code-workspace
+.vscode/*.json.bak
+.vscode/.ropeproject/
+# VS Code
+.history/
+*.code-workspace

@@ -7,18 +7,22 @@ Sets up Loguru with:
 """
 
 import sys
+from typing import TYPE_CHECKING, Any
 
 from loguru import logger
 
 from grimoire_core.varenv import get_env
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
-def _build_axiom_sink():
-    """Returns an Axiom sink function, or None if credentials are not configured."""
+
+def _build_axiom_sink() -> tuple[Callable[[Any], None] | None, str | None]:
+    """Return an Axiom sink function, or None if credentials are not configured."""
     try:
         token = get_env("AXIOM_TOKEN")
         dataset = get_env("AXIOM_DATASET")
-    except (KeyError, FileNotFoundError):
+    except KeyError, FileNotFoundError:
         return None, None
 
     if not token or not dataset:
@@ -32,7 +36,7 @@ def _build_axiom_sink():
         logger.warning("axiom-py not installed. Axiom logging disabled. Run: pip install axiom-py")
         return None, None
 
-    def axiom_sink(message) -> None:
+    def axiom_sink(message: Any) -> None:
         record = message.record
         event = {
             "message": record["message"],

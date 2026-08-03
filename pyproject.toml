@@ -1,8 +1,9 @@
 [project]
 name = "grimoire-core"
 version = "0.1.0"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
+    "axiom-py>=0.12.0",
     "gspread==6.2.1",
     "icecream==2.2.0",
     "loguru>=0.7.3",
@@ -44,6 +45,7 @@ ignore = [
     "B008",   # Function calls in default arguments
     "UP046",  # 3.13 Generic types in classes
     "UP047",  # 3.13 Generic types in functions
+    "D401",   # First line of comments in imperative mood
 ]
 
 
@@ -67,7 +69,7 @@ indent-style = "space"
 line-ending = "auto"
 
 [dependency-groups]
-dev = ["ruff>=0.15.20"]
+dev = ["ruff>=0.16.1"]
 
 [build-system]
 requires = ["uv_build>=0.11.17,<0.12.0"]

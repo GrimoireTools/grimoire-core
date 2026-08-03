@@ -1,9 +1,8 @@
-import functools
-from typing import Any, Self, TypeVar
+"""Various utility functions and classes for the Grimoire Core library."""
 
-from gspread.exceptions import APIError
-from loguru import logger
-from nextcord import Interaction, SlashOption, Member, User
+from typing import Self, TypeVar
+
+from nextcord import Member, SlashOption, User
 
 from grimoire_core.varenv import get_env
 
@@ -17,6 +16,8 @@ default_user_option = SlashOption(
 
 
 class DataNotFoundError(Exception):
+    """Custom exception for data not found errors."""
+
     pass
 
 
@@ -27,19 +28,18 @@ class StopError(Exception):
 
 
 class Column(str):
+    """A class representing a column in a spreadsheet."""
+
     def excel_index(self: Self) -> int:
         """
-        Entrega el indice (indexado a 0) de la letra de la columna
+        Entrega el indice (indexado a 0) de la letra de la columna.
+
         Ejemplos:
         - A -> 0
         - C -> 2
         - AA -> 26.
         """
         return column_to_num(self)
-
-
-def sign(num: int | float) -> int:
-    return 1 if num >= 0 else -1
 
 
 T = TypeVar("T")
@@ -59,16 +59,18 @@ def not_none(val: T | None) -> T:
 
 
 def parse_float_arg(num: str) -> float:
+    """Parse a string argument to a float, replacing commas with dots."""
     rnum = num.replace(",", ".")
     try:
         return float(rnum)
-    except ValueError:
-        raise ValueError(f"{num} no es un número válido")
+    except ValueError as e:
+        raise ValueError(f"{num} no es un número válido") from e
 
 
 def num_to_column(column_int: int) -> str:
     """
-    Entrega la letra de un numero (indexado a 1)
+    Entrega la letra de un numero (indexado a 1).
+
     Ejemplos:
     - 1 -> A
     - 3 -> C
@@ -86,64 +88,17 @@ def num_to_column(column_int: int) -> str:
 
 
 def try_int(val: str) -> int:
+    """Try to convert a string to an integer, returning 0 if it fails."""
     try:
         return int(val)
     except ValueError:
         return 0
 
 
-def log_command(func):
-    @functools.wraps(func)
-    @logger.catch
-    async def logged_command(self: Any, interaction: Interaction, *args, **kwargs) -> None:
-        user = interaction.user
-        if user is not None:
-            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
-        else:
-            logger.info(f"[{func.__name__}] called by null user.")
-        logger.debug(f"[{func.__name__}] called with {kwargs}.")
-
-        await func(self, interaction, *args, **kwargs)
-
-    return logged_command
-
-
-def log_command_not_cog(func):
-    @functools.wraps(func)
-    @logger.catch
-    async def logged_command(interaction: Interaction, *args, **kwargs) -> None:
-        user = interaction.user
-        if user is not None:
-            logger.info(f"[{func.__name__}] called by {user.name} ({user.id}).")
-        else:
-            logger.info(f"[{func.__name__}] called by null user.")
-        logger.debug(f"[{func.__name__}] called with {kwargs}.")
-        await func(interaction, *args, **kwargs)
-
-    return logged_command
-
-
-def try_command(func):
-    @functools.wraps(func)
-    async def try_command_func(self: Any, interaction: Interaction, *args, **kwargs):
-        try:
-            await interaction.response.defer()
-            if interaction.user is None:
-                return await interaction.followup.send("Error: Null user")
-            return await func(self, interaction, *args, **kwargs)
-        except DataNotFoundError as e:
-            await interaction.followup.send(f"DataNotFoundError: {e}")
-        except NoneError:
-            await interaction.followup.send("None Error: not_none found None value")
-        except APIError as e:
-            await interaction.followup.send(f"API Error: {e!s}")
-
-    return try_command_func
-
-
 def column_to_num(column: str) -> int:
     """
-    Entrega el indice (indexado a 0 de la letra de la columna)
+    Entrega el indice (indexado a 0 de la letra de la columna).
+
     Ejemplos:
     - A -> 0
     - C -> 2

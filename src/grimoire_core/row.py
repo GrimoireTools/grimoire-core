@@ -2,12 +2,14 @@
 
 import json
 import types
-from abc import ABC
 from collections import OrderedDict
-from dataclasses import dataclass, field
-from typing import Any, Generic, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
+from dataclasses import field
+from typing import TYPE_CHECKING, Any, Generic, Literal, TypeVar, Union, get_args, get_origin, get_type_hints
 
 from grimoire_core.utils import num_to_column
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 Col = int | str
 Value = str | int | float
@@ -15,47 +17,40 @@ T = TypeVar("T")
 
 
 def rangeify(row: int, start: int, end: int) -> str:
+    """Return a range string for a given row and start/end columns.
+
+    The row is 1-indexed, and the start and end columns are 0-indexed.
+    For example, if row=1, start=0, end=2, the output will be "A1:C1".
+    """
     return f"{num_to_column(start + 1)}{row}:{num_to_column(end + 1)}{row}"
 
 
-def row_none_default(cls=None, **kwargs):
-    def wrap(cls):
-        hints = get_type_hints(cls)
-        for name, _type_hint in hints.items():
-            if not hasattr(cls, name):
-                setattr(cls, name, field(default=None))
-        return dataclass(**kwargs)(cls)
-
-    if cls is None:
-        return wrap
-    return wrap(cls)
-
-
-class Row(ABC):
+class Row:
     """Abstract class that represents a single row in a sheet.
 
     Subclasses should define the fields as class attributes with type hints.
     Types can be str, int and float, which can be Optional.
 
-    fields set to None are assumed to be skippable, meaning that if the value is None, it will be skipped when writing to the sheet.
+    fields set to None are assumed to be skippable, meaning that if the value is None,
+    it will be skipped when writing to the sheet.
     """
 
     __index = -1
 
     @classmethod
     def from_dict(cls: type[T], row: dict[str, Value | None]) -> T:
-        """Creates a new instance of the class from a dictionary."""
+        """Create a new instance of the class from a dictionary."""
         return cls(**row)
 
     @classmethod
     def from_list(cls: type[T], row: list[Value]) -> T:
-        """Creates a new instance of the class from a list."""
+        """Create a new instance of the class from a list."""
         hints = get_type_hints(cls)
         keys = list(hints.keys())
         return cls(**{keys[i]: value for i, value in enumerate(row)})
 
     def __init__(self, **kwargs: Any) -> types.NoneType:
-        """Initializes the class with none, some or all of its attributes.
+        """Initialize the class with none, some or all of its attributes.
 
         Attributes not given are set to None.
         """
@@ -68,21 +63,24 @@ class Row(ABC):
         self.__index = -1
 
     def __repr__(self) -> str:
-        """Returns a string representation of the row."""
-        return f"{self.__class__.__name__}({', '.join(f'{k}={v}' for k, v in self.__dict__.items() if k != '_Row__index')})"
+        """Return a string representation of the row."""
+        return (
+            f"{self.__class__.__name__}"
+            f"({', '.join(f'{k}={v}' for k, v in self.__dict__.items() if k != '_Row__index')})"
+        )
 
     def to_dict(self) -> dict[str, Value]:
-        """Returns a dictionary representation of the row."""
+        """Return a dictionary representation of the row."""
         hints = get_type_hints(type(self))
         vals = [(name, self.__getattribute__(name)) for name in hints]
         return OrderedDict(vals)
 
     def to_list(self) -> list[Value]:
-        """Returns a list representation of the row."""
+        """Return a list representation of the row."""
         return [v for k, v in self.__dict__.items() if k != "_Row__index"]
 
     def __setattr__(self, name: str, value: Any) -> None:
-        """Sets an attribute, casting it to the correct type if necessary.
+        """Set an attribute, casting it to the correct type if necessary.
 
         This way, when getting a value from the sheet, it is automatically casted to the correct type.
         """
@@ -92,17 +90,15 @@ class Row(ABC):
             super().__setattr__(name, value)
 
     def set_index(self, index: int) -> None:
-        """Sets the 0-based index of the row in the sheet."""
+        """Set the 0-based index of the row in the sheet."""
         self.__index = index
 
     def get_index(self) -> int:
-        """Returns the 0-based index of the row in the sheet
-        or -1 if the row has not been added to the sheet yet.
-        """
+        """Return the 0-based index of the row in the sheet or -1 if the row has not been added to the sheet yet."""
         return self.__index
 
     def _cast_value(self, name: str, value: Value) -> Value:
-        """Casts a value to the type defined in the annotations."""
+        """Cast a value to the type defined in the annotations."""
         if value is None:
             return None
         _type = get_type_hints(type(self))[name]
@@ -111,7 +107,7 @@ class Row(ABC):
             for _typ in _types:
                 try:
                     return _typ(value)
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     pass
             raise ValueError(f"Value {value} could not be casted to any of the types in the Union: {_types}")
         elif get_origin(_type) is Literal:
@@ -121,7 +117,7 @@ class Row(ABC):
                     val = type(lit_val)(value)
                     if val == lit_val:
                         return val
-                except (ValueError, TypeError):
+                except ValueError, TypeError:
                     continue
             raise ValueError(f"Value {value} is not in the Literal: {lit_vals}")
         else:
@@ -129,24 +125,25 @@ class Row(ABC):
 
     @classmethod
     def col_letter(cls, name: str) -> str:
+        """Return the letter of a column with the given name."""
         try:
             return num_to_column(list(cls.__annotations__).index(name) + 1)
-        except ValueError:
-            raise ValueError(f"Column {name} not found in {cls.__name__}")
+        except ValueError as e:
+            raise ValueError(f"Column {name} not found in {cls.__name__}") from e
 
     @classmethod
     def col_index(cls, col: str) -> int:
         """Return the index of a column with the given name."""
         try:
             return list(cls.__annotations__).index(col)
-        except ValueError:
-            raise ValueError(f"Column {col} not found in {cls.__name__}")
+        except ValueError as e:
+            raise ValueError(f"Column {col} not found in {cls.__name__}") from e
 
     def _ranges(
         self, row: int, force_set: dict[str, bool] | None = None, force_skip: dict[str, bool] | None = None
     ) -> list[dict[str, str | list[Value]]]:
         """
-        Creates a list of ranges and values for each range in the row.
+        Create a list of ranges and values for each range in the row.
 
         For example, if the row is [1, 2, None, 4, 5, None, 7, 8, 9], the output will be:
         [
@@ -164,7 +161,7 @@ class Row(ABC):
         row += 1  # Convert to 1-based index for Google Sheets
         values = self.to_dict()
 
-        def check_skippable(key) -> bool:
+        def check_skippable(key: str) -> bool:
             skip = values[key] is None
             if force_skip is not None:
                 skip = skip or force_skip.get(key, False)
@@ -214,9 +211,9 @@ def rfield(default: T | None = None) -> T:
 
 RowType = TypeVar("RowType", bound=Row)
 
-r_int = Union[int, None]
-r_float = Union[float, None]
-r_str = Union[str, None]
+r_int = int | None
+r_float = float | None
+r_str = str | None
 
 
 K = TypeVar("K")
@@ -226,8 +223,11 @@ V = TypeVar("V")
 class JsonData(dict[K, V], Generic[K, V]):
     """A dictionary that can be serialized to JSON."""
 
-    def __init__(self, data=None) -> None:
-        """Initializes the JsonData object. If data is a list, it is converted to a dictionary with the index as the key."""
+    def __init__(self, data: Mapping[Any, Any] | str | None = None) -> None:
+        """Initializes the JsonData object.
+
+        If data is a list, it is converted to a dictionary with the index as the key.
+        """
         if isinstance(data, str):
             parsed = json.loads(data)
             if isinstance(parsed, list):
